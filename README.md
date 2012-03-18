@@ -14,7 +14,7 @@ Check those out, *yard* is rather simple actually
 
 - I like some things of *Piston* 
 - I like *Dagny*
-- I wanted something nit to control the logic for acceptable parameters in each http-GET-requests
+- I wanted something neat to control the logic for acceptable parameters in each http-GET-requests
 
 et voilá
 
