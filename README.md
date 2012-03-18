@@ -7,25 +7,23 @@
 2. [Dagny](https://github.com/zacharyvoase/dagny)
 3. [This snippet](http://djangosnippets.org/snippets/1071/)
 
-Check those out, *yard* is rather simple actually
+Check those out.
 
 
 ## Motivations
 
-- I like some things of *Piston* 
-- I like *Dagny*
-- I wanted something neat to control the logic for acceptable parameters in each http-GET-requests
-
-et voilá
+- I like some things of *Piston*.
+- I like *Dagny*.
+- I wanted something neat to control the logic for acceptable parameters in each http-GET-requests.
 
 
-## How to
+## Usage
 
 *urls.py*
 <pre>
 from django.conf.urls.defaults import patterns, url
 from yard.urls import include
-from views import Books # my resource
+from views     import Books # my resource
 
 urlpatterns = patterns('django_yard.app.views.',
     url( r'^books', include( Books ) ),
@@ -35,19 +33,21 @@ urlpatterns = patterns('django_yard.app.views.',
 *views.py*
 <pre>
 from django.views.decorators.csrf import csrf_exempt
-from yard import Resource
+from yard   import Resource
 from models import Book
 
 @csrf_exempt #need this to enable http-POST-requests
 class Books(Resource):
+    
     #only for index method
     parameters = (
-        {'name': 'year', # query parameter name - required
-         'alias': 'publication_date', # actual name within server's logic - not required
-         'required': False, # defaults to False - not required
-         'limit': lambda x: max(1970, min(2012, x)) # parameter's logic - not required
+        {'name':     'year',                           #query parameter name - required
+         'alias':    'publication_date',               #actual name within server's logic - not required
+         'required': False,                            #defaults to False - not required
+         'limit':    lambda x: max(1970, min(2012, x)) #parameter's logic - not required
         },
     )
+    
     #fields returned in json response - only for index and show methods 
     fields = (('author', ('name','gender')), 'name' )
 
@@ -76,3 +76,5 @@ class Books(Resource):
         '''DELETE /books/:id/'''
         return
 </pre>
+
+
