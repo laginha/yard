@@ -41,10 +41,19 @@ class Books(Resource):
     
     #only for index method
     parameters = (
-        {'name':     'year',                           #query parameter name - required
-         'alias':    'publication_date',               #actual name within server's logic - not required
-         'required': False,                            #defaults to False - not required
-         'limit':    lambda x: max(1970, min(2012, x)) #parameter's logic - not required
+        { 'or': (
+            {'name':     'year',                           #query parameter name - required
+             'alias':    'publication_date',               #actual name within server's logic - not required
+             'required': False,                            #defaults to False - not required
+             'limit':    lambda x: max(1970, min(2012, x)) #parameter's logic - not required
+            },
+            {'name':  'author'
+             'alias': 'author__name',
+            }, ) 
+        },
+        {'name':     'label',
+         'alias':    'label__name',
+         'required': True,
         },
     )
     
