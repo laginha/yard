@@ -39,7 +39,7 @@ from models import Book
 @csrf_exempt #need this to enable http-POST-requests
 class Books(Resource):
     
-    #only for index method
+    #only used in the index method.
     parameters = (
         { 'or': (
             {'name':     'year',                           #query parameter name - required
