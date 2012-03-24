@@ -88,8 +88,8 @@ class Resource(object):
         '''
         Return a HttpResponse according to given response
         '''
-        return HttpResponse() if not response else (
-            JsonResponse( self.serialize(response) ) if is_queryset(response) else response
+        return JsonResponse( self.serialize(response) ) if is_queryset(response) else(
+            HttpResponse() if not response else response
         )
 
 

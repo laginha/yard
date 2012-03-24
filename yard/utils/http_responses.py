@@ -10,7 +10,7 @@ class HttpResponseUnauthorized(HttpResponse):
 
 class JsonResponse(HttpResponse):
     def __init__(self, content='', mimetype=None, status=None, content_type=None):
-        HttpResponse.__init__(self, content      = json.dumps( content or {}, indent=2 ), 
+        HttpResponse.__init__(self, content      = json.dumps( content or [], indent=2 ), 
                                     mimetype     = mimetype, 
                                     status       = status, 
                                     content_type = 'application/json', )
