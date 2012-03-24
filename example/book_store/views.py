@@ -20,7 +20,7 @@ class Books(Resource):
             }, )
         },
     )
-    fields = ('id', 'title', 'publication_date', ('author', ('name',)) )
+    fields = ('id', 'title', 'publication_date', ('author', ('name','age','gender_')) )
     
     @staticmethod
     def index(request, params):

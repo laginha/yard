@@ -1,11 +1,17 @@
 from django.db import models
-from datetime import datetime
+from datetime  import datetime, date
         
     
 class Author( models.Model ):
     name     = models.CharField( max_length=100 )
     gender   = models.CharField( max_length=1, choices=(('M', 'male'),('F','female')) )
     birthday = models.DateField( default=datetime.today )
+    
+    def gender_(self):
+        return 'male' if self.gender=='M' else 'female'
+    
+    def age(self):
+        return (date.today()-self.birthday).days / 365
     
     def __str__(self):
         return self.name

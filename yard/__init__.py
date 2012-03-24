@@ -6,7 +6,7 @@ from django.core            import serializers
 from utils                  import *
 from utils.exceptions       import RequiredParamMissing
 from utils.http_responses   import JsonResponse, HttpResponse, HttpResponseUnauthorized, HttpResponseNotFound
-import json
+import json, inspect
 
 
 class Resource(object):
@@ -40,10 +40,10 @@ class Resource(object):
                 
                 # if field is sub-field
                 if resource:
-                    lambda_ = lambda x: unicode( getattr( resource(x), field, '' ) ) 
+                    lambda_ = lambda x: getattr( resource(x), field, '' )
                 # if first-level field
                 else:
-                    lambda_ = lambda x: unicode( getattr( x, field, '' ) )
+                    lambda_ = lambda x: getattr( x, field, '' )
                 return ( field, lambda_ )
         
         json_tree   = build_json_tree( self.fields )
@@ -103,7 +103,9 @@ class Resource(object):
             for k,v in tree.items():        
                 value = build_json_response( v, resource ) if is_dict( v ) else v( resource )
                 if value:
-                    dict_[ k ] = value
+                    dict_[ k ] = value if is_dict(value) else (
+                        unicode(value()) if inspect.ismethod(value) else unicode(value)
+                    )
             return dict_
         
         # build json for each resource
