@@ -118,6 +118,8 @@ class Resource(object):
             '''validate param value through param limit key'''
             lambda_ = param.get( 'limit', lambda x: x)
             value   = request.GET.get( param['name'] )
+            if not value: return None
+                
             try:
                 # tries to convert value into float or int before passing it through limit
                 return lambda_( float(value) ) if is_float( value ) else (
