@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from django.contrib.gis.db.models.fields import GeometryField
-from django.db.models.query import QuerySet
+from django.db.models.query import QuerySet, ValuesQuerySet
 import re
 
 float_  = re.compile(r'^\-?[0-9]+\.[0-9]+$')
@@ -17,3 +17,4 @@ is_tuple = lambda x: isinstance(x, tuple)
 is_dict  = lambda x: isinstance(x, dict)
 is_list  = lambda x: isinstance(x, list)
 is_queryset = lambda x: isinstance(x, QuerySet)
+is_valuesset = lambda x: isinstance(x, ValuesQuerySet)

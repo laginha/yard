@@ -38,5 +38,8 @@ class Book( models.Model ):
     publication_date = models.DateField( default=datetime.today )
     genres           = models.ManyToManyField( Genre )
     
+    def genres_(self):
+        return self.genres.all()#.values('name')
+    
     def __str__(self):
         return self.title
