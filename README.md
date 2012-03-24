@@ -21,12 +21,12 @@ Check those out.
 
 *urls.py*
 <pre>
-from django.conf.urls.defaults import patterns, url
-from yard.urls import include
-from views     import Books # my resource
+from django.conf.urls.defaults import patterns, include, url
+from views     import Books
+from yard.urls import include_resource
 
 urlpatterns = patterns('django_yard.app.views.',
-    url( r'^books', include( Books ) ),
+    url( r'^books', include_resource( Books ) ),
 )
 </pre>
 
@@ -36,54 +36,44 @@ from django.views.decorators.csrf import csrf_exempt
 from yard   import Resource
 from models import Book
 
-@csrf_exempt #need this to enable http-POST-requests
+@csrf_exempt
 class Books(Resource):
-    
-    #only used in the index method.
     parameters = (
-        { 'or': (
-            {'name':     'year',                           #query parameter name - required
-             'alias':    'publication_date',               #actual name within server's logic - not required
-             'required': False,                            #defaults to False - not required
-             'limit':    lambda x: max(1970, min(2012, x)) #parameter's logic - not required
-            },
-            {'name':  'author'
-             'alias': 'author__name',
-            }, ) 
+        { 'name':     'year',                           #query parameter name - required
+          'alias':    'publication_date__year',         #actual name within server's logic - not required
+          'required': False,                            #defaults to False - not required
+          'limit':    lambda x: max(1970, min(2012, x)) #parameter's logic - not required
         },
-        {'name':     'label',
-         'alias':    'label__name',
-         'required': True,
+        { 'name': 'title' },
+        { 'and': (                                      # genre AND ( author OR house )
+            { 'name': 'genre', 'alias': 'genres'},
+            { 'or': (
+                { 'name': 'author', 'alias': 'author__id' },                                      
+                { 'name': 'house',  'alias': 'publishing_house__id' }, ) 
+            }, )
         },
     )
-    
-    #fields returned in json response - only for index and show methods 
-    fields = (('author', ('name','gender')), 'name' )
+    fields = ('id', 'title', 'publication_date', ('author', ('name',)) )
 
     @staticmethod
     def index(request, params):
-        '''GET /books/'''
         return Book.objects.filter( **params )
 
     @staticmethod
     def show(request, book_id):
-        '''GET /books/:id/'''
         return Book.objects.filter( id=book_id )
 
     @staticmethod
     def create(request):
-        '''POST /books/'''
         return
 
     @staticmethod
     def update(request, book_id):
-        '''PUT/POST /books/:id/'''
         return
 
     @staticmethod
     def destroy(request, book_id):
-        '''DELETE /books/:id/'''
         return
-</pre>
 
+</pre>
 
