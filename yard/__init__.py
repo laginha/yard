@@ -102,14 +102,17 @@ class Resource(object):
             dict_ = {}
             for k,v in tree.items():        
                 value = build_json_response( v, resource ) if is_dict( v ) else v( resource )
-                if value:
-                    if inspect.ismethod(value):
-                        result = value()
-                        dict_[ k ] = list( result ) if is_valuesset(result) else (
-                            [unicode(i) for i in result] if is_queryset(result) else unicode(result)
+                if not value: 
+                    continue
+                elif inspect.ismethod(value):
+                    result = value()
+                    dict_[ k ] = list( result ) if is_valuesset(result) else (
+                        [unicode(i) for i in result] if is_queryset(result) else (
+                            result if is_dict(result) or is_list(result) else unicode(result)
                         )
-                    else:
-                        dict_[ k ] = value if is_dict(value) else unicode(value)
+                    )
+                else:
+                    dict_[ k ] = value if is_dict(value) else unicode(value)
             return dict_
         
         # build json for each resource
