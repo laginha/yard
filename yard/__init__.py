@@ -84,13 +84,23 @@ class Resource(object):
         return self.respond( response )
 
 
-    def respond(self, response):
+    def respond(self, response, status=200):
         '''
         Return a HttpResponse according to given response
         '''
-        return JsonResponse( self.serialize(response) ) if is_queryset(response) else(
-            HttpResponse() if not response else response
-        )
+        if is_tuple(response) and len(response)>1:
+            if isinstance(response[0], int):
+                status = response[0]
+            response = response[1]
+        
+        if not response: return HttpResponse(status=status)                       
+        elif is_queryset(response): return JsonResponse(self.serialize(response), status=status)
+        elif isinstance(response, int): return HttpResponse(status=response)
+        elif is_str(response): return HttpResponse(response, status=status)                
+        elif is_valuesset(response): return JsonResponse(list(response), status=status)          
+        elif is_json_serializable(response): return JsonResponse(response, status=status)      
+        else: return response          
+
 
 
     def serialize(self, resources):   

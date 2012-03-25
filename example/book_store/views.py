@@ -24,7 +24,7 @@ class Books(Resource):
     
     @staticmethod
     def index(request, params):
-        return Book.objects.filter( **params )
+        return Book.objects.filter( **params ) #returns a JsonResponse-200
 
     @staticmethod
     def show(request, book_id):
@@ -32,12 +32,15 @@ class Books(Resource):
     
     @staticmethod
     def create(request):
-        return
+        #HttpResponse(status=405)
+        return 405
         
     @staticmethod
     def update(request, book_id):
+        #defaults to HttpResponse(status=200)
         return
         
     @staticmethod
     def destroy(request, book_id):
-        return
+        #HttpResponse('You are not authorize', status=401)
+        return 401, 'You are not authorize'
