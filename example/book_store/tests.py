@@ -42,7 +42,11 @@ class Book_TestCase( unittest.TestCase ):
     def get(self, **params):
         response = self.client.get( '/books/', params )
         assert response.status_code == 200, response.status_code
-        return json.loads( response.content )
+        try:
+            return json.loads( response.content )
+        except ValueError as e:
+            print response.content
+            assert False, "%s\n%s" %(e, response.content)
     
     
     def test_year_param(self):
@@ -120,7 +124,7 @@ class Book_TestCase( unittest.TestCase ):
     
     def test_create(self):
         response = self.client.post( '/books/' )
-        assert response.status_code == 200, response.status_code
+        assert response.status_code == 405, response.status_code
     
     
     def test_update(self):
@@ -130,7 +134,7 @@ class Book_TestCase( unittest.TestCase ):
         
     def test_destroy(self):
         response = self.client.delete( '/books/%s/' %self.book1.id )
-        assert response.status_code == 200, response.status_code
+        assert response.status_code == 401, response.status_code
     
         
         

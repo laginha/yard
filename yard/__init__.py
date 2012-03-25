@@ -92,8 +92,8 @@ class Resource(object):
             if is_int(response[0]):
                 status = response[0]
             response = response[1]
-        
-        if not response: return HttpResponse(status=status)                       
+            
+        if response == None: return HttpResponse(status=status)                       
         elif is_queryset(response): return JsonResponse(self.serialize(response), status=status)
         elif is_int(response): return HttpResponse(status=response)
         elif is_str(response): return HttpResponse(response, status=status)                
