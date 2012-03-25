@@ -6,7 +6,7 @@ from django.core            import serializers
 from utils                  import *
 from utils.exceptions       import RequiredParamMissing
 from utils.http_responses   import JsonResponse, HttpResponse, HttpResponseUnauthorized, HttpResponseNotFound
-import json, inspect
+import json
 
 
 class Resource(object):
@@ -89,16 +89,16 @@ class Resource(object):
         Return a HttpResponse according to given response
         '''
         if is_tuple(response) and len(response)>1:
-            if isinstance(response[0], int):
+            if is_int(response[0]):
                 status = response[0]
             response = response[1]
         
         if not response: return HttpResponse(status=status)                       
         elif is_queryset(response): return JsonResponse(self.serialize(response), status=status)
-        elif isinstance(response, int): return HttpResponse(status=response)
+        elif is_int(response): return HttpResponse(status=response)
         elif is_str(response): return HttpResponse(response, status=status)                
         elif is_valuesset(response): return JsonResponse(list(response), status=status)          
-        elif is_json_serializable(response): return JsonResponse(response, status=status)      
+        elif is_dict(response) or is_list(response): return JsonResponse(response, status=status)      
         else: return response          
 
 
@@ -114,7 +114,7 @@ class Resource(object):
                 value = build_json_response( v, resource ) if is_dict( v ) else v( resource )
                 if not value: 
                     continue
-                elif inspect.ismethod(value):
+                elif is_method(value):
                     result = value()
                     dict_[ k ] = list( result ) if is_valuesset(result) else (
                         [unicode(i) for i in result] if is_queryset(result) else (
@@ -141,8 +141,8 @@ class Resource(object):
                 
             try:
                 # tries to convert value into float or int before passing it through limit
-                return lambda_( float(value) ) if is_float( value ) else (
-                    lambda_( int(value) ) if is_int( value ) else lambda_( value )
+                return lambda_( float(value) ) if is_strfloat( value ) else (
+                    lambda_( int(value) ) if is_strint( value ) else lambda_( value )
                 )
             except ValueError:
                 return
