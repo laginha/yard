@@ -102,7 +102,6 @@ class Resource(object):
         else: return response          
 
 
-
     def serialize(self, resources):   
         '''
         Serialize resources into json
@@ -114,8 +113,10 @@ class Resource(object):
                 value = build_json_response( v, resource ) if is_dict( v ) else v( resource )
                 if not value: 
                     continue
+                # if field is a model instance method
                 elif is_method(value):
                     result = value()
+                    # expect for a valuesQuerySet, querySet, dict, list or unicoded value
                     dict_[ k ] = list( result ) if is_valuesset(result) else (
                         [unicode(i) for i in result] if is_queryset(result) else (
                             result if is_dict(result) or is_list(result) else unicode(result)
