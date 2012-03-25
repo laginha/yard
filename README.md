@@ -12,7 +12,7 @@ Check those out.
 
 ## Motivations
 
-- I like some things of *Piston*.
+- I like some things in *Piston*.
 - I like *Dagny*.
 - I wanted something neat to control the logic for acceptable parameters in each http-GET-requests.
 
@@ -30,6 +30,7 @@ urlpatterns = patterns('django_yard.app.views.',
 )
 </pre>
 
+
 *views.py*
 <pre>
 from django.views.decorators.csrf import csrf_exempt
@@ -38,6 +39,7 @@ from models import Book
 
 @csrf_exempt
 class Books(Resource):
+    #allowed query parameters - only used in index method
     parameters = (
         { 'name':     'year',                           #query parameter name - required
           'alias':    'publication_date__year',         #actual name within server's logic - not required
@@ -53,27 +55,32 @@ class Books(Resource):
             }, )
         },
     )
+    #fields returned in json response - only used in index and show methods
     fields = ('id', 'title', 'publication_date', ('author', ('name',)) )
-
+    
     @staticmethod
     def index(request, params):
+        #GET /resource/
         return Book.objects.filter( **params )
 
     @staticmethod
     def show(request, book_id):
+        #GET /resource/:id/
         return Book.objects.filter( id=book_id )
-
+    
     @staticmethod
     def create(request):
-        return
-
+        #POST /resource/
+        ...
+    
     @staticmethod
-    def update(request, book_id):
-        return
-
+    def update(request):
+        #PUT /resource/:id/
+        ...
+            
     @staticmethod
-    def destroy(request, book_id):
-        return
-
+    def destroy(request):
+        #DELETE /resource/:id/
+        ...
 </pre>
 
