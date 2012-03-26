@@ -16,7 +16,9 @@ class My_Resource(Resource):
         ...
 </pre>
 
-As you can see, *yard* resource supports automatically crud methods:
+## Resource Methods
+
+*Yard* resource supports automatically the following crud methods:
 
 <table border="1">
     <tr>
@@ -51,15 +53,70 @@ As you can see, *yard* resource supports automatically crud methods:
     </tr>
 </table>
 
+All you need to do is to include the resource in the urlpatterns.
 
-All you need to do is, in *urls.py*:
-
+*urls.py*
 <pre>
 from yard.urls import include_resource
 
 urlpatterns = patterns('',
     url( r'^myresource', include_resource( My_Resource ) ),
 )
+</pre>
+
+### Responses
+
+Supported return types:
+
+<table border="1">
+    <tr>
+        <th>Support Type</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td>QuerySet</td>
+        <td>Returns JSON-response according to attribute fields</td>
+    </tr>
+    <tr>
+        <td>ValuesQuerySet</td>
+        <td>Defines content of JSON-response</td>
+    </tr>
+    <tr>
+        <td>int</td>
+        <td>Defines the HTTP-response's status code</td>
+    </tr>
+    <tr>
+        <td>str</td>
+        <td>Defines the HTTP-response's content</td>
+    </tr>
+    <tr>
+        <td>dict</td>
+        <td>Defines content of JSON-response</td>
+    </tr>
+    <tr>
+        <td>list</td>
+        <td>Defines content of JSON-response</td>
+    </tr>
+    <tr>
+        <td>tuple</td>
+        <td>
+            First value defines HTTP-response's status.
+            Second value defines content as explained above.
+        </td>
+    </tr>
+    <tr>
+        <td>None</td>
+        <td>Defaults to HTTP-response with status 200</td>
+    </tr>
+</table>
+
+*example*
+<pre>
+class My_Resource(Resource):
+
+    @staticmethod
+    def create(request):
+        return 401, 'Not Authorize'
 </pre>
 
 
@@ -91,7 +148,7 @@ In this example, we have a resource named *Book*. Only the *show* method is impl
 
 In fact, *id* and *title* are attributes of model *Book*, as well as *author* which is a foreign key field to model instance *Author*, that has attribute *name*.
 
-### Instance methods in field
+### Instance methods in fields
 
 Specified fields can also be instance methods, as long as they are callable with no arguments besides instance. This is a good way to include data into the JSON response which can't be specified directly in the *fields* attributes (e.g. ManyToMany fields).
 
@@ -181,7 +238,7 @@ For each parameter the following keys can be defined:
         <td>required</td>
         <td>Not required</td>
         <td>Boolean</td>
-        <td>Wether parameter is required or not</td>
+        <td>Whether parameter is required or not</td>
     </tr>
     <tr>
         <td>limit</td>
@@ -203,7 +260,7 @@ class Books(Resource):
                   'alias': 'author__id' },                                      
                 { 'name':  'year',
                   'alias': 'publication_date__year',
-                  'limit': lambda x: x<2012 and x>1970 }, 
+                  'limit': lambda x: x<=2012 and x>=1970 }, 
             )}, 
         )}, 
     )
@@ -212,5 +269,4 @@ class Books(Resource):
 In this example, the given parameters have to obey the logic: *title* AND (*author* OR *year*). 
 
 Notice that the parameter *year* has the key *limit* which demands for the parameter's value to be between 1970 and 2012. If this verification fails, the parameter is ignored. (Note: *Yard* detects if parameter's value is whether float or int and automatically converts it before passing it through *limit*)
-
 
