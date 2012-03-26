@@ -278,7 +278,7 @@ class Books(Resource):
                   'alias': 'author__id' },                                      
                 { 'name':  'year',
                   'alias': 'publication_date__year',
-                  'limit': lambda x: x<=2012 and x>=1970 }, 
+                  'limit': lambda x: x&le;2012 and x&ge;1970 }, 
             )}, 
         )}, 
     )
