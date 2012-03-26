@@ -55,7 +55,7 @@ class Books(Resource):
             }, )
         },
     )
-    #fields returned in json response - used if QueryField is returned
+    #fields returned in json response - used if QuerySet is returned
     fields = ('id', 'title', 'publication_date', ('author', ('name',)) )
     
     @staticmethod
