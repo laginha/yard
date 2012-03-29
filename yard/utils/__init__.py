@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # encoding: utf-8
+
 from django.contrib.gis.db.models.fields import GeometryField
-from django.db.models.query import QuerySet, ValuesQuerySet
-from django.db import models
+from django.db.models.query              import QuerySet, ValuesQuerySet
+from django.db                           import models
+from django.http                         import HttpResponse
 import re, inspect
 
 float_  = re.compile(r'^\-?[0-9]+\.[0-9]+$')
@@ -22,3 +24,4 @@ is_geo       = lambda x: isinstance(x, GeometryField)
 is_queryset  = lambda x: isinstance(x, QuerySet)
 is_valuesset = lambda x: isinstance(x, ValuesQuerySet)
 is_modelinstance = lambda x: isinstance(x, models.Model)
+is_httpresponse  = lambda x: isinstance(x, HttpResponse)

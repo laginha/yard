@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator  import Paginator, EmptyPage
 from django.core            import serializers
 from utils                  import *
@@ -92,10 +93,11 @@ class Resource(object):
             if is_int(response[0]):
                 status = response[0]
             response = response[1]
-            
-        if response == None: return HttpResponse(status=status)                       
+              
+        if is_httpresponse(response): return response                     
         elif is_queryset(response): return JsonResponse(self.resources_to_json(response), status=status)
         elif is_modelinstance(response): return JsonResponse(self.resource_to_json(response), status=status)
+        elif response == None: return HttpResponse(status=status)
         elif is_int(response): return HttpResponse(status=response)
         elif is_str(response): return HttpResponse(response, status=status)                
         elif is_valuesset(response): return JsonResponse(list(response), status=status)          
@@ -106,17 +108,19 @@ class Resource(object):
     def resources_to_json(self, resources):   
         '''
         Serialize each resource into json
-        '''        
-        return [ resource_to_json(self.tree, i) for i in resources ]
+        '''       
+        return [ self.resource_to_json(i) for i in resources ]
 
 
-    def resource_to_json(self, tree, resource):
+    def resource_to_json(self, resource, tree=None):
         '''
         Use pre-calculated json_tree to create json for given resource
         '''
+        if not tree:
+            tree = self.tree
         dict_ = {}
         for k,v in tree.items():        
-            value = build_json_response( v, resource ) if is_dict( v ) else v( resource )
+            value = self.resource_to_json( resource, v ) if is_dict( v ) else v( resource )
             if not value: 
                 continue
             # if field is a model instance method

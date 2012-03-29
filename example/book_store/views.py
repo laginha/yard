@@ -28,7 +28,7 @@ class Books(Resource):
 
     @staticmethod
     def show(request, book_id):
-        return Book.objects.filter( id=book_id )
+        return Book.objects.get( id=book_id )
     
     @staticmethod
     def create(request):
