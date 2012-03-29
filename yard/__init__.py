@@ -94,7 +94,8 @@ class Resource(object):
             response = response[1]
             
         if response == None: return HttpResponse(status=status)                       
-        elif is_queryset(response): return JsonResponse(self.serialize(response), status=status)
+        elif is_queryset(response): return JsonResponse(self.resources_to_json(response), status=status)
+        elif is_modelinstance(response): return JsonResponse(self.resource_to_json(response), status=status)
         elif is_int(response): return HttpResponse(status=response)
         elif is_str(response): return HttpResponse(response, status=status)                
         elif is_valuesset(response): return JsonResponse(list(response), status=status)          
@@ -102,34 +103,36 @@ class Resource(object):
         else: return response          
 
 
-    def serialize(self, resources):   
+    def resources_to_json(self, resources):   
         '''
-        Serialize resources into json
+        Serialize each resource into json
+        '''        
+        return [ resource_to_json(self.tree, i) for i in resources ]
+
+
+    def resource_to_json(self, tree, resource):
         '''
-        def build_json_response( tree, resource ):
-            '''Use pre-calculated json_tree to create json for given resource'''
-            dict_ = {}
-            for k,v in tree.items():        
-                value = build_json_response( v, resource ) if is_dict( v ) else v( resource )
-                if not value: 
-                    continue
-                # if field is a model instance method
-                elif is_method(value):
-                    result = value()
-                    # expect for a valuesQuerySet, querySet, dict, list or unicoded value
-                    dict_[ k ] = list( result ) if is_valuesset(result) else (
-                        [unicode(i) for i in result] if is_queryset(result) else (
-                            result if is_dict(result) or is_list(result) else unicode(result)
-                        )
+        Use pre-calculated json_tree to create json for given resource
+        '''
+        dict_ = {}
+        for k,v in tree.items():        
+            value = build_json_response( v, resource ) if is_dict( v ) else v( resource )
+            if not value: 
+                continue
+            # if field is a model instance method
+            elif is_method(value):
+                result = value()
+                # expect for a valuesQuerySet, querySet, dict, list or unicoded value
+                dict_[ k ] = list( result ) if is_valuesset(result) else (
+                    [unicode(i) for i in result] if is_queryset(result) else (
+                        result if is_dict(result) or is_list(result) else unicode(result)
                     )
-                else:
-                    dict_[ k ] = value if is_dict(value) else unicode(value)
-            return dict_
-        
-        # build json for each resource
-        return [ build_json_response(self.tree, i) for i in resources ]
-        
-    
+                )
+            else:
+                dict_[ k ] = value if is_dict(value) else unicode(value)
+        return dict_
+
+
     def fetch_params(self, request):
         '''
         Get values from request according to specified parameters attribute
