@@ -75,6 +75,10 @@ Supported return types:
     </tr>
     <tr>
         <td>QuerySet</td>
+        <td>Returns JSON-response (list) according to attribute fields</td>
+    </tr>
+    <tr>
+        <td>Model Instance</td>
         <td>Returns JSON-response according to attribute fields</td>
     </tr>
     <tr>
@@ -110,8 +114,6 @@ Supported return types:
     </tr>
 </table>
 
-Note that *Yard* does not yet support model instances as return value. In other words, use *filter* instead of *get*. 
-
 *example*
 <pre>
 class Book(Resource):
@@ -121,7 +123,7 @@ class Book(Resource):
         return 401, 'Not Authorize'
 </pre>
 
-Moreover, due to the fact *Yard* applies the attribute *fields* (as explained below) in every *QuerySet* response, you are always limited to return *QuerySet* of the same base model within the resource. Which means
+Moreover, due to the fact *Yard* applies the attribute *fields* (as explained below) in every *QuerySet* or model instance response, you are always limited to return resources of the same base model. Which means
 
 <pre>
 class Book(Resource):
@@ -131,11 +133,11 @@ class Book(Resource):
         return Book.objects.filter(**params)
     
     @staticmethod
-    def show(request, id_):
-        return Author.objects.filter(id=id_)
+    def show(request, book_id):
+        return Author.objects.filter(id=book_id)
 </pre>
 
-this won't work properly.
+won't work properly.
 
 
 ## Fields
