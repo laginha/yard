@@ -10,6 +10,16 @@ from utils.http_responses   import JsonResponse, HttpResponse, HttpResponseUnaut
 import json
 
 
+def method(f):
+    @staticmethod
+    def wrapper(*args, **kwargs):
+        try:
+            return f( *args, **kwargs )
+        except ObjectDoesNotExist:
+            return 404
+    return wrapper
+
+
 class Resource(object):
     parameters  = ()
     fields      = ()

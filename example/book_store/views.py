@@ -1,5 +1,5 @@
 from django.views.decorators.csrf import csrf_exempt
-from yard   import Resource
+from yard   import Resource, method
 from models import Book
 
 
@@ -26,7 +26,7 @@ class Books(Resource):
     def index(request, params):
         return Book.objects.filter( **params ) #returns a JsonResponse-200
 
-    @staticmethod
+    @method
     def show(request, book_id):
         return Book.objects.get( id=book_id )
     
