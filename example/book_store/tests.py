@@ -112,14 +112,12 @@ class Book_TestCase( unittest.TestCase ):
         response = self.client.get( '/books/%s/' %self.book1.id )
         assert response.status_code == 200, response.status_code 
         response = json.loads( response.content )  
-        assert len(response) == 1, response
-        assert int(response[0]['id']) == self.book1.id, (int(response[0]['id']), self.book1.id)
+        assert int(response['id']) == self.book1.id, (int(response['id']), self.book1.id)
         
         response = self.client.get( '/books/%s/' %self.book2.id )
         assert response.status_code == 200, response.status_code   
         response = json.loads( response.content ) 
-        assert len(response) == 1, response
-        assert int(response[0]['id']) == self.book2.id, (int(response[0]['id']), self.book2.id)
+        assert int(response['id']) == self.book2.id, (int(response['id']), self.book2.id)
         
     
     def test_create(self):
