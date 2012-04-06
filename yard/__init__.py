@@ -84,8 +84,8 @@ class Resource(object):
         try:
             view     = getattr( self, method )
             # Run desired view
-            response = view( request, parameters['id'] ) if method in ['show', 'update', 'destroy'] else (
-                view( request ) if method == 'create' else view( request, parameters )
+            response = view( request, parameters.pop('id'), **parameters ) if method in ['show', 'update', 'destroy'] else (
+                view( request, **parameters ) if method == 'create' else view( request, parameters )
             )
         except AttributeError:
             # if view not implemented

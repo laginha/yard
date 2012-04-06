@@ -2,6 +2,11 @@ from django.views.decorators.csrf import csrf_exempt
 from yard   import Resource, method
 from models import Book
 
+class Order(Resource):
+    @staticmethod
+    def show(request, order_id, **kwargs):
+        return 200
+
 
 @csrf_exempt
 class Books(Resource):
