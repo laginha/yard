@@ -107,7 +107,8 @@ class Resource(object):
         if is_httpresponse(response):                                    return response                     
         elif is_queryset(response):                                      return JsonResponse(self.resources_to_json(response), status=status)
         elif is_modelinstance(response):                                 return JsonResponse(self.resource_to_json(response), status=status)
-        elif response == None or is_int(response):                       return HttpResponse(status=status)
+        elif response == None:                                           return HttpResponse(status=status)
+        elif is_int(response):                                           return HttpResponse(status=response)
         elif is_str(response) or is_dict(response) or is_list(response): return JsonResponse(response, status=status)                 
         elif is_valuesset(response):                                     return JsonResponse(list(response), status=status)     
         else:                                                            return HttpResponse(str(response), status=status)          
