@@ -9,7 +9,7 @@ setup(
     author           = "Diogo Laginha",
     url              = 'https://github.com/laginha/yard',
     description      = "Yet Another Resftul Django-app",
-    packages         = ['yard'],
+    packages         = find_packages(where='src'),
     install_requires = [],
     extras_require   = {},
 )
