@@ -7,7 +7,7 @@ from django.core            import serializers
 from yard.utils             import *
 from yard.utils.exceptions  import RequiredParamMissing
 from yard.http              import JsonResponse, HttpResponse, HttpResponseUnauthorized, HttpResponseNotFound
-import json
+import json, mimetypes
 
 
 def method(f):
@@ -90,6 +90,9 @@ class Resource(object):
         except AttributeError:
             # if view not implemented
             return HttpResponseNotFound()
+        except IOError:
+            # if return file not found
+            return HttpResponseNotFound()
         
         # return a http compliant response
         return self.respond( response )
@@ -104,14 +107,27 @@ class Resource(object):
                 status = response[0]
             response = response[1]
               
-        if is_httpresponse(response):                                    return response                     
-        elif is_queryset(response):                                      return JsonResponse(self.resources_to_json(response), status=status)
-        elif is_modelinstance(response):                                 return JsonResponse(self.resource_to_json(response), status=status)
-        elif response == None:                                           return HttpResponse(status=status)
-        elif is_int(response):                                           return HttpResponse(status=response)
-        elif is_str(response) or is_dict(response) or is_list(response): return JsonResponse(response, status=status)                 
-        elif is_valuesset(response):                                     return JsonResponse(list(response), status=status)     
-        else:                                                            return HttpResponse(str(response), status=status)          
+        if is_httpresponse(response):
+            return response                     
+        elif is_queryset(response):
+            return JsonResponse(self.resources_to_json(response), status=status)
+        elif is_modelinstance(response):
+            return JsonResponse(self.resource_to_json(response), status=status)
+        elif response == None:
+            return HttpResponse(status=status)
+        elif is_int(response):
+            return HttpResponse(status=response)
+        elif is_str(response) or is_dict(response) or is_list(response):
+            return JsonResponse(response, status=status) 
+        elif is_file(response): 
+            mimetype     = mimetypes.guess_type(response.name)[0]
+            httpresponse = HttpResponse(response, status=status, mimetype=mimetype)
+            httpresponse['Content-Disposition'] = 'attachment; filename=' + response.name
+            return httpresponse           
+        elif is_valuesset(response):
+            return JsonResponse(list(response), status=status)     
+        else:
+            return HttpResponse(str(response), status=status)          
 
 
     def resources_to_json(self, resources):   

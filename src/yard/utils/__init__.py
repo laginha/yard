@@ -17,6 +17,7 @@ is_unicode   = lambda x: isinstance(x, unicode)
 is_tuple     = lambda x: isinstance(x, tuple)
 is_dict      = lambda x: isinstance(x, dict)
 is_list      = lambda x: isinstance(x, list)
+is_file      = lambda x: isinstance(x, file)
 is_strfloat  = lambda x: bool( float_.match(x) ) if x else False
 is_strint    = lambda x: x.isdigit() if is_unicode(x) or is_str(x) else False
 is_method    = lambda x: inspect.ismethod(x)
