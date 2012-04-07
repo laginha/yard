@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from django.http import HttpResponse, HttpResponseForbidden, HttpResponseServerError, HttpResponseNotFound, HttpResponseBadRequest
+from django.http import *
 import json
 
 class HttpResponseUnauthorized(HttpResponse):

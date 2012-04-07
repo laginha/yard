@@ -4,9 +4,9 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator  import Paginator, EmptyPage
 from django.core            import serializers
-from utils                  import *
-from utils.exceptions       import RequiredParamMissing
-from utils.http_responses   import JsonResponse, HttpResponse, HttpResponseUnauthorized, HttpResponseNotFound
+from yard.utils             import *
+from yard.utils.exceptions  import RequiredParamMissing
+from yard.http              import JsonResponse, HttpResponse, HttpResponseUnauthorized, HttpResponseNotFound
 import json
 
 
@@ -104,15 +104,13 @@ class Resource(object):
                 status = response[0]
             response = response[1]
               
-        if is_httpresponse(response): return response                     
-        elif is_queryset(response): return JsonResponse(self.resources_to_json(response), status=status)
-        elif is_modelinstance(response): return JsonResponse(self.resource_to_json(response), status=status)
-        elif response == None: return HttpResponse(status=status)
-        elif is_int(response): return HttpResponse(status=response)
-        elif is_str(response): return HttpResponse(response, status=status)                
-        elif is_valuesset(response): return JsonResponse(list(response), status=status)          
-        elif is_dict(response) or is_list(response): return JsonResponse(response, status=status)      
-        else: return response          
+        if is_httpresponse(response):                                    return response                     
+        elif is_queryset(response):                                      return JsonResponse(self.resources_to_json(response), status=status)
+        elif is_modelinstance(response):                                 return JsonResponse(self.resource_to_json(response), status=status)
+        elif response == None or is_int(response):                       return HttpResponse(status=status)
+        elif is_str(response) or is_dict(response) or is_list(response): return JsonResponse(response, status=status)                 
+        elif is_valuesset(response):                                     return JsonResponse(list(response), status=status)     
+        else:                                                            return HttpResponse(str(response), status=status)          
 
 
     def resources_to_json(self, resources):   
