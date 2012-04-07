@@ -91,7 +91,7 @@ Supported return types:
     </tr>
     <tr>
         <td>str</td>
-        <td>Defines the HTTP-response's content</td>
+        <td>Defines content of JSON-response</td>
     </tr>
     <tr>
         <td>dict</td>
@@ -101,6 +101,10 @@ Supported return types:
         <td>list</td>
         <td>Defines content of JSON-response</td>
     </tr>
+    <tr>
+        <td>file</td>
+        <td>Returns a HTTP-response as file like object</td>
+    </tr
     <tr>
         <td>tuple</td>
         <td>
