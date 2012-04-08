@@ -104,7 +104,7 @@ Supported return types:
     <tr>
         <td>file</td>
         <td>Returns a HTTP-response as file like object</td>
-    </tr
+    </tr>
     <tr>
         <td>tuple</td>
         <td>
