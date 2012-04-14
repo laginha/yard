@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from django.http import *
+from django.http import HttpResponse
 import json, mimetypes
 
 class HttpResponseUnauthorized(HttpResponse):
@@ -25,14 +25,24 @@ class FileResponse(HttpResponse):
         self['Content-Disposition'] = 'attachment; filename=' + content.name
 
 
-def JsonpResponse(req, data):
-    #JSONP builder
-    json_str = lambda x: json.dumps( x, indent=2 )
-    response = HttpResponse( json_str( data ), content_type='application/json' )
-    if response.status_code == 200:
-        for key in ['callback', 'jsonp']:
-            if key in req.GET:
-                response['Content-Type'] = 'text/javascript; charset=utf-8'
-                response.content = "%s(%s)" %( req.GET[key], response.content )
-                return response
-    return response
+class JsonpResponse(HttpResponse):
+    def __init__(self, content='', mimetype=None, status=None, param='callback'):
+        content = json.dumps( content or [], indent=2 )
+        HttpResponse.__init__(self, content      = "%s(%s)" %(param, content), 
+                                    mimetype     = mimetype,
+                                    status       = status, 
+                                    content_type = 'text/javascript; charset=utf-8', )
+
+
+class ProperJsonResponse:
+    def __init__(self, request):
+        self.__jsonp_param = None
+        for param in ['callback', 'jsonp']:
+            if param in request.GET:
+                self.__jsonp_param = param
+                
+    def __call__(self, *args, **kwargs):
+        if self.__jsonp_param:
+            return JsonpResponse(*args, param=self.__jsonp_param, **kwargs) 
+        return JsonResponse(*args, **kwargs)
+

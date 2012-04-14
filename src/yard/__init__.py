@@ -4,10 +4,11 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator  import Paginator, EmptyPage
 from django.core            import serializers
+from django.http            import HttpResponse, HttpResponseNotFound
 from yard.utils             import *
 from yard.utils.builders    import JSONbuilder
 from yard.utils.exceptions  import RequiredParamMissing, HttpMethodNotAllowed
-from yard.http              import JsonResponse, FileResponse, HttpResponse, HttpResponseUnauthorized, HttpResponseNotFound
+from yard.http              import JsonResponse, FileResponse, HttpResponseUnauthorized
 import json, mimetypes
 
 
