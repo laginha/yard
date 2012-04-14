@@ -128,8 +128,10 @@ class Resource(object):
         '''
         def limits_(param, request):
             '''validate param value through param limit key'''
-            lambda_ = param.get( 'limit', lambda x: x)
+            lambda_ = param.get( 'limit' )
             value   = request.GET.get( param['name'] )
+            
+            if not lambda_: return value
             if not value: return None
                 
             try:
