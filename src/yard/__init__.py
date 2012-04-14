@@ -5,6 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator  import Paginator, EmptyPage
 from django.core            import serializers
 from yard.utils             import *
+from yard.utils.builders    import JSONbuilder
 from yard.utils.exceptions  import RequiredParamMissing
 from yard.http              import JsonResponse, HttpResponse, HttpResponseUnauthorized, HttpResponseNotFound
 import json, mimetypes
@@ -26,79 +27,56 @@ class Resource(object):
     
     
     def __init__(self, routes):
-        def build_json_tree(field, resource=None):
-            '''
-            pre-build a json according to the given fields
-            '''
-            if is_tuple( field ):     
-                
-                # if it is a resource-field with sub-fields (x,(y,z))
-                if len( field ) == 2 and is_str( field[0] ) and is_tuple( field[1] ): #known issue here
-                    resource = lambda x: getattr( x, field[0], None )
-                    # recursive: go into sub-fields
-                    value    = build_json_tree( field[1], resource )
-                    return ( field[0], value ) 
-                    
-                # if sub-fields (y,z)
-                else:
-                    # recursive: go into fields
-                    results  = [ build_json_tree(f, resource) for f in field ]
-                    # filter non-existing fields
-                    filtered = filter(lambda x: x and is_tuple( x ), results)
-                    return dict( filtered )  
-            
-            elif is_str( field ):
-                
-                # if field is sub-field
-                if resource:
-                    lambda_ = lambda x: getattr( resource(x), field, '' )
-                # if first-level field
-                else:
-                    lambda_ = lambda x: getattr( x, field, '' )
-                return ( field, lambda_ )
-        
-        json_tree   = build_json_tree( self.fields )
-        # make sure json_tree is a dictinary
-        self.tree   = json_tree if is_dict( json_tree ) else dict(json_tree if is_list(json_tree) else [json_tree])
+        self.json   = JSONbuilder(self.fields)
         self.routes = routes # maps http methods with respective views
 
     
     def __call__(self, request, **parameters):
-        http_method = request.method.lower()
-        # check if http_method within possible routes
-        if http_method not in self.routes:
-            return HttpResponseNotFound()
-        
-        method = self.routes[http_method]
-        if method == 'index':
-               
-            try:
-                # get params from request according to the given parameters attribute
-                params = self.fetch_params( request )
-                for param in params:
-                    parameters.update( param )
-            except RequiredParamMissing as e:
-                # if required param missing from request
-                return HttpResponseUnauthorized( str(e) )
-        
         try:
-            view     = getattr( self, method )
-            # Run desired view
-            response = view( request, parameters.pop('id'), **parameters ) if method in ['show', 'update', 'destroy'] else (
-                view( request, **parameters ) if method == 'create' else view( request, parameters )
-            )
+            http_method = request.method.lower()
+            # check if http_method within possible routes
+            if http_method not in self.routes:
+                return HttpResponseNotFound()
+
+            method = self.routes[http_method]
+            if method == 'index':
+                self.__update( request, parameters )
+            response = self.__view( request, method, parameters )
+            return self.__respond( response )
+        
+        except RequiredParamMissing as e:
+            # if required param missing from request
+            return HttpResponseUnauthorized( str(e) )
         except AttributeError:
             # if view not implemented
             return HttpResponseNotFound()
         except IOError:
             # if return file not found
             return HttpResponseNotFound()
-        
-        # return a http compliant response
-        return self.respond( response )
 
-
-    def respond(self, response, status=200):
+    
+    def __update(self, request, parameters):
+        '''
+        Get params from request according to the given parameters attribute
+        '''
+        params = self.__fetch_params( request )
+        for param in params:
+            parameters.update( param )
+    
+    
+    def __view(self, request, method, parameters):
+        '''
+        Run desired view according to method
+        '''
+        view = getattr( self, method )
+        if method in ['show', 'update', 'destroy']:
+            return view( request, parameters.pop('id'), **parameters ) 
+        elif method == 'create':
+            return view( request, **parameters )
+        return view( request, parameters )
+    
+    
+    def __respond(self, response, status=200):
         '''
         Return a HttpResponse according to given response
         '''
@@ -110,9 +88,9 @@ class Resource(object):
         if is_httpresponse(response):
             return response                     
         elif is_queryset(response):
-            return JsonResponse(self.resources_to_json(response), status=status)
+            return JsonResponse(self.__resources_to_json(response), status=status)
         elif is_modelinstance(response):
-            return JsonResponse(self.resource_to_json(response), status=status)
+            return JsonResponse(self.__resource_to_json(response), status=status)
         elif response == None:
             return HttpResponse(status=status)
         elif is_int(response):
@@ -130,39 +108,21 @@ class Resource(object):
             return HttpResponse(str(response), status=status)          
 
 
-    def resources_to_json(self, resources):   
+    def __resources_to_json(self, resources):   
         '''
         Serialize each resource into json
-        '''       
-        return [ self.resource_to_json(i) for i in resources ]
-
-
-    def resource_to_json(self, resource, tree=None):
         '''
-        Use pre-calculated json_tree to create json for given resource
+        return [self.json(i) for i in resources]       
+
+
+    def __resource_to_json(self, resource):
         '''
-        if not tree:
-            tree = self.tree
-        dict_ = {}
-        for k,v in tree.items():        
-            value = self.resource_to_json( resource, v ) if is_dict( v ) else v( resource )
-            if not value: 
-                continue
-            # if field is a model instance method
-            elif is_method(value):
-                result = value()
-                # expect for a valuesQuerySet, querySet, dict, list or unicoded value
-                dict_[ k ] = list( result ) if is_valuesset(result) else (
-                    [unicode(i) for i in result] if is_queryset(result) else (
-                        result if is_dict(result) or is_list(result) else unicode(result)
-                    )
-                )
-            else:
-                dict_[ k ] = value if is_dict(value) else unicode(value)
-        return dict_
+        Create json for given resource
+        '''
+        return self.json(resource)
 
 
-    def fetch_params(self, request):
+    def __fetch_params(self, request):
         '''
         Get values from request according to specified parameters attribute
         '''
