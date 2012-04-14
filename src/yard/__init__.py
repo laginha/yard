@@ -28,7 +28,7 @@ class Resource(object):
             if method == 'index':
                 self.__update( request, parameters )
             response = self.__view( request, method, parameters )
-            return self.__respond( response )
+            return self.__response( response )
         
         except HttpMethodNotAllowed:
             # if http_method not allowed for this resource
@@ -78,7 +78,7 @@ class Resource(object):
         return view( request, parameters )
     
     
-    def __respond(self, response, status=200):
+    def __response(self, response, status=200):
         '''
         Return a HttpResponse according to given response
         '''
@@ -87,9 +87,10 @@ class Resource(object):
                 status = response[0]
             response = response[1]
               
-        if is_httpresponse(response):
-            return response                     
-        elif is_queryset(response):
+        elif is_httpresponse(response):
+            return response
+                                 
+        if is_queryset(response):
             return JsonResponse(self.__resources_to_json(response), status=status)
         elif is_modelinstance(response):
             return JsonResponse(self.__resource_to_json(response), status=status)
