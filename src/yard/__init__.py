@@ -11,16 +11,6 @@ from yard.http              import JsonResponse, HttpResponse, HttpResponseUnaut
 import json, mimetypes
 
 
-def method(f):
-    @staticmethod
-    def wrapper(*args, **kwargs):
-        try:
-            return f( *args, **kwargs )
-        except ObjectDoesNotExist:
-            return 404
-    return wrapper
-
-
 class Resource(object):
     parameters  = ()
     fields      = ()
@@ -47,6 +37,9 @@ class Resource(object):
             return HttpResponseUnauthorized( str(e) )
         except AttributeError:
             # if view not implemented
+            return HttpResponseNotFound()
+        except ObjectDoesNotExist:
+            # if return model instance does not exist
             return HttpResponseNotFound()
         except IOError:
             # if return file not found
