@@ -6,7 +6,7 @@ from django.core.paginator  import Paginator, EmptyPage
 from django.core            import serializers
 from yard.utils             import *
 from yard.utils.builders    import JSONbuilder
-from yard.utils.exceptions  import RequiredParamMissing
+from yard.utils.exceptions  import RequiredParamMissing, HttpMethodNotAllowed
 from yard.http              import JsonResponse, HttpResponse, HttpResponseUnauthorized, HttpResponseNotFound
 import json, mimetypes
 
@@ -33,17 +33,15 @@ class Resource(object):
     
     def __call__(self, request, **parameters):
         try:
-            http_method = request.method.lower()
-            # check if http_method within possible routes
-            if http_method not in self.routes:
-                return HttpResponseNotFound()
-
-            method = self.routes[http_method]
+            method = self.__method( request )
             if method == 'index':
                 self.__update( request, parameters )
             response = self.__view( request, method, parameters )
             return self.__respond( response )
         
+        except HttpMethodNotAllowed:
+            # if http_method not allowed for this resource
+            return HttpResponseNotFound( str(e) )
         except RequiredParamMissing as e:
             # if required param missing from request
             return HttpResponseUnauthorized( str(e) )
@@ -54,6 +52,15 @@ class Resource(object):
             # if return file not found
             return HttpResponseNotFound()
 
+
+    def __method(self, request):
+        '''
+        Check if http_method within possible routes
+        '''
+        http_method = request.method.lower()
+        if http_method not in self.routes:
+            raise HttpMethodNotAllowed( http_method )
+        return self.routes[http_method]
     
     def __update(self, request, parameters):
         '''
