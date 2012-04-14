@@ -7,7 +7,7 @@ from django.core            import serializers
 from yard.utils             import *
 from yard.utils.builders    import JSONbuilder
 from yard.utils.exceptions  import RequiredParamMissing, HttpMethodNotAllowed
-from yard.http              import JsonResponse, HttpResponse, HttpResponseUnauthorized, HttpResponseNotFound
+from yard.http              import JsonResponse, FileResponse, HttpResponse, HttpResponseUnauthorized, HttpResponseNotFound
 import json, mimetypes
 
 
@@ -55,6 +55,7 @@ class Resource(object):
             raise HttpMethodNotAllowed( http_method )
         return self.routes[http_method]
     
+    
     def __update(self, request, parameters):
         '''
         Get params from request according to the given parameters attribute
@@ -97,11 +98,8 @@ class Resource(object):
             return HttpResponse(status=response)
         elif is_str(response) or is_dict(response) or is_list(response):
             return JsonResponse(response, status=status) 
-        elif is_file(response): 
-            mimetype     = mimetypes.guess_type(response.name)[0]
-            httpresponse = HttpResponse(response, status=status, mimetype=mimetype)
-            httpresponse['Content-Disposition'] = 'attachment; filename=' + response.name
-            return httpresponse           
+        elif is_file(response):
+            return FileResponse(response, status=status)        
         elif is_valuesset(response):
             return JsonResponse(list(response), status=status)     
         else:
