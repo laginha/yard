@@ -87,7 +87,7 @@ Supported return types:
     </tr>
     <tr>
         <td>int</td>
-        <td>Defines the HTTP-response's status code</td>
+        <td>Defines the HTTP-response's status code (defaults to 200)</td>
     </tr>
     <tr>
         <td>str</td>
@@ -106,6 +106,10 @@ Supported return types:
         <td>Returns a HTTP-response as file like object</td>
     </tr>
     <tr>
+        <td>None</td>
+        <td>Defaults to HTTP-response</td>
+    </tr>
+    <tr>
         <td>tuple</td>
         <td>
             First value defines HTTP-response's status.
@@ -113,8 +117,8 @@ Supported return types:
         </td>
     </tr>
     <tr>
-        <td>None</td>
-        <td>Defaults to HTTP-response with status 200</td>
+        <td>HttpResponse</td>
+        <td>Returns HttpResponse as it is</td>
     </tr>
 </table>
 
