@@ -178,7 +178,7 @@ In fact, *id* and *title* are attributes of model *Book*, as well as *author* wh
 
 ### Instance methods in fields
 
-Specified fields can also be instance methods, as long as they are callable with no arguments besides instance. This is a good way to include data into the JSON response which can't be specified directly in the *fields* attributes (e.g. ManyToMany fields).
+Specified fields can also be instance methods, as long as they are callable with no arguments besides instance. This is a good way to include data into the JSON response which can't be specified directly through the model's attributes.
 
 <pre>
 class Book(models.Model):
@@ -209,15 +209,11 @@ class Book(Resource):
         <td>Converts to list</td>
     </tr>
     <tr>
-        <td>dict</td>
+        <td>JSON-serializable (e.g. dict, list)</td>
         <td> - </td>
     </tr>
     <tr>
-        <td>list</td>
-        <td> - </td>
-    </tr>
-    <tr>
-        <td>other</td>
+        <td>other (e.g. model instance)</td>
         <td>Unicodes value</td>
     </tr>
 </table>

@@ -36,7 +36,7 @@ class Resource(object):
         except RequiredParamMissing as e:
             # if required param missing from request
             return HttpResponseUnauthorized( str(e) )
-        except AttributeError:
+        except AttributeError as e:
             # if view not implemented
             return HttpResponseNotFound()
         except ObjectDoesNotExist:
