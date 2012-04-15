@@ -1,6 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 from yard   import Resource
 from models import Book
+from yards  import BOOK_PARAMETERS
 
 class Order(Resource):
     @staticmethod
@@ -10,22 +11,8 @@ class Order(Resource):
 
 @csrf_exempt
 class Books(Resource):
-    parameters = (
-        { 'name':     'year',                           #query parameter name - required
-          'alias':    'publication_date__year',         #actual name within server's logic - not required
-          'required': False,                            #defaults to False - not required
-          'limit':    lambda x: max(1970, min(2012, x)) #parameter's logic - not required
-        },
-        { 'name': 'title' },
-        { 'and': (                                      # genre AND ( author OR house )
-            { 'name': 'genre', 'alias': 'genres'},
-            { 'or': (
-                { 'name': 'author', 'alias': 'author__id' },                                      
-                { 'name': 'house',  'alias': 'publishing_house__id' }, ) 
-            }, )
-        },
-    )
-    fields = ('id', 'title', 'publication_date', 'genres', ('author', ('name','age','gender_')) )
+    parameters = BOOK_PARAMETERS
+    fields     = ('id', 'title', 'publication_date', 'genres', ('author', ('name','age','gender_')) )
     
     @staticmethod
     def index(request, params):
