@@ -4,10 +4,10 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator  import Paginator, EmptyPage
 from django.core            import serializers
-from django.http            import HttpResponse, HttpResponseNotFound
+from django.http            import HttpResponse, HttpResponseNotFound, HttpResponseServerError
 from yard.utils             import *
 from yard.utils.builders    import JSONbuilder
-from yard.utils.exceptions  import RequiredParamMissing, HttpMethodNotAllowed
+from yard.utils.exceptions  import RequiredParamMissing, HttpMethodNotAllowed, InvalidStatusCode
 from yard.http              import JsonResponse, FileResponse, HttpResponseUnauthorized
 import json, mimetypes
 
@@ -45,6 +45,8 @@ class Resource(object):
         except IOError:
             # if return file not found
             return HttpResponseNotFound()
+        except InvalidStatusCode as e:
+            return HttpResponseServerError(str(e))
 
 
     def __method(self, request):
@@ -85,8 +87,9 @@ class Resource(object):
         if is_tuple(response) and len(response)>1:
             if is_int(response[0]):
                 status = response[0]
+            else:
+                raise InvalidStatusCode(response[0])
             response = response[1]
-              
         elif is_httpresponse(response):
             return response
                                  

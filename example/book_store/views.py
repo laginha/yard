@@ -1,7 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 from yard   import Resource
 from models import Book
-from yards  import BOOK_PARAMETERS
+from params import BOOK_PARAMETERS
 
 class Order(Resource):
     @staticmethod
