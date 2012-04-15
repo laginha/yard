@@ -4,10 +4,11 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator  import Paginator, EmptyPage
 from django.core            import serializers
-from django.http            import HttpResponse, HttpResponseNotFound, HttpResponseServerError
+from django.http            import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
 from yard.utils             import *
 from yard.utils.builders    import JSONbuilder
 from yard.utils.exceptions  import RequiredParamMissing, HttpMethodNotAllowed, InvalidStatusCode
+from yard.utils.templates   import ServerErrorTemplate
 from yard.http              import JsonResponse, FileResponse, HttpResponseUnauthorized
 import json, mimetypes
 
@@ -32,10 +33,10 @@ class Resource(object):
         
         except HttpMethodNotAllowed:
             # if http_method not allowed for this resource
-            return HttpResponseNotFound( str(e) )
+            return HttpResponseNotFound()
         except RequiredParamMissing as e:
             # if required param missing from request
-            return HttpResponseUnauthorized( str(e) )
+            return HttpResponseBadRequest()
         except AttributeError as e:
             # if view not implemented
             return HttpResponseNotFound()
@@ -46,7 +47,10 @@ class Resource(object):
             # if return file not found
             return HttpResponseNotFound()
         except InvalidStatusCode as e:
-            return HttpResponseServerError(str(e))
+            # status code given is not int
+            return ServerErrorTemplate(e)
+        except Exception as e:
+            return ServerErrorTemplate(e, with_trace=True)
 
 
     def __method(self, request):
