@@ -28,3 +28,4 @@ class BookParameters(Form):
     
     logic = name, title, genre & (author|house)
 
+#print BookParameters()

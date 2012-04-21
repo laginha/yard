@@ -108,7 +108,7 @@ class Form(object):
             elif len(self.logic) == 1:
                 self.set_names( list(self.logic) )
         else:
-            self.logic = (p for n,p in self.__attributes.items() if n not in ['__module__', '__doc__'])
+            self.logic = [p for n,p in self.__attributes.items() if n not in ('__module__', '__doc__')]
             self.__set_names( self.logic )
         
     def __str__(self):
