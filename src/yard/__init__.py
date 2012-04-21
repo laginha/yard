@@ -5,32 +5,29 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator  import Paginator, EmptyPage
 from django.core            import serializers
 from django.http            import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
-from yard.utils             import *
-from yard.utils.builders    import JSONbuilder
-from yard.utils.exceptions  import RequiredParamMissing, HttpMethodNotAllowed, InvalidStatusCode
-from yard.utils.templates   import ServerErrorTemplate
 from yard.http              import JsonResponse, FileResponse, HttpResponseUnauthorized
+from yard.utils.builders    import JSONbuilder
+from yard.utils.exceptions  import HttpMethodNotAllowed, InvalidStatusCode
+from yard.utils.templates   import ServerErrorTemplate
+from yard.utils             import *
 import json, mimetypes
 
 
 class Resource(object):
     parameters  = ()
-    fields      = ()
-    
+    fields      = ()    
     
     def __init__(self, routes):
         self.json   = JSONbuilder(self.fields)
         self.routes = routes # maps http methods with respective views
-
-    
+  
     def __call__(self, request, **parameters):
         try:
             method = self.__method( request )
             if method == 'index':
-                self.__update( request, parameters )
+                self.__fetch( request, parameters )
             response = self.__view( request, method, parameters )
-            return self.__response( response )
-        
+            return self.__response( response )    
         except HttpMethodNotAllowed:
             # if http_method not allowed for this resource
             return HttpResponseNotFound()
@@ -39,7 +36,7 @@ class Resource(object):
             return HttpResponseBadRequest()
         except AttributeError as e:
             # if view not implemented
-            return HttpResponseNotFound()
+            return HttpResponseNotFound(str(e))
         except ObjectDoesNotExist:
             # if return model instance does not exist
             return HttpResponseNotFound()
@@ -49,9 +46,6 @@ class Resource(object):
         except InvalidStatusCode as e:
             # status code given is not int
             return ServerErrorTemplate(e)
-        except Exception as e:
-            return ServerErrorTemplate(e, with_trace=True)
-
 
     def __method(self, request):
         '''
@@ -62,15 +56,12 @@ class Resource(object):
             raise HttpMethodNotAllowed( http_method )
         return self.routes[http_method]
     
-    
-    def __update(self, request, parameters):
+    def __fetch(self, request, parameters):
         '''
-        Get params from request according to the given parameters attribute
+        Get paramters from request
         '''
-        params = self.__fetch_params( request )
-        for param in params:
-            parameters.update( param )
-    
+        for i in self.parameters.get( request ):
+            parameters.update( i )
     
     def __view(self, request, method, parameters):
         '''
@@ -127,67 +118,3 @@ class Resource(object):
         Create json for given resource
         '''
         return self.json(resource)
-
-
-    def __fetch_params(self, request):
-        '''
-        Get values from request according to specified parameters attribute
-        '''
-        def limits_(param, request):
-            '''validate param value through param limit key'''
-            lambda_ = param.get( 'limit' )
-            value   = request.GET.get( param['name'] )
-            
-            if not lambda_: return value
-            if not value: return None
-                
-            try:
-                # tries to convert value into float or int before passing it through limit
-                return lambda_( float(value) ) if is_strfloat( value ) else (
-                    lambda_( int(value) ) if is_strint( value ) else lambda_( value )
-                )
-            except ValueError:
-                return
-            except TypeError:
-                return
-        
-        def next_(param, request):
-            '''redirect param whether it is single or banded together with AND/OR'''
-            return or_( param['or'], request ) if param.has_key('or') else (
-                and_( param['and'], request ) if param.has_key('and') else solo_( param, request )
-            )
-
-        def solo_(param, request):
-            '''handle a normal/single param'''
-            value = limits_( param, request )
-            key   = param.get('alias') or param['name']
-            if not value and param.get('required', False):
-                # raise exception if value not valid of required param
-                raise RequiredParamMissing( key ) 
-            return {key: value} if value else {}
-
-        def and_(params, request):
-            '''handle params banded together with AND'''
-            together = {}
-            if is_tuple( params ):   
-                for param in params:
-                    value = next_( param, request )
-                    together.update( value  )
-            # returns params's values if all valid
-            return together if len(together)==len(params) else {}
-
-        def or_(params, request): 
-            '''handle params banded together with OR'''
-            if is_tuple( params ):
-                for param in params:
-                    value = next_( param, request )
-                    # returns the first valid value
-                    if value: return value
-            return {}
-        
-        # for each parameter
-        for param in self.parameters:  
-            if is_dict( param ):
-                yield next_( param, request )
-
-

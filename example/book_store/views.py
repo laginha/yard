@@ -1,7 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 from yard   import Resource
 from models import Book
-from params import BOOK_PARAMETERS
+from params import BookParameters
 
 class Order(Resource):
     @staticmethod
@@ -11,11 +11,12 @@ class Order(Resource):
 
 @csrf_exempt
 class Books(Resource):
-    parameters = BOOK_PARAMETERS
+    parameters = BookParameters()
     fields     = ('id', 'title', 'publication_date', 'genres', ('author', ('name','age','gender_')) )
     
     @staticmethod
     def index(request, params):
+        print params
         return Book.objects.filter( **params ) #returns a JsonResponse-200
 
     @staticmethod
