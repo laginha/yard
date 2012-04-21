@@ -10,4 +10,4 @@ class BookParameters(Form):
     author = Parameter( alias='author__id' )
     house  = Parameter( alias='publishing_house__id' ) 
     
-    logic = year | title | genre #, house & (author|house), author
+    logic = year, house & (author|house)
