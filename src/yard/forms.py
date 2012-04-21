@@ -14,7 +14,7 @@ class Parameter(object):
         self.name     = None
 
     def __or__(self, other):
-        return OR(self, other)
+        return OR(other, self)
 
     def __and__(self, other):
         return AND(self, other)

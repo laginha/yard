@@ -7,7 +7,7 @@ from django.core            import serializers
 from django.http            import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
 from yard.http              import JsonResponse, FileResponse, HttpResponseUnauthorized
 from yard.utils.builders    import JSONbuilder
-from yard.utils.exceptions  import HttpMethodNotAllowed, InvalidStatusCode
+from yard.utils.exceptions  import RequiredParamMissing, HttpMethodNotAllowed, InvalidStatusCode
 from yard.utils.templates   import ServerErrorTemplate
 from yard.utils             import *
 import json, mimetypes
