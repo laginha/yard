@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from yard.utils            import is_strfloat, is_strint, is_tuple, is_list, is_str, is_int, is_float
-from yard.utils.exceptions import RequiredParamMissing
+from yard.utils      import is_strfloat, is_strint, is_tuple, is_list, is_str, is_int, is_float
+from yard.exceptions import RequiredParamMissing
 import re
 
 

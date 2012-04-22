@@ -3,7 +3,7 @@
 
 from django.contrib.gis.geos import Point,
 from yard.forms.form         import *
-from yard.utils.exceptions   import InvalidParameterValue
+from yard.exceptions         import InvalidParameterValue
 from datetime                import datetime
 
 
