@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from django.contrib.gis.geos import Point,
+from django.contrib.gis.geos import Point
 from yard.forms.form         import *
 from yard.exceptions         import InvalidParameterValue
+from yard.utils              import is_unicode, is_str, is_strint
 from datetime                import datetime
 
 
@@ -26,17 +27,14 @@ class IntegerParam(Parameter):
             return
 
 
-class PositiveIntegerParam(IntegerParameter):
+class PositiveIntegerParam(IntegerParam):
     def __init__(self, alias=None, required=False, default=None, max=None):
         IntegerParam.__init__(self, alias=alias, required=required, default=default, min=0, max=max)
 
 
 class CharParam(Parameter):
     def __init__(self, alias=None, required=False, default=None, max_length=None):
-        if max_length:
-            validate = lambda x: is_str(x) and len(x) <= max_length
-        else:
-            validate = is_str
+        validate = None if not max_length else (lambda x: len(x) <= max_length)
         Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
     
     def convert(self, value):
@@ -44,7 +42,7 @@ class CharParam(Parameter):
 
 
 class RegexParam(Parameter):
-    def __init__(self, alias=None, required=False, default=None, regex):
+    def __init__(self, regex, alias=None, required=False, default=None):
         validate = lambda x: re.findall(regex, x)
         Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
     
@@ -71,15 +69,15 @@ class FloatParam(Parameter):
             return
 
 
-class PositiveFloatParam(IntegerParameter):
+class PositiveFloatParam(IntegerParam):
     def __init__(self, alias=None, required=False, default=None, max=None):
         FloatParam.__init__(self, alias=alias, required=required, default=None, min=0, max=max)
         
 
 class DateTimeParam(Parameter):
-    def __init__(self, alias=None, required=False, default=None, validate=None
+    def __init__(self, alias=None, required=False, default=None, validate=None,
                  formats=['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d']):
-        self.formats = [formats,] if is_str( formats ) else formats
+        self.formats = [formats,] if is_str(formats) or is_unicode(formats) else formats
         Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
     
     def convert(self, value, to_time=False, to_date=False):
@@ -93,8 +91,7 @@ class DateTimeParam(Parameter):
         
 
 class DateParam(Parameter):
-    def __init__(self, alias=None, required=False, default=None, validate=None
-                 formats=['%Y-%m-%d']):
+    def __init__(self, alias=None, required=False, default=None, validate=None, formats=['%Y-%m-%d']):
         DateTimeParam.__init__(self, alias=alias, required=required, default=default, validate=validate, format=formats)
 
     def convert(self, value):
@@ -102,8 +99,7 @@ class DateParam(Parameter):
 
 
 class TimeParam(Parameter):
-    def __init__(self, alias=None, required=False, default=None, validate=None
-                 formats=['%H:%M:%S']):
+    def __init__(self, alias=None, required=False, default=None, validate=None, formats=['%H:%M:%S']):
         DateTimeParam.__init__(self, alias=alias, required=required, default=default, validate=validate, format=formats)
 
     def convert(self, value):
@@ -121,19 +117,19 @@ class BooleanParam(Parameter):
 
         
 class ChoiceParam(Parameter):
-    def __init__(self, alias=None, required=False, default=None, choices):
+    def __init__(self, choices, alias=None, required=False, default=None):
         validate = lambda x: x in choices
         Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
 
 
 class ChoiceParam(Parameter):
-    def __init__(self, alias=None, required=False, default=None, choices):
+    def __init__(self, choices, alias=None, required=False, default=None):
         validate = lambda x: x in choices
         Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
 
 
 class MultipleChoiceParam(Parameter):
-    def __init__(self, alias=None, required=False, default=None, sep=',', choices):
+    def __init__(self, choices, alias=None, required=False, default=None, sep=','):
         self.sep = sep
         validate = lambda x: all([i in choices for i in x])
         Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
@@ -143,7 +139,7 @@ class MultipleChoiceParam(Parameter):
 
 
 class PointParam(Parameter):
-    def __init__(self, alias=None, required=False, default=None, ):
+    def __init__(self, alias=None, required=False, default=None):
         Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)        
 
     def convert(self, value):

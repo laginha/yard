@@ -12,6 +12,7 @@ class Form(object):
         if hasattr(self, 'logic'):
             if is_tuple( self.logic ):
                 self.__set_names( self.logic )
+                print self
             elif isinstance(self.logic, Parameter):
                 self.logic = (self.logic,)
                 self.__set_names( self.logic )
@@ -28,7 +29,9 @@ class Form(object):
 
     def get(self, request):
         for param in self.logic:
-            yield param.get( request ) 
+            x = param.get( request ) 
+            print x
+            yield x
     
     
 
@@ -96,25 +99,25 @@ class Parameter(object):
             # raise exception if value of required param is not valid
             raise RequiredParamMissing( self.alias ) 
         return {self.alias: value} if value else {}
-
-
-class LogicParameter(Parameter):
+        
+        
+class Logic(Parameter):
     def __init__(self, x, y):
         self.x = x
         self.y = y
-    
+
     def __len__(self):
         length = 0
         for i in self.__dict__.values():
-            length += len(i) if isinstance(i, LogicParameter) else 1
+            length += len(i) if isinstance(i, Logic) else 1
         return length
-    
+
     def set_name(self, params):
         for i in self.__dict__.values():
             i.set_name( params )
-        
 
-class OR(LogicParameter):
+
+class OR(Logic):
     def get(self, request):
         '''
         handle params banded together with OR
@@ -124,12 +127,12 @@ class OR(LogicParameter):
             # returns the first valid value
             if value: return value
         return {}
-    
+
     def __str__(self):
         return '( %s or %s )' %(self.x, self.y)
 
-        
-class AND(LogicParameter):
+
+class AND(Logic):
     def get(self, request):
         '''
         handle params banded together with AND
@@ -140,6 +143,7 @@ class AND(LogicParameter):
             together.update( value  )
         # returns params's values if all valid
         return together if len(together)==len(self) else {}
-        
+
     def __str__(self):
         return '( %s and %s )' %(self.x, self.y)
+
