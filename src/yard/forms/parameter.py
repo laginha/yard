@@ -7,11 +7,9 @@ from yard.exceptions import RequiredParamMissing
 
 class Parameter(object):
    def __init__(self, alias=None, validate=None, default=None, required=False, ignore_invalids=False):
-       self.alias    = alias
-       self.validate = validate
-       self.default  = default
-       self.required = required
-       self.ignore   = ignore_invalids
+       for k,v in locals().items():
+           #set attributes dynamically
+           setattr(self, k, v) if k != 'self' else None
        self.name     = None
 
    def __or__(self, other):
