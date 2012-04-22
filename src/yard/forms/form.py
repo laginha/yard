@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from yard.utils            import is_strfloat, is_strint, is_tuple, is_list
+from yard.utils            import is_strfloat, is_strint, is_tuple, is_list, is_str, is_int, is_float
 from yard.utils.exceptions import RequiredParamMissing
+from datetime import datetime
 import re
 
 
@@ -49,9 +50,9 @@ class Parameter(object):
     def __str__(self):
         return self.name or 'None'
         
-    def __convert(self, value):
+    def convert(self, value):
         '''
-        tries to convert value into float or int before passing it through limit
+        tries to convert value into float or int
         '''
         return float(value) if is_strfloat(value) else (
             int(value) if is_strint(value) else value )
@@ -60,7 +61,7 @@ class Parameter(object):
         value = request.GET.get( self.name )  
         if not value: 
             return  
-        return self.__convert(value)
+        return self.convert(value)
         
     def __default(self, value):
         '''
@@ -98,7 +99,7 @@ class Parameter(object):
         return {self.alias: value} if value else {}
 
 
-class BooleanParameter(Parameter):
+class LogicParameter(Parameter):
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -106,7 +107,7 @@ class BooleanParameter(Parameter):
     def __len__(self):
         length = 0
         for i in self.__dict__.values():
-            length += len(i) if isinstance(i, BooleanParameter) else 1
+            length += len(i) if isinstance(i, LogicParameter) else 1
         return length
     
     def set_name(self, params):
@@ -114,7 +115,7 @@ class BooleanParameter(Parameter):
             i.set_name( params )
         
 
-class OR(BooleanParameter):
+class OR(LogicParameter):
     def get(self, request):
         '''
         handle params banded together with OR
@@ -129,7 +130,7 @@ class OR(BooleanParameter):
         return '( %s or %s )' %(self.x, self.y)
 
         
-class AND(BooleanParameter):
+class AND(LogicParameter):
     def get(self, request):
         '''
         handle params banded together with AND
@@ -143,4 +144,3 @@ class AND(BooleanParameter):
         
     def __str__(self):
         return '( %s and %s )' %(self.x, self.y)
-

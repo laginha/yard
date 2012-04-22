@@ -16,7 +16,6 @@ class Books(Resource):
     
     @staticmethod
     def index(request, params):
-        print params
         return Book.objects.filter( **params ) #returns a JsonResponse-200
 
     @staticmethod

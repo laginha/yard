@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from yard.forms import Form, Parameter
+from yard.forms import *
 
 class BookParameters(Form):
-    year   = Parameter( alias='publication_date__year', limits=lambda x: max(1970, min(2012, x)) )
-    title  = Parameter()
-    genre  = Parameter( alias='genres' )
-    author = Parameter( alias='author__id' )
-    house  = Parameter( alias='publishing_house__id' ) 
+    year   = IntegerParam( alias='publication_date__year', max=2012, min=1970 )
+    title  = CharParam()
+    genre  = CharParam( alias='genres' )
+    author = CharParam( alias='author__id' )
+    house  = CharParam( alias='publishing_house__id' ) 
     
     logic = year, house & (author|house)
