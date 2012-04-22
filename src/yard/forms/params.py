@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 from django.contrib.gis.geos import Point
-from yard.forms.form         import *
+from yard.forms.parameter    import Parameter
 from yard.exceptions         import InvalidParameterValue
 from yard.utils              import is_unicode, is_str, is_strint
 from datetime                import datetime
