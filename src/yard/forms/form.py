@@ -3,7 +3,6 @@
 
 from yard.utils            import is_strfloat, is_strint, is_tuple, is_list, is_str, is_int, is_float
 from yard.utils.exceptions import RequiredParamMissing
-from datetime import datetime
 import re
 
 
