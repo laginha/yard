@@ -25,7 +25,7 @@ class Resource(object):
         try:
             method = self.__method( request )
             if method == 'index':
-                self.__fetch( request, parameters )
+                parameters = self.__query_parameters( request, parameters )
             response = self.__view( request, method, parameters )
             return self.__response( response )    
         except HttpMethodNotAllowed:
@@ -56,12 +56,15 @@ class Resource(object):
             raise HttpMethodNotAllowed( http_method )
         return self.routes[http_method]
     
-    def __fetch(self, request, parameters):
+    def __query_parameters(self, request, parameters):
         '''
         Get paramters from request
         '''
+        from yard.forms import QueryParameters
+        query_params = QueryParameters( parameters )
         for i in self.parameters.get( request ):
-            parameters.update( i )
+            query_params.update( i )
+        return query_params
     
     def __view(self, request, method, parameters):
         '''
@@ -73,8 +76,7 @@ class Resource(object):
         elif method == 'create':
             return view( request, **parameters )
         return view( request, parameters )
-    
-    
+       
     def __response(self, response, status=200):
         '''
         Return a HttpResponse according to given response
@@ -105,13 +107,11 @@ class Resource(object):
         else:
             return HttpResponse(str(response), status=status)          
 
-
     def __resources_to_json(self, resources):   
         '''
         Serialize each resource into json
         '''
         return [self.json(i) for i in resources]       
-
 
     def __resource_to_json(self, resource):
         '''

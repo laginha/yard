@@ -18,9 +18,12 @@ class HttpMethodNotAllowed(Exception):
 
 
 class RequiredParamMissing(Exception):
-    def __init__(self, name):
-        self.name = name
-    
+    def __init__(self, param):
+        self.param = param
+        
+    def __nonzero__(self):
+        return False
+
     def __str__(self):
         return "Required parameter missing from request."
  
@@ -30,6 +33,21 @@ class InvalidParameterValue(Exception):
         self.value = value
         self.param = param
     
+    def __nonzero__(self):
+        return False
+    
     def __str__(self):
         return "Query value '%s' failed %s validation." %(self.value, self.param.__class__.__name__)
+
+
+class ConversionError(Exception):
+    def __init__(self, param, value):
+        self.value = value
+        self.param = param
+    
+    def __nonzero__(self):
+        return False
+
+    def __str__(self):
+        return "Query value '%s' for %s could not be converted properly." %(self.value, self.param.__class__.__name__)
 

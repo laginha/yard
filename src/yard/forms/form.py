@@ -28,5 +28,5 @@ class Form(object):
 
     def get(self, request):
         for param in self.logic:
-            yield param.get( request ) 
-    
+            yield param.get(request)
+
