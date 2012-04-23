@@ -19,7 +19,7 @@ class Books(Resource):
         if params.is_valid():
             return Book.objects.filter( **params ) #returns a JsonResponse-200
         else:
-            return params.errors()
+            return 400, params.errors()
 
     @staticmethod
     def show(request, book_id):

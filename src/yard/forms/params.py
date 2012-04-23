@@ -3,8 +3,8 @@
 
 from django.contrib.gis.geos import Point
 from yard.forms.parameter    import Parameter
-from yard.exceptions         import InvalidParameterValue
-from yard.utils              import is_unicode, is_str, is_strint
+from yard.exceptions         import InvalidParameterValue, ConversionError
+from yard.utils              import is_iter, is_strint
 from datetime                import datetime
 
 
@@ -77,7 +77,7 @@ class PositiveFloatParam(IntegerParam):
 class DateTimeParam(Parameter):
     def __init__(self, alias=None, required=False, default=None, validate=None,
                  formats=['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d']):
-        self.formats = [formats,] if is_str(formats) or is_unicode(formats) else formats
+        self.formats = formats if is_iter(formats) else [formats,]
         Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
     
     def convert(self, value, to_time=False, to_date=False):
