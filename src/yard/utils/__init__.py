@@ -5,7 +5,7 @@ from django.contrib.gis.db.models.fields import GeometryField
 from django.db.models.query              import QuerySet, ValuesQuerySet
 from django.db                           import models
 from django.http                         import HttpResponse
-import re, inspect, collections
+import re, inspect
 
 float_  = re.compile(r'^\-?[0-9]+\.[0-9]+$')
 
@@ -18,7 +18,7 @@ is_tuple     = lambda x: isinstance(x, tuple)
 is_dict      = lambda x: isinstance(x, dict)
 is_list      = lambda x: isinstance(x, list)
 is_file      = lambda x: isinstance(x, file)
-is_iter      = lambda x: isinstance(x, collections.Iterable)
+is_iter      = lambda x: hasattr(x, '__iter__')
 is_strfloat  = lambda x: bool( float_.match(x) ) if x else False
 is_strint    = lambda x: x.isdigit() if is_unicode(x) or is_str(x) else False
 is_method    = lambda x: inspect.ismethod(x)
