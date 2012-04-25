@@ -63,6 +63,7 @@ class Resource(object):
         from yard.forms import QueryParameters
         query_params = QueryParameters( parameters )
         for i in self.parameters.get( request ):
+            print i
             query_params.update( i )
         return query_params
     

@@ -2,7 +2,8 @@
 # encoding: utf-8
 
 from yard.utils      import is_strfloat, is_strint
-from yard.exceptions import RequiredParamMissing
+from yard.exceptions import RequiredParamMissing, InvalidParameterValue, ConversionError
+
 
 
 class Parameter(object):
@@ -39,6 +40,8 @@ class Parameter(object):
         validate param value through param limit key
         '''
         if not self.default:
+            if not value and self.required:
+                raise RequiredParamMissing(self)
             return value
         return self.default(value) if value and callable(self.default) else (
             value if value else self.default
@@ -48,9 +51,9 @@ class Parameter(object):
         '''
         validate param value through param limit key
         '''
-        if not self.validate: 
-            return value          
-        return value if value and self.validate( value ) else None
+        if not self.validate or value and self.validate(value):
+            return value
+        raise InvalidParameterValue(self, value)          
 
     def set_name(self, params):
         for k,v in params.items():
@@ -62,12 +65,12 @@ class Parameter(object):
         '''
         handle a normal/single param
         '''
-        value = self.__value( request )
-        value = self.__validate( self.__default(value) )
-        if not value and self.required:
-            # raise exception if value of required param is not valid
-            #raise RequiredParamMissing(self) 
-            return {self.name: RequiredParamMissing(self)}
+        try:
+            value = self.__value( request )
+            value = self.__default( value )
+            value = self.__validate( value )
+        except (ConversionError, InvalidParameterValue, RequiredParamMissing) as e:
+            return {self.name: e}
         return {self.alias: value} if value else {}
 
 

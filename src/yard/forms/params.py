@@ -24,7 +24,7 @@ class IntegerParam(Parameter):
         try:
             return int(value)
         except ValueError:
-            return
+            raise ConversionError(self, value)
 
 
 class PositiveIntegerParam(IntegerParam):
@@ -66,7 +66,7 @@ class FloatParam(Parameter):
         try:
             return float(value)
         except ValueError:
-            return
+            return ConversionError(self, value)
 
 
 class PositiveFloatParam(IntegerParam):
@@ -83,11 +83,12 @@ class DateTimeParam(Parameter):
     def convert(self, value, to_time=False, to_date=False):
         for format in self.formats:
             try:
-                dt = datetime.strptime( format, value )
+                dt = datetime.strptime( value, format )
                 return dt.time() if to_time else(
                     dt.date() if to_date else df ) 
             except ValueError:
                 continue 
+        return ConversionError(self, value)
         
 
 class DateParam(Parameter):
@@ -147,4 +148,4 @@ class PointParam(Parameter):
             lng, lat = value.split(',')
             return Point(float(lng), float(lat))
         except ValueError:
-            return
+            return ConversionError(self, value)
