@@ -93,6 +93,7 @@ class DateTimeParam(Parameter):
 
 class DateParam(Parameter):
     def __init__(self, alias=None, required=False, default=None, validate=None, formats=['%Y-%m-%d']):
+        self.formats = formats
         DateTimeParam.__init__(self, alias=alias, required=required, default=default, validate=validate, format=formats)
 
     def convert(self, value):
@@ -101,6 +102,7 @@ class DateParam(Parameter):
 
 class TimeParam(Parameter):
     def __init__(self, alias=None, required=False, default=None, validate=None, formats=['%H:%M:%S']):
+        self.formats = formats
         DateTimeParam.__init__(self, alias=alias, required=required, default=default, validate=validate, format=formats)
 
     def convert(self, value):
