@@ -66,10 +66,10 @@ class FloatParam(Parameter):
         try:
             return float(value)
         except ValueError:
-            return ConversionError(self, value)
+            raise ConversionError(self, value)
 
 
-class PositiveFloatParam(IntegerParam):
+class PositiveFloatParam(FloatParam):
     def __init__(self, alias=None, required=False, default=None, max=None):
         FloatParam.__init__(self, alias=alias, required=required, default=None, min=0, max=max)
         
@@ -85,28 +85,26 @@ class DateTimeParam(Parameter):
             try:
                 dt = datetime.strptime( value, format )
                 return dt.time() if to_time else(
-                    dt.date() if to_date else df ) 
-            except ValueError:
+                    dt.date() if to_date else dt ) 
+            except ValueError as e:
                 continue 
-        return ConversionError(self, value)
+        raise ConversionError(self, value)
         
 
-class DateParam(Parameter):
+class DateParam(DateTimeParam):
     def __init__(self, alias=None, required=False, default=None, validate=None, formats=['%Y-%m-%d']):
-        self.formats = formats
-        DateTimeParam.__init__(self, alias=alias, required=required, default=default, validate=validate, format=formats)
+        DateTimeParam.__init__(self, alias=alias, required=required, default=default, validate=validate, formats=formats)
 
     def convert(self, value):
-        return DateTime.convert(self, value, to_date=True)
+        return DateTimeParam.convert(self, value, to_date=True)
 
 
-class TimeParam(Parameter):
-    def __init__(self, alias=None, required=False, default=None, validate=None, formats=['%H:%M:%S']):
-        self.formats = formats
-        DateTimeParam.__init__(self, alias=alias, required=required, default=default, validate=validate, format=formats)
+class TimeParam(DateTimeParam):
+    def __init__(self, alias=None, required=False, default=None, validate=None, formats=['%H:%M:%S', '%H:%M']):
+        DateTimeParam.__init__(self, alias=alias, required=required, default=default, validate=validate, formats=formats)
 
     def convert(self, value):
-        return DateTime.convert(self, value, to_time=True)
+        return DateTimeParam.convert(self, value, to_time=True)
         
 
 class BooleanParam(Parameter):
@@ -115,16 +113,10 @@ class BooleanParam(Parameter):
         
     def convert(self, value):
         return False if value.lower() in ['false', 'none'] else (
-            bool(int(value)) if is_strint() else True
+            bool(int(value)) if is_strint(value) else True
         )
 
         
-class ChoiceParam(Parameter):
-    def __init__(self, choices, alias=None, required=False, default=None):
-        validate = lambda x: x in choices
-        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
-
-
 class ChoiceParam(Parameter):
     def __init__(self, choices, alias=None, required=False, default=None):
         validate = lambda x: x in choices
@@ -142,7 +134,7 @@ class MultipleChoiceParam(Parameter):
 
 
 class PointParam(Parameter):
-    def __init__(self, alias=None, required=False, default=None):
+    def __init__(self, alias=None, required=False, default=None, validate=None):
         Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)        
 
     def convert(self, value):
@@ -150,4 +142,4 @@ class PointParam(Parameter):
             lng, lat = value.split(',')
             return Point(float(lng), float(lat))
         except ValueError:
-            return ConversionError(self, value)
+            raise ConversionError(self, value)

@@ -5,7 +5,6 @@ from yard.utils      import is_strfloat, is_strint
 from yard.exceptions import RequiredParamMissing, InvalidParameterValue, ConversionError
 
 
-
 class Parameter(object):
     def __init__(self, alias=None, validate=None, default=None, required=False, ignore_invalids=False):
         for k,v in locals().items():

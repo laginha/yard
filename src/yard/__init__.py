@@ -13,6 +13,32 @@ from yard.utils             import *
 import json, mimetypes
 
 
+class ResourceParameters(dict):
+    def __init__(self, params={}):
+        self.__errors = {}
+        self.__query  = params
+        self.update( params, False )
+
+    def update(self, params):
+        for key,value in params.items():
+            if value:
+                self[key] = value
+            else:
+                self.__errors[key] = str(value)
+    
+    def from_query(self):
+        return self.__query
+        
+    def from_url(self):
+        return dict( [(k,v) for k,v in self.items() if k not in self.__query] )
+    
+    def is_valid(self):
+        return not bool(self.__errors)
+
+    def errors(self):
+        return {'ERRORS': self.__errors} if self.__errors else {}
+
+
 class Resource(object):
     parameters  = ()
     fields      = ()    
@@ -25,7 +51,7 @@ class Resource(object):
         try:
             method = self.__method( request )
             if method == 'index':
-                parameters = self.__query_parameters( request, parameters )
+                parameters = self.__resource_parameters( request, parameters )
             response = self.__view( request, method, parameters )
             return self.__response( response )    
         except HttpMethodNotAllowed:
@@ -60,10 +86,8 @@ class Resource(object):
         '''
         Get paramters from request
         '''
-        from yard.forms import QueryParameters
-        query_params = QueryParameters( parameters )
+        query_params = ResourceParameters( parameters )
         for i in self.parameters.get( request ):
-            print i
             query_params.update( i )
         return query_params
     
