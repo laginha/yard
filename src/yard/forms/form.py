@@ -11,7 +11,6 @@ class Form(object):
         if hasattr(self, 'logic'):
             if is_tuple( self.logic ):
                 self.__set_names( self.logic )
-                print self
             elif isinstance(self.logic, Parameter):
                 self.logic = (self.logic,)
                 self.__set_names( self.logic )
