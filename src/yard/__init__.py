@@ -14,32 +14,53 @@ import json, mimetypes
 
 
 class ResourceParameters(dict):
+    '''
+    Dictionary with given resource parameters values
+    '''   
     def __init__(self, params={}):
         self.__errors = {}
-        self.__query  = params
+        self.__path   = params
         self.update( params )
 
     def update(self, params):
+        '''
+        Updates parameters
+        '''
         for key,value in params.items():
             if value:
                 self[key] = value
             else:
                 self.__errors[key] = str(value)
     
-    def from_query(self):
-        return self.__query
+    def from_path(self):
+        '''
+        Returns parameters of type path
+        '''
+        return self.__path
         
-    def from_url(self):
-        return dict( [(k,v) for k,v in self.items() if k not in self.__query] )
+    def from_query(self):
+        '''
+        Returns parameters of type query
+        '''
+        return dict( [(k,v) for k,v in self.items() if k not in self.__path] )
     
     def is_valid(self):
+        '''
+        Were there any errors while processing the parameters
+        '''
         return not bool(self.__errors)
 
     def errors(self):
+        '''
+        Returns JSON with evaluated errors 
+        '''
         return {'ERRORS': self.__errors} if self.__errors else {}
 
 
 class Resource(object):
+    '''
+    API Resource object
+    '''
     parameters  = ()
     fields      = ()    
     
@@ -48,6 +69,9 @@ class Resource(object):
         self.routes = routes # maps http methods with respective views
   
     def __call__(self, request, **parameters):
+        '''
+        Called in every request made to Resource
+        '''
         try:
             method = self.__method( request )
             if method == 'index':
@@ -75,7 +99,7 @@ class Resource(object):
 
     def __method(self, request):
         '''
-        Check if http_method within possible routes
+        Checks if http_method within possible routes
         '''
         http_method = request.method.lower()
         if http_method not in self.routes:
@@ -84,7 +108,7 @@ class Resource(object):
     
     def __resource_parameters(self, request, parameters):
         '''
-        Get paramters from request
+        Gets parameters from resource request
         '''
         resource_params = ResourceParameters( parameters )
         for i in self.parameters.get( request ):
@@ -93,7 +117,7 @@ class Resource(object):
     
     def __view(self, request, method, parameters):
         '''
-        Run desired view according to method
+        Runs desired view according to method
         '''
         view = getattr( self, method )
         if method in ['show', 'update', 'destroy']:
@@ -104,7 +128,7 @@ class Resource(object):
        
     def __response(self, response, status=200):
         '''
-        Return a HttpResponse according to given response
+        Returns a HttpResponse according to given response
         '''
         if is_tuple(response) and len(response)>1:
             if is_int(response[0]):
@@ -134,12 +158,12 @@ class Resource(object):
 
     def __resources_to_json(self, resources):   
         '''
-        Serialize each resource into json
+        Serializes each resource into json
         '''
         return [self.json(i) for i in resources]       
 
     def __resource_to_json(self, resource):
         '''
-        Create json for given resource
+        Creates json for given resource
         '''
         return self.json(resource)

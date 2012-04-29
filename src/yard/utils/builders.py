@@ -8,23 +8,23 @@ import json
 
 
 class JSONbuilder:
-    
+    '''
+    Responsible for creating the JSON response
+    '''
     def __init__(self, fields):
         self.subfields = filter( is_tuple, fields )
         self.fields    = filter( is_str, fields )
         self.methods   = lambda x: filter( is_method, [getattr(x, i, None) for i in self.fields] )
-    
-    
+       
     def serializable(self, x):
         '''
-        Convert to JSON-serializable object
+        Converts to JSON-serializable object
         '''
         return x if is_list(x) or is_dict(x) else unicode(x)
-       
-        
+             
     def __call__(self, x):
         '''
-        Build JSON for resource according to fields attribute
+        Builds JSON for resource according to fields attribute
         '''
         json_ = model_to_dict( x, self.fields )
         json_ = dict( [(a, self.serializable(b)) for a,b in json_.items()])

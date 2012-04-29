@@ -6,6 +6,9 @@ from yard.forms.parameter import Parameter
 
 
 class Form(object):
+    '''
+    Form for acceptable Resource parameters
+    '''
     def __init__(self):
         self.__attributes = self.__class__.__dict__ 
         if hasattr(self, 'logic'):
@@ -22,10 +25,16 @@ class Form(object):
         return ' + '.join( [str(param) for param in self.logic] )
 
     def __set_names(self, params):
+        '''
+        Sets name attribute for all parameters in self.logic
+        '''
         for param in params:
             param.set_name( self.__attributes )        
 
     def get(self, request):
+        '''
+        Gets and validates parameters values in request
+        '''
         for param in self.logic:
             yield param.get(request)
 

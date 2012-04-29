@@ -21,6 +21,9 @@ template = '''
 
 
 class ServerErrorTemplate(HttpResponseServerError):
+    '''
+    Template for any Error in YARD side
+    '''
     def __init__(self, text, with_trace=False):        
         if with_trace:
             trace   = [ (i[:i.index(',')], i[i.index(','):]) for i in traceback.format_stack()]
