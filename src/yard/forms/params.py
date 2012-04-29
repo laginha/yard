@@ -6,15 +6,16 @@ from yard.forms.parameter    import Parameter
 from yard.exceptions         import InvalidParameterValue, ConversionError
 from yard.utils              import is_iter, is_strint
 from datetime                import datetime
+import re
 
 
 class IntegerParam(Parameter):
     def __init__(self, alias=None, required=False, default=None, min=None, max=None):
-        if max and min:
+        if max!=None and min!=None:
             validate = lambda x: x>=min and x<= max
-        elif max:
+        elif max!=None:
             validate = lambda x: x<=max
-        elif min:
+        elif min!=None:
             validate = lambda x: x>=min
         else:
             validate = None
@@ -43,24 +44,16 @@ class CharParam(Parameter):
 
 class RegexParam(Parameter):
     def __init__(self, regex, alias=None, required=False, default=None):
-        validate = lambda x: re.findall(regex, x)
+        validate = lambda x: re.findall(r'^%s$'%regex, x)
         Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
     
     def convert(self, value):
         return value
 
 
-class FloatParam(Parameter):
+class FloatParam(IntegerParam):
     def __init__(self, alias=None, required=False, default=None, min=None, max=None):
-        if max and min:
-            validate = lambda x: x>=min and x<= max
-        elif max:
-            validate = lambda x: x<=max
-        elif min:
-            validate = lambda x: x>=min
-        else:
-            validate = None
-        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
+        IntegerParam.__init__(self, alias=alias, required=required, default=default, min=min, max=max)
         
     def convert(self, value):
         try:
@@ -71,7 +64,7 @@ class FloatParam(Parameter):
 
 class PositiveFloatParam(FloatParam):
     def __init__(self, alias=None, required=False, default=None, max=None):
-        FloatParam.__init__(self, alias=alias, required=required, default=None, min=0, max=max)
+        FloatParam.__init__(self, alias=alias, required=required, default=default, min=0, max=max)
         
 
 class DateTimeParam(Parameter):
@@ -108,8 +101,8 @@ class TimeParam(DateTimeParam):
         
 
 class BooleanParam(Parameter):
-    def __init__(self, alias=None, required=False):
-        Parameter.__init__(self, alias=alias, required=required, default=None, validate=None)
+    def __init__(self, alias=None, required=False, default=True):
+        Parameter.__init__(self, alias=alias, required=required, default=default, validate=None)
         
     def convert(self, value):
         return False if value.lower() in ['false', 'none'] else (
@@ -130,7 +123,7 @@ class MultipleChoiceParam(Parameter):
         Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
         
     def convert(self, value):
-        return value.split(self.sep)
+        return [ Parameter.convert(self,i) for i in value.split(self.sep)]
 
 
 class PointParam(Parameter):

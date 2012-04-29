@@ -28,29 +28,29 @@ class Parameter(object):
         return float(value) if is_strfloat(value) else (
             int(value) if is_strint(value) else value )
 
-    def __value(self, request):
+    def _value(self, request):
         value = request.GET.get( self.name )  
         if not value: 
             return  
         return self.convert(value)
 
-    def __default(self, value):
+    def _default(self, value):
         '''
         validate param value through param limit key
         '''
-        if not self.default:
-            if not value and self.required:
+        if self.default==None:
+            if value==None and self.required:
                 raise RequiredParamMissing(self)
             return value
-        return self.default(value) if value and callable(self.default) else (
-            value if value else self.default
+        return self.default(value) if callable(self.default) else (
+            value if value!=None else self.default
         )    
 
-    def __validate(self, value):
+    def _validate(self, value):
         '''
         validate param value through param limit key
         '''
-        if not self.validate or value and self.validate(value):
+        if not self.validate or value!=None and self.validate(value):
             return value
         raise InvalidParameterValue(self, value)          
 
@@ -65,9 +65,9 @@ class Parameter(object):
         handle a normal/single param
         '''
         try:
-            value = self.__value( request )
-            value = self.__default( value )
-            value = self.__validate( value )
+            value = self._value( request )
+            value = self._default( value )
+            value = self._validate( value )
         except (ConversionError, InvalidParameterValue, RequiredParamMissing) as e:
             return {self.name: e}
         return {self.alias: value} if value else {}
