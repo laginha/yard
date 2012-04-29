@@ -30,9 +30,7 @@ class Parameter(object):
 
     def _value(self, request):
         value = request.GET.get( self.name )  
-        if not value: 
-            return  
-        return self.convert(value)
+        return None if not value else self.convert(value)
 
     def _default(self, value):
         '''
@@ -50,7 +48,7 @@ class Parameter(object):
         '''
         validate param value through param limit key
         '''
-        if not self.validate or value!=None and self.validate(value):
+        if not self.validate or value==None or self.validate(value):
             return value
         raise InvalidParameterValue(self, value)          
 

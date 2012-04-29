@@ -39,27 +39,19 @@ class Book_TestCase( unittest.TestCase ):
                                            publication_date = date(1999,2,1) )[0]
         
         
-    def get(self, **params):
+    def get(self, status=200, **params):
         response = self.client.get( '/books/', params )
-        assert response.status_code == 200, response.status_code
+        assert response.status_code == status, "%s - %s" %(response.status_code, response.content)
         try:
             return json.loads( response.content )
         except ValueError as e:
-            print response.content
             assert False, "%s\n%s" %(e, response.content)
     
     
     def test_year_param(self):
-        response = self.get( year=1996 )
-        assert len(response) == 1, response
-        assert int(response[0]['id']) == self.book1.id, (int(response[0]['id']), self.book1.id)
-        
-        response = self.get( year=2005 )
-        assert len(response) == 1, response
-        assert int(response[0]['id']) == self.book2.id, (int(response[0]['id']), self.book1.id)
-
-        response = self.get( year=2012 )
-        assert len(response) == 0, response
+        self.get( 400, year=1996 )
+        self.get( 400, year=2005 )        
+        self.get( 400, year=2012 )
         
     
     def test_title_param(self):
@@ -95,17 +87,12 @@ class Book_TestCase( unittest.TestCase ):
         
     
     def test_AND_params(self):
-        response = self.get( genre=self.genre1.id )
-        assert len(response) == 3, response #all
-        
-        response = self.get( genre=self.genre1.id, author=self.author.id )
-        assert len(response) == 2, response
-        
-        response = self.get( genre=self.genre1.id, house=self.house.id )
-        assert len(response) == 2, response
-        
-        response = self.get( author=self.author.id, house=self.house.id )
-        assert len(response) == 3, response #all
+        self.get( 400, genre=self.genre1.id )        
+        self.get( 400, genre=self.genre1.id, author=self.author.id )
+        self.get( title='A Game of Thrones', genre=self.genre1.id, author=self.author.id )        
+        self.get( 400, genre=self.genre1.id, house=self.house.id )
+        self.get( title='A Game of Thrones', genre=self.genre1.id, house=self.house.id )  
+        self.get( 400, author=self.author.id, house=self.house.id )
     
     
     def test_show(self):

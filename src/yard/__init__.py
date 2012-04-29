@@ -17,7 +17,7 @@ class ResourceParameters(dict):
     def __init__(self, params={}):
         self.__errors = {}
         self.__query  = params
-        self.update( params, False )
+        self.update( params )
 
     def update(self, params):
         for key,value in params.items():
@@ -82,14 +82,14 @@ class Resource(object):
             raise HttpMethodNotAllowed( http_method )
         return self.routes[http_method]
     
-    def __query_parameters(self, request, parameters):
+    def __resource_parameters(self, request, parameters):
         '''
         Get paramters from request
         '''
-        query_params = ResourceParameters( parameters )
+        resource_params = ResourceParameters( parameters )
         for i in self.parameters.get( request ):
-            query_params.update( i )
-        return query_params
+            resource_params.update( i )
+        return resource_params
     
     def __view(self, request, method, parameters):
         '''
