@@ -1,20 +1,15 @@
-# Yet Another Restful Django-app
+# Yet Another Restful Django Framework
 
-
-## Inspirations
-
-1. [Django-Piston](https://bitbucket.org/jespern/django-piston/wiki/Home)
-2. [Dagny](https://github.com/zacharyvoase/dagny)
-3. [This snippet](http://djangosnippets.org/snippets/1071/)
-
-Check those out.
+**Yard** is a *API* oriented framework that aims to simplify the developer's work when implementing complex *API design*. It provides a neat, familiar and easy way to control the logic for acceptable parameters in each http-request.
 
 
 ## Motivations
 
-- I like some things in *Piston*.
-- I like *Dagny*.
-- I wanted something neat to control the logic for acceptable parameters in each http-GET-requests.
+I've been working with a fairly complex project, with equally complex API design. *Django forms* weren't enough for what i needed, i still had too much code on my resources validating the input parameters. That was when I started to developed my own resource, inspired by the [Dagny](https://github.com/zacharyvoase/dagny) project, that would relieved my views from the ugliness of input validations.
+
+With a few extra inspirations, a little from here and there, *Yard* was born.
+
+Other frameworks and applications, more mature and solid, such as [Django-Piston](https://bitbucket.org/jespern/django-piston/wiki/Home), [Tastypie](http://django-tastypie.readthedocs.org/en/latest/) and [Django-Rest-Framework](http://django-rest-framework.org/), can be enough for most needs. But i think *Yard* brings something new. In the end, I'm just having fun really and keeping it simple.
 
 
 ## Usage
@@ -30,6 +25,19 @@ urlpatterns = patterns('django_yard.app.views.',
 )
 </pre>
 
+*params.py*
+<pre>
+from yard.forms import *    
+
+class BookParameters(Form):
+    year   = IntegerParam( alias='publication_date__year', min=1970, max=2012 )
+    title  = CharParam( required=True )
+    genre  = CharParam( alias='genres' )
+    author = CharParam( alias='author__id' )
+    house  = CharParam( alias='publishing_house__id' ) 
+
+    logic = year, title, genre & (author|house)
+</pre>
 
 *views.py*
 <pre>
@@ -39,25 +47,9 @@ from models import Book
 
 @csrf_exempt
 class Books(Resource):
-    #allowed query parameters - only used in index method
-    parameters = (
-        { 'name':     'year',                           #query parameter name - required
-          'alias':    'publication_date__year',         #actual name within server's logic - not required
-          'required': False,                            #defaults to False - not required
-          'limit':    lambda x: max(1970, min(2012, x)) #parameter's logic - not required
-        },
-        { 'name': 'title' },
-        { 'and': (                                      # genre AND ( author OR house )
-            { 'name': 'genre', 'alias': 'genres'},
-            { 'or': (
-                { 'name': 'author', 'alias': 'author__id' },                                      
-                { 'name': 'house',  'alias': 'publishing_house__id' }, ) 
-            }, )
-        },
-    )
-    #fields returned in json response - used if QuerySet is returned
-    fields = ('id', 'title', 'publication_date', ('author', ('name',)) )
-    
+    parameters = BookParameters()
+    fields     = ('id', 'title', 'publication_date', 'genres', ('author', ('name', 'age',)))
+
     @staticmethod
     def index(request, params):
         #GET /resource/
@@ -66,21 +58,23 @@ class Books(Resource):
     @staticmethod
     def show(request, book_id):
         #GET /resource/:id/
-        return Book.objects.filter( id=book_id )
-    
+        return Book.objects.get( id=book_id )
+
     @staticmethod
     def create(request):
         #POST /resource/
-        ...
-    
+        return 401, 'You are not authorize'
+
     @staticmethod
-    def update(request):
+    def update(request, book_id):
         #PUT /resource/:id/
         ...
-            
+
     @staticmethod
-    def destroy(request):
+    def destroy(request, book_id):
         #DELETE /resource/:id/
         ...
 </pre>
+
+For more information, check the documentation.
 
