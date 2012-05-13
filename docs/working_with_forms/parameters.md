@@ -125,9 +125,10 @@ Extra arguments:
 
     PointParam( validate=lambda x: x.coords[1]>0  ) 
 
-*Note: expected input like: 40.0,8.0 (longitude, latitude)*
+*Note: expected input like: 40.0,8.0*
 
 Extra arguments:
 
 - **validate:** Single-argument callable function used for parameter value validation.
+- **latitude_first:** Determines if first coordinate should be considered as latitude or not. Defaults to False.
 

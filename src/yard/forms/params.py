@@ -38,8 +38,12 @@ class PositiveIntegerParam(IntegerParam):
     '''
     Parameter for positive integer values
     '''
-    def __init__(self, alias=None, required=False, default=None, max_value=None):
-        IntegerParam.__init__(self, alias=alias, required=required, default=default, min_value=0, max_value=max_value)
+    def __init__(self, alias=None, required=False, default=None, min_value=0, max_value=None):
+        if max_value!=None:
+            validate = lambda x: x<=max_value and x>=max(min_value, 0)
+        else:
+            validate = lambda x: x>=max(min_value, 0)
+        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
 
 
 class CharParam(Parameter):
@@ -187,7 +191,8 @@ class PointParam(Parameter):
     '''
     Parameter for point values
     '''
-    def __init__(self, alias=None, required=False, default=None, validate=None):
+    def __init__(self, alias=None, required=False, default=None, validate=None, latitude_first=False):
+        self.latitude_first = latitude_first
         Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)        
 
     def convert(self, value):
@@ -195,7 +200,7 @@ class PointParam(Parameter):
         Converts to Point
         '''
         try:
-            lng, lat = value.split(',')
-            return Point(float(lng), float(lat))
+            x, y = [float(i) for i in value.split(',')]
+            return Point(y, x) if self.latitude_first else Point(x, y)
         except ValueError:
             raise ConversionError(self, value)
