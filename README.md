@@ -1,13 +1,13 @@
 # Yet Another Restful Django Framework
 
-**Yard** is a *API* oriented framework that aims to simplify the developer's work when implementing complex *API design*. It provides a neat, familiar and easy way to control the logic for acceptable parameters in each http-request.
+**Yard** is an *API* oriented framework that aims to simplify the developer's work when implementing complex *API design*. It provides a neat, familiar and easy way to control the logic for acceptable parameters in each http-GET-request.
 
 
 ## Motivations
 
-I've been working with a fairly complex project, with equally complex API design. *Django forms* weren't enough for what i needed, i still had too much code on my resources validating the input parameters. That was when I started to developed my own resource, inspired by the [Dagny](https://github.com/zacharyvoase/dagny) project, that would relieved my views from the ugliness of input validations.
+I've been working with a fairly complex project, with equally complex API design. *Django forms* weren't enough for what i needed, i still had too much code on my resources validating the input parameters. That was when I started to developed my own resource, inspired by the [Dagny](https://github.com/zacharyvoase/dagny) project, that would relieve my views from the ugliness of input validations.
 
-With a few extra inspirations, a little from here and there, *Yard* was born.
+With a few extra inspirations, *Yard* was born.
 
 Other frameworks and applications, more mature and solid, such as [Django-Piston](https://bitbucket.org/jespern/django-piston/wiki/Home), [Tastypie](http://django-tastypie.readthedocs.org/en/latest/) and [Django-Rest-Framework](http://django-rest-framework.org/), can be enough for most needs. But i think *Yard* brings something new. In the end, I'm just having fun really and keeping it simple.
 
@@ -47,7 +47,9 @@ from models import Book
 
 @csrf_exempt
 class Books(Resource):
+    # used in the index method
     parameters = BookParameters()
+    # used in the index and show mthods
     fields     = ('id', 'title', 'publication_date', 'genres', ('author', ('name', 'age',)))
 
     @staticmethod
