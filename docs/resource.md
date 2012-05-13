@@ -5,7 +5,7 @@ The *Resource* object represents the resource data you wish to provide access to
 - organize the different crud methods into its instance methods. 
 - simplify your http responses, returning JSON whenever possible (see [responses.md](responses.md)).
 - structure your JSON resource response, according to class attribute *fields* (see [fields.md](fields.md))..
-- parse input according to class attribute *parameters* (see [forms.md](forms.md)).
+- parse input according to class attribute *parameters* (see [working_with_forms/forms.md](forms.md)).
 
 In the end, your resource might look like this: 
 

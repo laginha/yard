@@ -12,7 +12,7 @@ class BookResource(Resource):
 </pre>
 
 
-Very much like *django forms*, you can include any parameter type as a form attribute. However there is a special attribute, *logic*, where you can easily define logic between parameters for a particular API method.
+Very much like *django forms*, you can include any [parameter type](parameters.md) as a form attribute. However there is a special attribute, *logic*, where you can easily define logic between parameters for a particular API method.
 
 <pre>
 from yard.forms import *
