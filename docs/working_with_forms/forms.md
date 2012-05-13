@@ -1,6 +1,6 @@
 # Forms
 
-The *Yard* resource relies on the *parameters* attribute for the in the **index** method. Its purpose is to filter and process the http request parameters according to a given *yard form*.
+The *Yard* resource relies on the *parameters* attribute for the **index** method. Its purpose is to filter and process the http request parameters according to a given *yard form*.
 
 <pre>
 class BookResource(Resource):
