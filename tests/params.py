@@ -54,17 +54,17 @@ class TestIntegerParam(unittest.TestCase):
             assert p._validate(i) != None
             
         min_, max_ = -RANDOM.number(), RANDOM.number()
-        p = param(min=min_, max=max_)
+        p = param(min_value=min_, max_value=max_)
         assert fail_validation(p, min_-RANDOM.number())
         assert fail_validation(p, max_+RANDOM.number())
         
         max_ = RANDOM.number()
-        p = param(max=max_)
+        p = param(max_value=max_)
         assert p._validate(-max_)
         assert fail_validation(p, max_+RANDOM.number())
         
         min_ = -RANDOM.number()
-        p = param(min=min_)
+        p = param(min_value=min_)
         assert fail_validation(p, min_-RANDOM.number())
         assert p._validate(min_*-1)
     
@@ -84,7 +84,7 @@ class TestPositiveIntegerParam(TestIntegerParam):
         assert fail_validation(p, -RANDOM.number())
         
         max_ = RANDOM.number()
-        p = PositiveIntegerParam(max=max_)
+        p = PositiveIntegerParam(max_value=max_)
         assert fail_validation(p, max_+RANDOM.number())
 
 

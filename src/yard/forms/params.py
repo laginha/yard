@@ -13,13 +13,13 @@ class IntegerParam(Parameter):
     '''
     Parameter for integer values
     '''
-    def __init__(self, alias=None, required=False, default=None, min=None, max=None):
-        if max!=None and min!=None:
-            validate = lambda x: x>=min and x<= max
-        elif max!=None:
-            validate = lambda x: x<=max
-        elif min!=None:
-            validate = lambda x: x>=min
+    def __init__(self, alias=None, required=False, default=None, min_value=None, max_value=None):
+        if max_value!=None and min_value!=None:
+            validate = lambda x: x>=min_value and x<= max_value
+        elif max_value!=None:
+            validate = lambda x: x<=max_value
+        elif min_value!=None:
+            validate = lambda x: x>=min_value
         else:
             validate = None
         Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
@@ -38,8 +38,8 @@ class PositiveIntegerParam(IntegerParam):
     '''
     Parameter for positive integer values
     '''
-    def __init__(self, alias=None, required=False, default=None, max=None):
-        IntegerParam.__init__(self, alias=alias, required=required, default=default, min=0, max=max)
+    def __init__(self, alias=None, required=False, default=None, max_value=None):
+        IntegerParam.__init__(self, alias=alias, required=required, default=default, min_value=0, max_value=max_value)
 
 
 class CharParam(Parameter):
@@ -70,8 +70,8 @@ class FloatParam(IntegerParam):
     '''
     Parameter for float values
     '''
-    def __init__(self, alias=None, required=False, default=None, min=None, max=None):
-        IntegerParam.__init__(self, alias=alias, required=required, default=default, min=min, max=max)
+    def __init__(self, alias=None, required=False, default=None, min_value=None, max_value=None):
+        IntegerParam.__init__(self, alias=alias, required=required, default=default, min_value=min_value, max_value=max_value)
         
     def convert(self, value):
         '''
@@ -87,8 +87,8 @@ class PositiveFloatParam(FloatParam):
     '''
     Parameter for positive float values
     '''
-    def __init__(self, alias=None, required=False, default=None, max=None):
-        FloatParam.__init__(self, alias=alias, required=required, default=default, min=0, max=max)
+    def __init__(self, alias=None, required=False, default=None, max_value=None):
+        FloatParam.__init__(self, alias=alias, required=required, default=default, min_value=0, max_value=max_value)
         
 
 class DateTimeParam(Parameter):

@@ -4,7 +4,7 @@
 from yard.forms import *
 
 class BookParameters(Form):
-    year   = IntegerParam( alias='publication_date__year', min=1970, max=2012 )
+    year   = IntegerParam( alias='publication_date__year', min_value=1970, max_value=2012 )
     title  = CharParam( required=True )
     genre  = CharParam( alias='genres' )
     author = CharParam( alias='author__id' )
