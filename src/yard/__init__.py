@@ -64,9 +64,17 @@ class Resource(object):
     parameters  = ()
     fields      = ()    
     
+    class Meta(object):
+        keywords = ['parameters_considered', 'total_objects']
+
     def __init__(self, routes):
         self.json   = JSONbuilder(self.fields)
         self.routes = routes # maps http methods with respective views
+        self._meta  = self.Meta()
+        for i in self._meta.keywords:
+            if not hasattr(self._meta, i):
+                setattr(self._meta, i, True)
+
   
     def __call__(self, request, **parameters):
         '''
@@ -75,8 +83,10 @@ class Resource(object):
         try:
             method = self.__method( request )
             if method == 'index':
-                parameters = self.__resource_parameters( request, parameters )
-            response = self.__view( request, method, parameters )
+                self.rparameters = self.__resource_parameters( request, parameters )
+            else:
+                self.rparameters = parameters
+            response = self.__view( request, method, self.rparameters )
             return self.__response( response )    
         except HttpMethodNotAllowed:
             # if http_method not allowed for this resource
@@ -140,7 +150,7 @@ class Resource(object):
             return response
                                  
         if is_queryset(response):
-            return JsonResponse(self.__resources_to_json(response), status=status)
+            return JsonResponse(self.__resources_with_meta(response), status=status)
         elif is_modelinstance(response):
             return JsonResponse(self.__resource_to_json(response), status=status)
         elif response == None:
@@ -155,6 +165,20 @@ class Resource(object):
             return JsonResponse(list(response), status=status)     
         else:
             return HttpResponse(str(response), status=status)          
+
+    def __resources_with_meta(self, resources):
+        return {
+            'Objects': self.__resources_to_json(resources),
+            'Meta':    self.__resources_to_meta(resources),
+        }
+
+    def __resources_to_meta(self, resources):
+        meta = {}
+        if self._meta.total_objects:
+            meta.update( {'total_objects': resources.count()} )
+        if self._meta.parameters_considered:
+            meta.update( {'parameters_considered': self.rparameters} )
+        return meta
 
     def __resources_to_json(self, resources):   
         '''
