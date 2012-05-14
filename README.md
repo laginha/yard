@@ -49,7 +49,7 @@ from models import Book
 class Books(Resource):
     # used in the index method
     parameters = BookParameters()
-    # used in the index and show mthods
+    # used in the index and show methods
     fields     = ('id', 'title', 'publication_date', 'genres', ('author', ('name', 'age',)))
 
     @staticmethod
