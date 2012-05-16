@@ -65,6 +65,7 @@ class Resource(object):
     fields      = ()    
     
     class Meta(object):
+        no_meta = False
         keywords = ['parameters_considered', 'total_objects']
 
     def __init__(self, routes):
@@ -74,6 +75,7 @@ class Resource(object):
         for i in self._meta.keywords:
             if not hasattr(self._meta, i):
                 setattr(self._meta, i, True)
+        
 
   
     def __call__(self, request, **parameters):
@@ -167,13 +169,17 @@ class Resource(object):
             return HttpResponse(str(response), status=status)          
 
     def __resources_with_meta(self, resources):
-        return {
-            'Objects': self.__resources_to_json(resources),
-            'Meta':    self.__resources_to_meta(resources),
+        meta    = self.__resources_to_meta(resources)
+        objects = self.__resources_to_json(resources)
+        return objects if not meta else {
+            'Objects': objects,
+            'Meta':    meta,
         }
 
     def __resources_to_meta(self, resources):
         meta = {}
+        if self._meta.no_meta:
+            return meta
         if self._meta.total_objects:
             meta.update( {'total_objects': resources.count()} )
         if self._meta.parameters_considered:
