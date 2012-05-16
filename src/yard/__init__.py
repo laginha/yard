@@ -10,6 +10,8 @@ from yard.utils.builders    import JSONbuilder
 from yard.exceptions        import RequiredParamMissing, HttpMethodNotAllowed, InvalidStatusCode
 from yard.utils.templates   import ServerErrorTemplate
 from yard.utils             import *
+from yard.meta              import ResourceMeta
+from yard.forms             import Form
 import json, mimetypes
 
 
@@ -61,22 +63,16 @@ class Resource(object):
     '''
     API Resource object
     '''
-    parameters  = ()
+    parameters  = None
     fields      = ()    
     
     class Meta(object):
-        no_meta = False
-        keywords = ['parameters_considered', 'total_objects']
+        pass
 
     def __init__(self, routes):
         self.json   = JSONbuilder(self.fields)
         self.routes = routes # maps http methods with respective views
-        self._meta  = self.Meta()
-        for i in self._meta.keywords:
-            if not hasattr(self._meta, i):
-                setattr(self._meta, i, True)
-        
-
+        self._meta  = ResourceMeta( self.Meta() )   
   
     def __call__(self, request, **parameters):
         '''
@@ -169,22 +165,15 @@ class Resource(object):
             return HttpResponse(str(response), status=status)          
 
     def __resources_with_meta(self, resources):
-        meta    = self.__resources_to_meta(resources)
+        '''
+        Appends Meta data into the json response
+        '''
+        meta    = self._meta.fetch(resources, self.rparameters)
         objects = self.__resources_to_json(resources)
         return objects if not meta else {
             'Objects': objects,
             'Meta':    meta,
         }
-
-    def __resources_to_meta(self, resources):
-        meta = {}
-        if self._meta.no_meta:
-            return meta
-        if self._meta.total_objects:
-            meta.update( {'total_objects': resources.count()} )
-        if self._meta.parameters_considered:
-            meta.update( {'parameters_considered': self.rparameters} )
-        return meta
 
     def __resources_to_json(self, resources):   
         '''

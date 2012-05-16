@@ -37,6 +37,7 @@ class Book( models.Model ):
     title            = models.CharField( max_length=100 )
     publication_date = models.DateField( default=datetime.today )
     genres           = models.ManyToManyField( Genre )
+    number_of_pages  = models.PositiveIntegerField(blank=True, null=True)
     
     def genres_(self):
         return self.genres.all()#.values('name')
