@@ -67,3 +67,9 @@ class ConversionError(Exception):
     def __str__(self):
         return "Query value '%s' for %s could not be converted properly." %(self.value, self.param.__class__.__name__)
 
+
+class NoMeta(Exception):
+    '''
+    For when no meta is desired for the QuerySet based json-response
+    '''
+    pass
