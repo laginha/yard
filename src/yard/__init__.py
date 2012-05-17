@@ -119,8 +119,9 @@ class Resource(object):
         Gets parameters from resource request
         '''
         resource_params = ResourceParameters( parameters )
-        for i in self.parameters.get( request ):
-            resource_params.update( i )
+        if self.parameters:
+            for i in self.parameters.get( request ):
+                resource_params.update( i )
         return resource_params
     
     def __view(self, request, method, parameters):
