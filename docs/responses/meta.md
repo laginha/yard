@@ -40,18 +40,25 @@ For *QuerySet* based responses *Yard* appends useful metadata by default:
 - no metadata is included in the JSON response, if *True*.
 - defaults to *False*.
 
+### no_meta
+
+    with_errors = True
+
+- adds parameters' validation errors to the JSON response, if *True*.
+- defaults to *False*.
+
 ### total_objects
 
     total_objects = False
 
-- adds the number of instances returned by the QuerySet in the JSON response, if *True*.
+- adds the number of instances returned by the QuerySet to the JSON response, if *True*.
 - defaults to *True*.
 
 ### parameters_considered
 
     parameters_validated = False
 
-- adds validated parameters for filtering in the JSON response, if *True*. 
+- adds validated parameters for filtering to the JSON response, if *True*. 
 - defaults to *True*.
 
 ### average

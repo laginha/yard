@@ -7,12 +7,12 @@ from django.core               import serializers
 from django.http               import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
 from yard.exceptions           import RequiredParamMissing, HttpMethodNotAllowed, InvalidStatusCode
 from yard.forms                import Form
-from yard.meta                 import ResourceMeta
 from yard.utils                import *
 from yard.utils.http           import JsonResponse, FileResponse, HttpResponseUnauthorized
 from yard.resources.parameters import ResourceParameters
 from yard.resources.builders   import JSONbuilder
 from yard.resources.templates  import ServerErrorTemplate
+from yard.resources.meta       import ResourceMeta
 import json, mimetypes
 
 

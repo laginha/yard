@@ -10,11 +10,14 @@ class MetaDict(dict):
         self.resources = resources
         self.params    = params
     
-    def total_objects(self, name):
-        self[name] = self.resources.count()
+    def with_errors(self):
+        self.update( self.params.errors() )
     
-    def parameters_validated(self, name):
-        self[name] = self.params.with_names
+    def total_objects(self):
+        self['total_objects'] = self.resources.count()
+    
+    def parameters_validated(self):
+        self['parameters_validated'] = self.params.with_names
     
     def __aggregation(self, value, call):
         if not value: return
@@ -43,6 +46,7 @@ class MetaDict(dict):
 class ResourceMeta(object):
     __defaults = [
         ('no_meta',               False),
+        ('with_errors',           False),
         ('parameters_validated',  True),
         ('total_objects',         True),
         ('average',               None),
@@ -75,7 +79,7 @@ class ResourceMeta(object):
             elif default==None:
                 getattr(meta, name)( value )
             elif value:
-                getattr(meta, name)( name )
+                getattr(meta, name)()
         return meta
    
     def __fetch_new_meta(self, meta):

@@ -8,6 +8,7 @@ class Books(Resource):
                  ('author', ('name','age','gender_')) )
     
     class Meta:
+        with_errors = True
         maximum = (('longest_title', 'title'),)
         average = (('average_pages', 'number_of_pages'),)
         

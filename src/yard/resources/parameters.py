@@ -18,9 +18,9 @@ class ResourceParameters(dict):
         for key,value in params.iteritems():
             if value:
                 self[key.alias] = value
-                self.with_names[key.name] = value
+                self.with_names[key.name] = unicode(value)
             else:
-                self.__errors[key] = str(value)
+                self.__errors[key] = unicode(value)
     
     def from_path(self):
         '''
@@ -44,5 +44,5 @@ class ResourceParameters(dict):
         '''
         Returns JSON with evaluated errors 
         '''
-        return {'ERRORS': self.__errors} if self.__errors else {}
+        return {'Errors': self.__errors if self.__errors else {}}
 
