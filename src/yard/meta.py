@@ -13,7 +13,7 @@ class MetaDict(dict):
     def total_objects(self, name):
         self[name] = self.resources.count()
     
-    def parameters_considered(self, name):
+    def parameters_validated(self, name):
         self[name] = self.params
     
     def __aggregation(self, value, call):
@@ -43,7 +43,7 @@ class MetaDict(dict):
 class ResourceMeta(object):
     __defaults = [
         ('no_meta',               False),
-        ('parameters_considered', True),
+        ('parameters_validated',  True),
         ('total_objects',         True),
         ('average',               None),
         ('minimum',               None),

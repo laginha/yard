@@ -49,7 +49,7 @@ For *QuerySet* based responses *Yard* appends useful metadata by default:
 
 ### parameters_considered
 
-    parameters_considered = False
+    parameters_validated = False
 
 - adds validated parameters for filtering in the JSON response, if *True*. 
 - defaults to *True*.
