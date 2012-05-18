@@ -43,8 +43,9 @@ class Book_TestCase( unittest.TestCase ):
         response = self.client.get( '/books/', params )
         assert response.status_code == status, "%s - %s" %(response.status_code, response.content)
         try:
-            return json.loads( response.content )
-        except ValueError as e:
+            jdict = json.loads( response.content )
+            return jdict['Objects'] if 'Objects' in jdict else jdict
+        except (ValueError, KeyError) as e:
             assert False, "%s\n%s" %(e, response.content)
     
     
@@ -98,12 +99,12 @@ class Book_TestCase( unittest.TestCase ):
     def test_show(self):
         response = self.client.get( '/books/%s/' %self.book1.id )
         assert response.status_code == 200, response.status_code 
-        response = json.loads( response.content )  
+        response = json.loads( response.content )
         assert int(response['id']) == self.book1.id, (int(response['id']), self.book1.id)
         
         response = self.client.get( '/books/%s/' %self.book2.id )
         assert response.status_code == 200, response.status_code   
-        response = json.loads( response.content ) 
+        response = json.loads( response.content )
         assert int(response['id']) == self.book2.id, (int(response['id']), self.book2.id)
         
     
