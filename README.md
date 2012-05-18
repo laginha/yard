@@ -41,17 +41,19 @@ class BookParameters(Form):
 
 *views.py*
 <pre>
-from django.views.decorators.csrf import csrf_exempt
 from yard   import Resource
 from models import Book
 
-@csrf_exempt
 class Books(Resource):
     # used in the index method
     parameters = BookParameters()
     # used in the index and show methods
-    fields     = ('id', 'title', 'publication_date', 'genres', ('author', ('name', 'age',)))
-
+    fields = ( 'id', 'title', 'publication_date', 'genres', ('author', ('name', 'age',)) )
+    
+    class Meta:
+        maximum = (('longest_title', 'title'),)
+        average = (('average_pages', 'number_of_pages'),)
+    
     @staticmethod
     def index(request, params):
         #GET /resource/
@@ -78,5 +80,5 @@ class Books(Resource):
         ...
 </pre>
 
-For more information, check the documentation.
+For more information, check the [documentation](docs/index.md).
 
