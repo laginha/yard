@@ -14,7 +14,7 @@ class MetaDict(dict):
         self[name] = self.resources.count()
     
     def parameters_validated(self, name):
-        self[name] = self.params
+        self[name] = self.params.with_names
     
     def __aggregation(self, value, call):
         if not value: return

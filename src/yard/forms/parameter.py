@@ -83,7 +83,7 @@ class Parameter(object):
             value = self._validate( value )
         except (ConversionError, InvalidParameterValue, RequiredParamMissing) as e:
             return {self.name: e}
-        return {self.alias: value} if value else {}
+        return {self: value} if value else {}
 
 
 class Logic(Parameter):

@@ -20,17 +20,19 @@ class ResourceParameters(dict):
     Dictionary with given resource parameters values
     '''   
     def __init__(self, params={}):
-        self.__errors = {}
-        self.__path   = params
+        self.__errors   = {}
+        self.__path     = params
+        self.with_names = {}
         self.update( params )
 
     def update(self, params):
         '''
         Updates parameters
         '''
-        for key,value in params.items():
+        for key,value in params.iteritems():
             if value:
-                self[key] = value
+                self[key.alias] = value
+                self.with_names[key.name] = value
             else:
                 self.__errors[key] = str(value)
     
