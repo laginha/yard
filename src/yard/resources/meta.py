@@ -57,7 +57,7 @@ class ResourceMeta(object):
     
     def __init__(self, meta):
         self.__new_meta = [
-            (k,v) for k,v in meta.__class__.__dict__.iteritems() if callable(v)
+            (k,v) for k,v in meta.__dict__.iteritems() if callable(v)
         ]
         for k,v in self.__defaults:
             setattr(self, k, getattr(meta,k) if hasattr(meta, k) else v)

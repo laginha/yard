@@ -2,6 +2,7 @@ from yard.resources import Resource
 from models import Book
 from params import BookParameters
 
+
 class Books(Resource):
     parameters = BookParameters()
     fields     = ('id', 'title', 'publication_date', 'genres', 
@@ -11,6 +12,14 @@ class Books(Resource):
         with_errors = True
         maximum = (('longest_title', 'title'),)
         average = (('average_pages', 'number_of_pages'),)
+
+    class Page:
+        offset_parameter = 'offset' #Required
+        results_per_page = {
+            'parameter': 'results', #Optional
+            'default': 25,          #Required
+            'limit': 50,            #Optional
+        }
         
     @staticmethod
     def index(request, params):
@@ -31,7 +40,6 @@ class Books(Resource):
     @staticmethod
     def update(request, book_id):
         #defaults to HttpResponse(status=200)
-        print 'here'
         return
         
     @staticmethod

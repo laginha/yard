@@ -13,6 +13,7 @@ from yard.resources.parameters import ResourceParameters
 from yard.resources.builders   import JSONbuilder
 from yard.resources.templates  import ServerErrorTemplate
 from yard.resources.meta       import ResourceMeta
+from yard.resources.page       import ResourcePage
 import json, mimetypes
 
 
@@ -25,23 +26,28 @@ class Resource(object):
     
     class Meta(object):
         pass
+    
+    class Page(object):
+        pass
 
     def __init__(self, routes):
         self.json   = JSONbuilder(self.fields)
         self.routes = routes # maps http methods with respective views
-        self._meta  = ResourceMeta( self.Meta() )   
+        self._meta  = ResourceMeta( self.Meta ) 
+        self._page  = ResourcePage( self.Page )  
   
     def __call__(self, request, **parameters):
         '''
         Called in every request made to Resource
         '''
         try:
-            method = self.__method( request )
+            self.request = request
+            method = self.__method()
             if method == 'index':
-                self.rparameters = self.__resource_parameters( request, parameters )
+                self.rparameters = self.__resource_parameters( parameters )
             else:
                 self.rparameters = parameters
-            response = self.__view( request, method, self.rparameters )
+            response = self.__view( method, self.rparameters )
             return self.__response( response )    
         except HttpMethodNotAllowed:
             # if http_method not allowed for this resource
@@ -62,35 +68,35 @@ class Resource(object):
             # status code given is not int
             return ServerErrorTemplate(e)
 
-    def __method(self, request):
+    def __method(self):
         '''
         Checks if http_method within possible routes
         '''
-        http_method = request.method.lower()
+        http_method = self.request.method.lower()
         if http_method not in self.routes:
             raise HttpMethodNotAllowed( http_method )
         return self.routes[http_method]
     
-    def __resource_parameters(self, request, parameters):
+    def __resource_parameters(self, parameters):
         '''
         Gets parameters from resource request
         '''
         resource_params = ResourceParameters( parameters )
         if self.parameters:
-            for i in self.parameters.get( request ):
+            for i in self.parameters.get( self.request ):
                 resource_params.update( i )
         return resource_params
     
-    def __view(self, request, method, parameters):
+    def __view(self, method, parameters):
         '''
         Runs desired view according to method
         '''
         view = getattr( self, method )
         if method in ['show', 'update', 'destroy']:
-            return view( request, parameters.pop('id'), **parameters ) 
+            return view( self.request, parameters.pop('id'), **parameters ) 
         elif method == 'create':
-            return view( request, **parameters )
-        return view( request, parameters )
+            return view( self.request, **parameters )
+        return view( self.request, parameters )
        
     def __response(self, response, status=200):
         '''
@@ -132,12 +138,15 @@ class Resource(object):
             'Objects': objects,
             'Meta':    meta,
         }
-
+    
+    def __paginate(self, resources):
+        return self._page.select( self.request, resources )
+    
     def __resources_to_json(self, resources):   
         '''
         Serializes each resource into json
         '''
-        return [self.json(i) for i in resources]       
+        return [self.json(i) for i in self.__paginate(resources)]       
 
     def __resource_to_json(self, resource):
         '''
