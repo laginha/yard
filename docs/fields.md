@@ -1,6 +1,6 @@
 # Fields
 
-The *fields* attribute is responsible for defining which returned model's attributes are to be included in the JSON response (only used for **index** and **show** methods only). 
+The *fields* attribute is responsible for defining which returned model's attributes are to be included in the JSON response (only used for **index** and **show** methods only). If not defined all model's attributes will be used.
 
 For this attribute is expected a tuple of strings and tuples. While the former type indicates a model attribute's name, the latter is meant to dive into a foreign key instance as follows:
 

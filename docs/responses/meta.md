@@ -4,6 +4,7 @@
 class Books(Resource):
 
     class Meta:
+        with_errors = True
         ...
 </pre>
 
