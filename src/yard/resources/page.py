@@ -27,13 +27,14 @@ class ResourcePage(object):
     def __number(self, request):
         if 'parameter' in self.results_per_page:
             parameter = self.results_per_page['parameter']
-            number    = request.get(parameter, self.results_per_page['default'])      
-            return self.__limit( int(number) )
+            number    = request.get(parameter, '')  
+            if number.isdigit():
+                return self.__limit( int(number) )
         return self.results_per_page['default']
     
     def __offset(self, request):
-        requested_offset = request.get(self.offset_parameter)
-        return max(0, int(requested_offset))
+        offset = request.get(self.offset_parameter, '')
+        return max(0, int(offset)) if offset.isdigit() else 0
     
     def __paginate(self, request, resources):
         offset = self.__offset( request )

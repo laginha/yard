@@ -30,7 +30,8 @@ class Books(Resource):
 
     results_per_page = {
         'parameter': 'results',       
-        'default': 25,         
+        'default': 25,
+        'limit': 50,      
     }
 
 - **default**: default number of results per each page. (REQUIRED)
