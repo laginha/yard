@@ -50,14 +50,21 @@ For *QuerySet* based responses *Yard* appends useful metadata by default:
 
 ### total_objects
 
-    total_objects = False
+    total_objects = True
 
 - adds the number of instances returned by the QuerySet to the JSON response, if *True*.
 - defaults to *True*.
 
-### parameters_considered
+### paginated_objects
 
-    parameters_validated = False
+    number_of_objects = True
+
+- adds the number of instances returned by the paginated QuerySet to the JSON response, if *True*.
+- defaults to *True*.
+
+### validated_parameters
+
+    validated_parameters = True
 
 - adds validated parameters for filtering to the JSON response, if *True*. 
 - defaults to *True*.
