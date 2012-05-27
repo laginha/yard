@@ -6,9 +6,9 @@ class ResourceParameters(dict):
     Dictionary with given resource parameters values
     '''   
     def __init__(self, params={}):
-        self.__errors   = {}
-        self.__path     = params
-        self.with_names = {}
+        self.__errors  = {}
+        self.__path    = params
+        self.validated = {}
         self.update( params )
 
     def update(self, params):
@@ -18,7 +18,7 @@ class ResourceParameters(dict):
         for key,value in params.iteritems():
             if value:
                 self[key.alias] = value
-                self.with_names[key.name] = unicode(value)
+                self.validated[key.name] = unicode(value)
             else:
                 self.__errors[key] = unicode(value)
     

@@ -15,7 +15,7 @@ class ResourcePage(object):
             
     def select(self, request, resources):
         if not self.results_per_page or not self.offset_parameter:
-            return resources
+            return resources, {}
         return self.__paginate(request.REQUEST, resources)
     
     def __limit(self, number):
@@ -25,18 +25,26 @@ class ResourcePage(object):
         return number
     
     def __number(self, request):
+        default = self.results_per_page['default']
         if 'parameter' in self.results_per_page:
             parameter = self.results_per_page['parameter']
             number    = request.get(parameter, '')  
             if number.isdigit():
-                return self.__limit( int(number) )
-        return self.results_per_page['default']
+                number = self.__limit( int(number) )
+                return number, [(parameter, number)]
+            return default, [(parameter, default)]
+        return default, []
     
     def __offset(self, request):
         offset = request.get(self.offset_parameter, '')
-        return max(0, int(offset)) if offset.isdigit() else 0
+        if offset.isdigit():
+            offset = max(0, int(offset))
+            return offset, [(self.offset_parameter, offset)]
+        return 0, [(self.offset_parameter, 0)]
     
     def __paginate(self, request, resources):
-        offset = self.__offset( request )
-        number = self.__number( request )
-        return Paginator( resources[offset:], number ).page(1).object_list
+        offset, param1 = self.__offset( request )
+        number, param2 = self.__number( request )
+        objects = Paginator( resources[offset:], number ).page(1).object_list
+        return objects, dict(param1+param2)
+        

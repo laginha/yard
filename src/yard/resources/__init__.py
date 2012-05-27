@@ -132,21 +132,27 @@ class Resource(object):
         '''
         Appends Meta data into the json response
         '''
-        meta    = self._meta.fetch(resources, self.rparameters)
-        objects = self.__resources_to_json(resources)
+        page    = self.__paginate( resources )
+        objects = self.__resources_to_json( page )
+        meta    = self._meta.fetch(resources, page, self.rparameters)
         return objects if not meta else {
             'Objects': objects,
             'Meta':    meta,
         }
     
     def __paginate(self, resources):
-        return self._page.select( self.request, resources )
+        '''
+        Return page of resources according to default or parameter values
+        '''
+        paginated_resources = self._page.select( self.request, resources )
+        self.rparameters.validated.update( paginated_resources[1] )
+        return paginated_resources[0]
     
     def __resources_to_json(self, resources):   
         '''
-        Serializes each resource into json
+        Serializes each resource (within page) into json
         '''
-        return [self.json(i) for i in self.__paginate(resources)]       
+        return [self.json(i) for i in resources]       
 
     def __resource_to_json(self, resource):
         '''

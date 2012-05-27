@@ -6,9 +6,10 @@ from yard.exceptions  import NoMeta
 
 
 class MetaDict(dict):
-    def __init__(self, resources, params):
+    def __init__(self, resources, page, params):
         self.resources = resources
         self.params    = params
+        self.page      = page
     
     def with_errors(self):
         self.update( self.params.errors() )
@@ -16,8 +17,11 @@ class MetaDict(dict):
     def total_objects(self):
         self['total_objects'] = self.resources.count()
     
-    def parameters_validated(self):
-        self['parameters_validated'] = self.params.with_names
+    def paginated_objects(self):
+        self['paginated_objects'] = self.page.count()
+    
+    def validated_parameters(self):
+        self['validated_parameters'] = self.params.validated
     
     def __aggregation(self, value, call):
         if not value: return
@@ -47,8 +51,9 @@ class ResourceMeta(object):
     __defaults = [
         ('no_meta',               False),
         ('with_errors',           False),
-        ('parameters_validated',  True),
+        ('validated_parameters',  True),
         ('total_objects',         True),
+        ('paginated_objects',     True),
         ('average',               None),
         ('minimum',               None),
         ('maximum',               None),
@@ -62,9 +67,9 @@ class ResourceMeta(object):
         for k,v in self.__defaults:
             setattr(self, k, getattr(meta,k) if hasattr(meta, k) else v)
                       
-    def fetch(self, resources, params):
+    def fetch(self, resources, page, params):
         try:
-            meta = MetaDict( resources, params )
+            meta = MetaDict( resources, page, params )
             self.__fetch_defaults( meta ) 
             self.__fetch_new_meta( meta )
             return meta
