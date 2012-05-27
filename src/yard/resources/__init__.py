@@ -112,7 +112,10 @@ class Resource(object):
             return response
                                  
         if is_queryset(response):
-            return JsonResponse(self.__resources_with_meta(response), status=status)
+            content, exists = self.__resources_with_meta(response)
+            print content
+            print exists
+            return JsonResponse(content, status=status if exists else 404)
         elif is_modelinstance(response):
             return JsonResponse(self.__resource_to_json(response), status=status)
         elif response == None:
@@ -135,10 +138,10 @@ class Resource(object):
         page    = self.__paginate( resources )
         objects = self.__resources_to_json( page )
         meta    = self._meta.fetch(resources, page, self.rparameters)
-        return objects if not meta else {
-            'Objects': objects,
-            'Meta':    meta,
-        }
+        if not meta:
+            return objects, page.exists()
+        else:
+            return {'Objects': objects,'Meta': meta}, page.exists()
     
     def __paginate(self, resources):
         '''
