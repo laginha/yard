@@ -12,50 +12,66 @@ class JSONbuilder:
     Responsible for creating the JSON response
     '''
     def __init__(self, fields):
-        self.subfields = filter( is_tuple, fields )
-        self.fields    = filter( is_str, fields )
-        self.methods   = lambda x: filter( is_method, [getattr(x, i, None) for i in self.fields] )
-       
-    def serializable(self, x):
+        self.fields = fields
+        
+    def __serialize(self, x):
         '''
         Converts to JSON-serializable object
         '''
-        return x if is_list(x) or is_dict(x) else unicode(x)
-             
-    def __call__(self, x):
+        return x if isinstance(x, (list,dict)) else unicode(x)
+    
+    def __resource_to_dict(self, resource):
+        '''
+        Converts resource/model to dict according to fields
+        '''
+        attrs = filter( is_str, self.fields )
+        json_ = model_to_dict( resource, attrs )
+        return dict( 
+            [ (a, self.__serialize(b)) for a,b in json_.iteritems() ]
+        )
+    
+    def __handle_method(self, method, args):
+        '''
+        Handle fields of type str that are instance method
+        '''
+        result = method( *args )
+        if is_queryset( result ):
+            return { method.__name__: [unicode(i) for i in result] }
+        elif is_valuesset( result ):
+            return { method.__name__: list( result ) }
+        elif isinstance(result, (int, str,unicode)):
+            return { method.__name__: result }
+        return { method.__name__: json.dumps( self.__serialize(result) ) }
+    
+    def __handle_tuple(self, resource, field ):
+        '''
+        Handle fields of type tuple - subfields
+        '''
+        sub_resource = getattr( resource, field[0], None )
+        # build sub-json
+        return {
+            field[0]: JSONbuilder( field[1] ).to_json( sub_resource )
+        }
+    
+    def __handler(self, resource, field):
+        '''
+        Handler for each field
+        '''
+        if is_tuple( field ):
+            return self.__handle_tuple( resource, field )
+        #split method name from arguments
+        args   = field.split()
+        method = getattr( resource, args[0], None )
+        if not is_method( method ):
+            return {}
+        return self.__handle_method( method, args[1:] )
+    
+    def to_json(self, resource):
         '''
         Builds JSON for resource according to fields attribute
         '''
-        json_ = model_to_dict( x, self.fields )
-        json_ = dict( [(a, self.serializable(b)) for a,b in json_.items()])
-        
-        # If subfields in fields
-        for subfield in self.subfields:
-            resource = getattr( x, subfield[0], None )
-            # build sub-json
-            build    = JSONbuilder(subfield[1])
-            
-            # don't include nullable in json
-            if resource:
-                json_[ subfield[0] ] = build( resource )
-        
-        # If instance methods in fields
-        for method in self.methods(x):
-            result = method()
-            
-            # don't include nullable in json
-            if not result:
-                continue
-                
-            # expect for a valuesQuerySet, querySet or json-serializable
-            if is_queryset(result):
-                json_[method.__name__] = [unicode(i) for i in result]
-            elif is_valuesset(result):
-                json_[method.__name__] = list( result )
-            else:
-                try:
-                    json_[method.__name__] = json.dumps( result )
-                except TypeError:
-                    json_[method.__name__] = unicode( result )
-
+        json_ = self.__resource_to_dict( resource )
+        for field in self.fields:
+            json_.update( self.__handler(resource, field) )
         return json_
+    

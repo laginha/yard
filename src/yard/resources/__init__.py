@@ -31,10 +31,9 @@ class Resource(object):
         pass
 
     def __init__(self, routes):
-        self.json   = JSONbuilder(self.fields)
-        self.routes = routes # maps http methods with respective views
-        self._meta  = ResourceMeta( self.Meta ) 
-        self._page  = ResourcePage( self.Page )  
+        self.__routes = routes # maps http methods with respective views
+        self.__meta  = ResourceMeta( self.Meta ) 
+        self.__page  = ResourcePage( self.Page )  
   
     def __call__(self, request, **parameters):
         '''
@@ -44,10 +43,11 @@ class Resource(object):
             self.request = request
             method = self.__method()
             if method == 'index':
-                self.rparameters = self.__resource_parameters( parameters )
+                self.__rparameters = self.__resource_parameters( parameters )
             else:
-                self.rparameters = parameters
-            response = self.__view( method, self.rparameters )
+                self.__rparameters = parameters
+            response = self.__view( method, self.__rparameters )
+            self.builder = JSONbuilder(self.fields)
             return self.__response( response )    
         except HttpMethodNotAllowed:
             # if http_method not allowed for this resource
@@ -73,9 +73,9 @@ class Resource(object):
         Checks if http_method within possible routes
         '''
         http_method = self.request.method.lower()
-        if http_method not in self.routes:
+        if http_method not in self.__routes:
             raise HttpMethodNotAllowed( http_method )
-        return self.routes[http_method]
+        return self.__routes[http_method]
     
     def __resource_parameters(self, parameters):
         '''
@@ -93,10 +93,10 @@ class Resource(object):
         '''
         view = getattr( self, method )
         if method in ['show', 'update', 'destroy']:
-            return view( self.request, parameters.pop('id'), **parameters ) 
+            return view( parameters.pop('id'), **parameters ) 
         elif method == 'create':
-            return view( self.request, **parameters )
-        return view( self.request, parameters )
+            return view( **parameters )
+        return view( parameters )
        
     def __response(self, response, status=200):
         '''
@@ -135,7 +135,7 @@ class Resource(object):
         '''
         page    = self.__paginate( resources )
         objects = self.__resources_to_json( page )
-        meta    = self._meta.fetch(resources, page, self.rparameters)
+        meta    = self.__meta.fetch(resources, page, self.__rparameters)
         if not meta:
             return objects, page.exists()
         else:
@@ -145,18 +145,18 @@ class Resource(object):
         '''
         Return page of resources according to default or parameter values
         '''
-        paginated_resources = self._page.select( self.request, resources )
-        self.rparameters.validated.update( paginated_resources[1] )
+        paginated_resources = self.__page.select( self.request, resources )
+        self.__rparameters.validated.update( paginated_resources[1] )
         return paginated_resources[0]
     
     def __resources_to_json(self, resources):   
         '''
         Serializes each resource (within page) into json
         '''
-        return [self.json(i) for i in resources]       
+        return [self.builder.to_json(i) for i in resources]       
 
     def __resource_to_json(self, resource):
         '''
         Creates json for given resource
         '''
-        return self.json(resource)
+        return self.builder.to_json(resource)

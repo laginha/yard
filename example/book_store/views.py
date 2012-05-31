@@ -5,8 +5,8 @@ from params import BookParameters
 
 class Books(Resource):
     parameters = BookParameters()
-    fields     = ('id', 'title', 'publication_date', 'genres', 
-                 ('author', ('name','age','gender_')) )
+    fields     = ['id', 'title', 'publication_date', 'genres', 
+                 ('author', ('name','age','gender_')) ]
     
     class Meta:
         with_errors = True
@@ -21,28 +21,23 @@ class Books(Resource):
             'limit': 50,            #Optional
         }
         
-    @staticmethod
-    def index(request, params):
+    def index(self, params):
         if params.is_valid():
             return Book.objects.filter( **params ) #returns a JsonResponse-200
         else:
             return 400, params.errors()
 
-    @staticmethod
-    def show(request, book_id):
+    def show(self, book_id):
         return Book.objects.get( id=book_id )
     
-    @staticmethod
-    def create(request):
+    def create(self):
         #HttpResponse(status=405)
         return 405
         
-    @staticmethod
-    def update(request, book_id):
+    def update(self, book_id):
         #defaults to HttpResponse(status=200)
         return
         
-    @staticmethod
-    def destroy(request, book_id):
+    def destroy(self, book_id):
         #HttpResponse('You are not authorize', status=401)
         return 401, 'You are not authorize'
