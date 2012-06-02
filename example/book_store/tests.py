@@ -95,6 +95,26 @@ class Book_TestCase( unittest.TestCase ):
         self.get( 400, author=self.author.id, house=self.house.id )
     
     
+    def test_pagination(self):
+        self.get()
+        response = self.get( offset=0, results=1 )
+        assert len(response) == 1, response
+        response = self.get( offset=1, results=1 )
+        assert len(response) == 1, response
+        response = self.get( offset=2, results=1 )
+        assert len(response) == 1, response
+        response = self.get( 404, offset=3, results=1 )
+        assert len(response) == 0, response
+        response = self.get( offset=0, results=2 )
+        assert len(response) == 2, response
+        response = self.get( offset=1, results=2 )
+        assert len(response) == 2, response
+        response = self.get( offset=2, results=2 )
+        assert len(response) == 1, response
+        response = self.get( 404, offset=3, results=2 )
+        assert len(response) == 0, response
+        
+    
     def test_show(self):
         response = self.client.get( '/books/%s/' %self.book1.id )
         assert response.status_code == 200, response.status_code 
