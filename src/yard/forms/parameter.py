@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 from yard.utils      import is_strfloat, is_strint
-from yard.exceptions import RequiredParamMissing, InvalidParameterValue, ConversionError
+from yard.exceptions import RequiredParamMissing, InvalidParameterValue, ConversionError, AndParameterException
 
 
 class Parameter(object):
@@ -132,7 +132,17 @@ class OR(Logic):
 class AND(Logic):
     '''
     Relates two parameters through boolean 'and'
-    '''   
+    '''
+    
+    def size(self):
+        '''
+        Number of AND Parameters within
+        '''
+        length = 0
+        for i in self.__dict__.values():
+            length += i.size() if isinstance(i, AND) else 1
+        return length
+       
     def get(self, request):
         '''
         Handles params banded together with AND
@@ -141,8 +151,14 @@ class AND(Logic):
         for param in self.__dict__.values():
             value = param.get( request )
             together.update( value  )
-        # returns params's values if all valid
-        return together if len(together)==len(self) else {}
+        if not together:
+            return {}
+        if len(together)==self.size():
+            # returns params's values if all valid
+            return together
+        # return exception otherwise
+        exception = AndParameterException( together.keys() )
+        return {exception.alias: exception}
 
     def __str__(self):
         return '( %s and %s )' %(self.x, self.y)

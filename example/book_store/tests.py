@@ -50,9 +50,9 @@ class Book_TestCase( unittest.TestCase ):
     
     
     def test_year_param(self):
-        self.get( 400, year=1996 )
-        self.get( 400, year=2005 )        
-        self.get( 400, year=2012 )
+        self.get( 200, year=1996 )
+        self.get( 200, year=2005 )        
+        self.get( 404, year=2012 )
         
     
     def test_title_param(self):
@@ -64,7 +64,7 @@ class Book_TestCase( unittest.TestCase ):
         assert len(response) == 1, response
         assert int(response[0]['id']) == self.book2.id, (int(response[0]['id']), self.book1.id)
 
-        response = self.get( title='Some title' )
+        response = self.get( 404, title='Some title' )
         assert len(response) == 0, response
     
     
@@ -73,26 +73,25 @@ class Book_TestCase( unittest.TestCase ):
         assert len(response) == 1, response
         assert int(response[0]['id']) == self.book1.id, (int(response[0]['id']), self.book1.id)
         
-        response = self.get( title='A Game of Thrones', year=2005 )
+        response = self.get( 404, title='A Game of Thrones', year=2005 )
         assert len(response) == 0, response
         
         response = self.get( title='A Feast for Crows', year=2005 )
         assert len(response) == 1, response
         assert int(response[0]['id']) == self.book2.id, (int(response[0]['id']), self.book1.id)
 
-        response = self.get( title='A Feast for Crows', year=1996 )
+        response = self.get( 404, title='A Feast for Crows', year=1996 )
         assert len(response) == 0, response
         
-        response = self.get( title='Some title', year=2012 )
+        response = self.get( 404, title='Some title', year=2012 )
         assert len(response) == 0, response
         
     
     def test_AND_params(self):
         self.get( 400, genre=self.genre1.id )        
-        self.get( 400, genre=self.genre1.id, author=self.author.id )
-        self.get( title='A Game of Thrones', genre=self.genre1.id, author=self.author.id )        
-        self.get( 400, genre=self.genre1.id, house=self.house.id )
-        self.get( title='A Game of Thrones', genre=self.genre1.id, house=self.house.id )  
+        self.get( genre=self.genre1.id, author=self.author.id )
+        self.get( genre=self.genre1.id, house=self.house.id )
+        self.get( author=self.author.id, genre=self.genre1.id, house=self.house.id )  
         self.get( 400, author=self.author.id, house=self.house.id )
     
     

@@ -68,6 +68,28 @@ class ConversionError(Exception):
         return "Query value '%s' for %s could not be converted properly." %(self.value, self.param.__class__.__name__)
 
 
+class AndParameterException(Exception):
+    '''
+    For when not all parameters within a AND are not met/validated
+    '''
+    alias = 'ApiException'
+    
+    def __init__(self, params):
+        self.params = params
+    
+    def __nonzero__(self):
+        return False
+    
+    def __str__(self):
+        if len(self.params) == 1:
+            text = "'%s'" %self.params[0]
+        else:
+            _lambda = lambda a,b: "%s, '%s'"%(a,b)
+            text = reduce(_lambda, self.params[1:-1], "'%s'" %self.params[0])
+            text += " and '%s'" %self.params[-1]
+        return "Parameters %s cannot be used aloned" %text
+        
+
 class NoMeta(Exception):
     '''
     For when no meta is desired for the QuerySet based json-response
