@@ -33,7 +33,7 @@ The API client, whenever requesting *GET: http://example/books/id/*, will receiv
 
 ## Instance methods in fields
 
-*Fields* elements of type string can also indicate instance methods, as long as they are callable with no arguments besides instance. This is a good way to include data into the JSON response which can't be specified directly through model's attributes.
+*Fields* elements of type string can also indicate instance methods. This is a good way to include data into the JSON response which can't be specified directly through model's attributes.
 
 <pre>
 class Book(models.Model):
@@ -46,6 +46,10 @@ class Book(models.Model):
 class Book(Resource):
     fields = ('id', 'title', 'book_genres', ('author', ('name',)) )
 </pre>
+
+The instance method can be callable with arguments. You just need to indicate the argument in front of the instance method name, within the string field
+
+    fields = 'method arg0 arg1'
 
 *Yard* deals differently with different object types returned by instance methods:
 
