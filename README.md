@@ -50,10 +50,21 @@ class Books(Resource):
     # used in the index and show methods
     fields = ( 'id', 'title', 'publication_date', 'genres', ('author', ('name', 'age',)) )
     
+    # index's response metadata
     class Meta:
+        number_of_objects = True
         maximum = (('longest_title', 'title'),)
         average = (('average_pages', 'number_of_pages'),)
     
+    # index's pagination configuration  
+    class Page:
+        offset_parameter = 'offset'
+        results_per_page = {
+            'parameter': 'results',
+            'default': 25,
+            'limit': 50,
+        }
+
     @staticmethod
     def index(request, params):
         #GET /resource/
