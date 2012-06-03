@@ -31,9 +31,10 @@ class Resource(object):
         pass
 
     def __init__(self, routes):
-        self.__routes = routes # maps http methods with respective views
-        self.__meta  = ResourceMeta( self.Meta ) 
-        self.__page  = ResourcePage( self.Page )  
+        self.__routes   = routes # maps http methods with respective views
+        self.__meta     = ResourceMeta( self.Meta ) 
+        self.__page     = ResourcePage( self.Page )  
+        self.parameters = self.parameters()
   
     def __call__(self, request, **parameters):
         '''

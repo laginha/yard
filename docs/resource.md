@@ -12,7 +12,7 @@ In the end, your resource might look like this:
 <pre>
 class MyResource(Resource):
     parameters = ...
-    fields     = (...)
+    fields     = ...
 
     def index(self, params):
         return {'foo':'bar'}

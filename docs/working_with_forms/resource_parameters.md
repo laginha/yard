@@ -13,7 +13,7 @@ The second argument of the *index* method is a ResourceParameters instance. It p
 
 <pre>
 class BookResource(Resource):
-    parameters = BookParameters()
+    parameters = BookParameters
 
     def index(self, params):
         if params.is_valid():
@@ -25,7 +25,7 @@ In the example above, *filter* is executed only if *params* is valid. However, s
 
 <pre>
 class BookResource(Resource):
-    parameters = BookParameters()
+    parameters = BookParameters
 
     def index(self, params):
         return Book.objects.filter( **params )

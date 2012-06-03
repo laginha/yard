@@ -4,7 +4,7 @@ from params import BookParameters
 
 
 class Books(Resource):
-    parameters = BookParameters()
+    parameters = BookParameters
     fields     = ['id', 'title', 'publication_date', 'genres', 
                  ('author', ('name','age','gender_')) ]
     
