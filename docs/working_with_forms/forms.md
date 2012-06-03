@@ -6,8 +6,7 @@ The *Yard* resource relies on the *parameters* attribute for the **index** metho
 class BookResource(Resource):
     parameters = BookParameters()
 
-    @staticmethod
-    def index(request, params):
+    def index(self, params):
         return Book.objects.filter( **params )
 </pre>
 

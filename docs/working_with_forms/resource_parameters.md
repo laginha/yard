@@ -4,6 +4,10 @@ The second argument of the *index* method is a ResourceParameters instance. It p
 
 - **is_valid():**   Returns True if there was no error while fetching parameters from the http request. Otherwise, returns False.
 - **errors():**     Returns a dictionary with the errors detected while fetching parameters from the http request.
+    - *RequiredParamMissing:* required parameter not found in request.
+    - *InvalidParameterValue:* parameter value failed the validation test.
+    - *ConversionError:* parameter value could not be properly converted.
+    - *AndParameterException:* all parameters within an AND were not met/validated.
 - **from_path():**  Returns dictionary of parameters of type path, as defined in the url pattern.
 - **from_query():** Returns dictionary of parameters of type query.
 
@@ -11,8 +15,7 @@ The second argument of the *index* method is a ResourceParameters instance. It p
 class BookResource(Resource):
     parameters = BookParameters()
 
-    @staticmethod
-    def index(request, params):
+    def index(self, params):
         if params.is_valid():
             return Book.objects.filter( **params )
         return params.errors()
@@ -24,7 +27,6 @@ In the example above, *filter* is executed only if *params* is valid. However, s
 class BookResource(Resource):
     parameters = BookParameters()
 
-    @staticmethod
-    def index(request, params):
+    def index(self, params):
         return Book.objects.filter( **params )
 </pre>

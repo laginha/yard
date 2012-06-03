@@ -62,8 +62,7 @@
 <pre>
 class BookResource(Resource):
 
-    @staticmethod
-    def create(request):
+    def create(self):
         return 401, 'Not Authorize'
 </pre>
 
@@ -71,7 +70,7 @@ class BookResource(Resource):
 class BookResource(Resource):
 
     @staticmethod
-    def create(request):
+    def create(self):
         return 401
 </pre>
 
@@ -79,7 +78,7 @@ class BookResource(Resource):
 class BookResource(Resource):
 
     @staticmethod
-    def show(request, book_id):
+    def show(self, book_id):
         return Book.objects.get(id=book_id)
 </pre>
 

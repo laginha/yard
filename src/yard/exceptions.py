@@ -70,7 +70,7 @@ class ConversionError(Exception):
 
 class AndParameterException(Exception):
     '''
-    For when not all parameters within a AND are not met/validated
+    For when not all parameters within an AND are not met/validated
     '''
     alias = 'ApiException'
     

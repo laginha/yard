@@ -12,8 +12,7 @@ In the example below the resource named *BookResource* implements the *show* met
 class BookResource(Resource):
     fields = ('id', 'title', ('author', ('name',)) )
     
-    @staticmethod
-    def show(request, book_id):
+    def show(self, book_id):
         return Book.objects.filter(id=book_id)
 </pre>
 

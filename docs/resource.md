@@ -14,12 +14,10 @@ class MyResource(Resource):
     parameters = ...
     fields     = (...)
 
-    @staticmethod
-    def index(request, params):
+    def index(self, params):
         return {'foo':'bar'}
 
-    @staticmethod
-    def show(request, book_id):
+    def show(self, book_id):
         return 404
 </pre>
 
