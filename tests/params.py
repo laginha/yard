@@ -247,6 +247,36 @@ class TestPointParam(unittest.TestCase):
         assert fail_conversion(p, '1.1')
 
 
+class TestIpAddressParam(unittest.TestCase):
+
+    def test_validate(self):
+        p = IpAddressParam()
+        assert p.validate('1')
+        assert p.validate('1.1.1.1')
+        assert fail_validation(p, 'aa')
+        assert fail_validation(p, '1.1.1.1.1.1.1.1.1.1')
+
+
+class TestEmailParam(unittest.TestCase):
+
+    def test_validate(self):
+        p = EmailParam()
+        assert p.validate('sth@wtv.com')
+        assert p.validate('1.1@wtv.com')
+        assert fail_validation(p, 'sthwtv')
+        assert fail_validation(p, 'sth@wtv.1')
+        assert fail_validation(p, 'sth@wtv.x')
+
+
+class TestTimestampParam(unittest.TestCase):
+
+    def test_convert(self):
+        p = TimestampParam()
+        assert p.convert('1')
+        assert p.convert('11111')
+        assert fail_conversion(p, 'a')
+        assert fail_conversion(p, '11111111111111111')
+
 
 if __name__ == '__main__':
     unittest.main()

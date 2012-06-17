@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+from django.forms            import EmailField
 from django.contrib.gis.geos import Point
 from yard.forms.parameter    import Parameter
 from yard.exceptions         import InvalidParameterValue, ConversionError
 from yard.utils              import is_iter, is_strint
 from datetime                import datetime
-import re
+import re, socket
 
 
 class IntegerParam(Parameter):
@@ -204,3 +205,65 @@ class PointParam(Parameter):
             return Point(y, x) if self.latitude_first else Point(x, y)
         except ValueError:
             raise ConversionError(self, value)
+
+
+class IpAddressParam(Parameter):
+    '''
+    Parameter for IP values
+    '''
+    def __init__(self, alias=None, required=False, default=None):
+        def validate(x):
+            try: 
+                return socket.inet_aton( x )
+            except socket.error:
+                return False 
+        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
+
+    def convert(self, value):
+        return value
+
+
+class EmailParam(Parameter):
+    '''
+    Parameter for E-mail values
+    '''
+    def __init__(self, alias=None, required=False, default=None):
+        def validate(x):
+            try:
+                return EmailField().clean(x)
+            except:
+                return False
+        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)    
+
+    def convert(self, value):
+        return value
+        
+        
+class InstanceParam(Parameter):
+    '''
+    Parameter for model instances
+    '''
+    def __init__(self, model, model_attribute, alias=None, required=False, default=None):
+        self.model = model.objects
+        self.model_attribute = model_attribute
+        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
+        
+    def convert(self, value):
+        instance = self.model.filter( **{self.model_attribute: value} )
+        if instance.exists():
+            return instance[0]
+
+
+class TimestampParam(Parameter):
+    '''
+    Parameter for timestamp values
+    '''      
+    def __init__(self, alias=None, required=False, default=None, validate=None):     
+        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
+    
+    def convert(self, value):
+        try:
+            return datetime.fromtimestamp( float(value) )
+        except ValueError:
+            raise ConversionError(self, value)
+        

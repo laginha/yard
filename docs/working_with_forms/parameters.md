@@ -125,10 +125,45 @@ Extra arguments:
 
     PointParam( validate=lambda x: x.coords[1]>0  ) 
 
-*Note: expected input like: 40.0,8.0*
+*Note: expected input like 40.0,8.0*
 
 Extra arguments:
 
 - **validate:** Single-argument callable function used for parameter value validation.
 - **latitude_first:** Determines if first coordinate should be considered as latitude or not. Defaults to False.
 
+
+### IpAddressParam
+
+    IpAddressParam()
+
+*Note: expected input like 1.0.0.1*
+    
+No extra arguments.
+
+
+### EmailParam
+
+    EmailParam()
+    
+No extra arguments.
+
+
+### TimestampParam
+
+    TimestampParam( validate=lambda x: x<datetime.now() )
+    
+Extra arguments:
+
+- **validate:** Single-argument callable function used for parameter value validation.
+
+
+### IntanceParam
+
+    IntanceParam( model=Author, model_attribute='id' )
+    
+Extra arguments:
+
+- **validate:** Single-argument callable function used for parameter value validation.
+- **model:** Model from which the desired instance belongs to. (REQUIRED)
+- **model_attribute:** model's attribute used for filtering the instance. (REQUIRED)
