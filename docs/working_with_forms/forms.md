@@ -11,7 +11,7 @@ class BookResource(Resource):
 </pre>
 
 
-Very much like *django forms*, you can include any [parameter type](parameters.md) as a form attribute. However there is a special attribute, *logic*, where you can easily define logic between parameters for a particular API method.
+Very much like *django forms*, you can include any [parameter type](parameters.md) as a form attribute. However there is a special attribute, *__logic__*, where you can easily define logic between parameters for a particular API method.
 
 <pre>
 from yard.forms import *
@@ -21,7 +21,7 @@ class BookParameters(Form):
     title  = CharParam()
     author = CharParam( alias='author__name' )
 
-    logic = year, title & (author | year)
+    __logic__ = year, title & (author | year)
 </pre>
 
 In this example, the *year* parameter is allowed as well as the combined presence of *title* and either *author* or *year* parameters. 

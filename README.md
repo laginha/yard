@@ -36,7 +36,7 @@ class BookParameters(Form):
     author = CharParam( alias='author__id' )
     house  = CharParam( alias='publishing_house__id' ) 
 
-    logic = year, title, genre & (author|house)
+    __logic__ = year, title, genre & (author|house)
 </pre>
 
 *views.py*
