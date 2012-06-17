@@ -158,7 +158,7 @@ Extra arguments:
 - **validate:** Single-argument callable function used for parameter value validation.
 
 
-### IntanceParam
+### InstanceParam
 
     IntanceParam( model=Author, model_attribute='id' )
     
