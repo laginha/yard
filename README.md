@@ -41,7 +41,7 @@ class BookParameters(Form):
 
 *views.py*
 <pre>
-from yard   import Resource
+from yard.resources import Resource
 from models import Book
 
 class Books(Resource):
