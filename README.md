@@ -52,7 +52,6 @@ class Books(Resource):
     
     # index's response metadata
     class Meta:
-        number_of_objects = True
         maximum = (('longest_title', 'title'),)
         average = (('average_pages', 'number_of_pages'),)
     

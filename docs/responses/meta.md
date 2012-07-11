@@ -41,7 +41,7 @@ For *QuerySet* based responses *Yard* appends useful metadata by default:
 - no metadata is included in the JSON response, if *True*.
 - defaults to *False*.
 
-### no_meta
+### with_errors
 
     with_errors = True
 
