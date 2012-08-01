@@ -70,6 +70,7 @@ class JSONbuilder:
         '''
         Builds JSON for resource according to fields attribute
         '''
+        if not resource: return
         json_ = self.__resource_to_dict( resource )
         for field in self.fields:
             json_.update( self.__handler(resource, field) )
