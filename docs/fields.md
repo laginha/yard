@@ -6,6 +6,8 @@ For this attribute is expected a tuple of strings and tuples. While the former t
 
     ('name of the fk attribute',('fk intance attribute1', 'fk intance attribute2'))
 
+Also, *Yard* allows you to define different *fields* for the *show* and *index* methods, by means of *show\_fields* and *index\_fields* attributes.
+
 In the example below the resource named *BookResource* implements the *show* method which returns a QueryField for base model *Book*.
 
 <pre>
@@ -28,6 +30,7 @@ The API client, whenever requesting *GET: http://example/books/id/*, will receiv
     } 
 ]
 </pre>
+
 
 
 ## Instance methods in fields

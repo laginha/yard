@@ -10,6 +10,19 @@ class BookResource(Resource):
         return Book.objects.filter( **params )
 </pre>
 
+you can also use forms as a nested class within *Resource*:
+
+<pre>
+class BookResource(Resource):
+    
+    class Parameters(Form):
+        ...
+
+    def index(self, params):
+        return Book.objects.filter( **params )
+</pre>
+
+
 
 Very much like *django forms*, you can include any [parameter type](parameters.md) as a form attribute. However there is a special attribute, *__logic__*, where you can easily define logic between parameters for a particular API method.
 

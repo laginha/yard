@@ -21,8 +21,8 @@ class Resource(object):
     '''
     API Resource object
     '''
-    parameters  = None
-    fields      = ()    
+    parameters = Parameters = None
+    fields = show_fields = index_fields = ()    
     
     class Meta(object):
         pass
@@ -31,10 +31,10 @@ class Resource(object):
         pass
 
     def __init__(self, routes):
-        self.__routes   = routes # maps http methods with respective views
-        self.__meta     = ResourceMeta( self.Meta ) 
-        self.__page     = ResourcePage( self.Page )  
-        self.parameters = self.parameters()
+        self.__routes     = routes # maps http methods with respective views
+        self.__meta       = ResourceMeta( self.Meta ) 
+        self.__page       = ResourcePage( self.Page )  
+        self.parameters   = self.parameters() if self.parameters else self.Parameters()
   
     def __call__(self, request, **parameters):
         '''
@@ -48,7 +48,8 @@ class Resource(object):
             else:
                 self.__rparameters = parameters
             response = self.__view( method, self.__rparameters )
-            self.builder = JSONbuilder(self.fields)
+            fields   = self.index_fields if method=='index' else self.show_fields
+            self.builder = JSONbuilder( fields or self.fields )
             return self.__response( response )    
         except HttpMethodNotAllowed:
             # if http_method not allowed for this resource
