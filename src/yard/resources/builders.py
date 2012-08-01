@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
-
-from django.forms.models import model_to_dict
-from yard.utils          import is_tuple, is_str, is_list, is_dict
-from yard.utils          import is_method, is_valuesset, is_queryset
+#from django.db.models.fields.related import RelatedManager
+from django.forms.models             import model_to_dict
+from yard.utils                      import is_tuple, is_str, is_list, is_dict
+from yard.utils                      import is_method, is_valuesset, is_queryset
 import json
 
 
@@ -50,7 +50,7 @@ class JSONbuilder:
         sub_resource = getattr( resource, field[0], None )
         # build sub-json
         return {
-            field[0]: JSONbuilder( field[1] ).to_json( sub_resource )
+            field[0]: self.__class__( field[1] ).to_json( sub_resource )
         }
     
     def __handler(self, resource, field):
@@ -66,13 +66,26 @@ class JSONbuilder:
             return {}
         return self.__handle_method( method, args[1:] )
     
+    def __fields_to_json(self, resource, fields, dic={}):
+        '''
+        Builds (sub) json response according to given fields and resource
+        '''
+        print '--> ',resource
+        for field in fields:
+            print field
+            dic.update( self.__handler(resource, field) )
+        return dic
+    
     def to_json(self, resource):
         '''
         Builds JSON for resource according to fields attribute
         '''
-        if not resource: return
-        json_ = self.__resource_to_dict( resource )
-        for field in self.fields:
-            json_.update( self.__handler(resource, field) )
-        return json_
-    
+        if not resource:
+            return
+        try:
+            json_ = self.__resource_to_dict( resource )
+            return self.__fields_to_json( resource, self.fields, json_ )
+        except:
+            # resource is a RelatedManager
+            builder = self.__class__( self.fields )
+            return [builder.to_json( i ) for i in resource.all()]    
