@@ -2,7 +2,7 @@
 # encoding: utf-8
 #from django.db.models.fields.related import RelatedManager
 from django.forms.models             import model_to_dict
-from yard.utils                      import is_tuple, is_str, is_list, is_dict
+from yard.utils                      import is_tuple, is_str, is_list, is_dict, is_geo_value
 from yard.utils                      import is_method, is_valuesset, is_queryset
 import json
 
@@ -18,7 +18,8 @@ class JSONbuilder:
         '''
         Converts to JSON-serializable object
         '''
-        return x if isinstance(x, (list,dict)) else unicode(x)
+        return x if isinstance(x, (list,dict)) else (
+            json.loads(x.geojson) if is_geo_value(x) else unicode(x) )
     
     def __resource_to_dict(self, resource):
         '''
