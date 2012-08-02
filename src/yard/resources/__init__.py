@@ -116,7 +116,7 @@ class Resource(object):
                                  
         if is_queryset(response):
             content, exists = self.__resources_with_meta(response)
-            return JsonResponse(content, status=status if exists else 204)
+            return JsonResponse(content, status=status)
         elif is_modelinstance(response):
             return JsonResponse(self.__resource_to_json(response), status=status)
         elif response == None:
