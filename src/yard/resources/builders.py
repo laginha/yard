@@ -70,9 +70,7 @@ class JSONbuilder:
         '''
         Builds (sub) json response according to given fields and resource
         '''
-        print '--> ',resource
         for field in fields:
-            print field
             dic.update( self.__handler(resource, field) )
         return dic
     
@@ -85,7 +83,7 @@ class JSONbuilder:
         try:
             json_ = self.__resource_to_dict( resource )
             return self.__fields_to_json( resource, self.fields, json_ )
-        except:
+        except AttributeError as e:
             # resource is a RelatedManager
             builder = self.__class__( self.fields )
-            return [builder.to_json( i ) for i in resource.all()]    
+            return [builder.to_json( i ) for i in resource.all()]   
