@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 from django.contrib.gis.db.models.fields import GeometryField
+from django.contrib.gis.geos             import GEOSGeometry
 from django.db.models.query              import QuerySet, ValuesQuerySet
 from django.db                           import models
 from django.http                         import HttpResponse
@@ -22,6 +23,7 @@ is_iter          = lambda x: hasattr(x, '__iter__')
 is_strfloat      = lambda x: bool( float_.match(x) ) if x else False
 is_strint        = lambda x: x.isdigit() if is_unicode(x) or is_str(x) else False
 is_method        = lambda x: inspect.ismethod(x)
+is_geo_value     = lambda x: isinstance(x, GEOSGeometry)
 is_geo           = lambda x: isinstance(x, GeometryField)
 is_queryset      = lambda x: isinstance(x, QuerySet)
 is_valuesset     = lambda x: isinstance(x, ValuesQuerySet)
