@@ -158,7 +158,11 @@ class AND(Logic):
             return together
         # return exception otherwise
         exception = AndParameterException( together.keys() )
-        return {exception.alias: exception}
+        result    = {exception.alias: exception}
+        for k,v in together.iteritems():
+            if isinstance(v, Exception): result.update( {k:v} )
+        return result
+        #return {exception.alias: exception}
 
     def __str__(self):
         return '( %s and %s )' %(self.x, self.y)
