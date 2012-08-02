@@ -9,14 +9,19 @@ class ResourceParameters(dict):
         self.__errors  = {}
         self.__path    = params
         self.validated = {}
-        self.update( params )
+        self.__update_nested( params )
+
+    def __update_nested(self, params):
+        for key,value in params.iteritems():
+            self[key] = value
+            self.validated[key] = unicode(value)
 
     def update(self, params):
         '''
         Updates parameters
         '''
         for key,value in params.iteritems():
-            if value:
+            if value!=None:
                 self[key.alias] = value
                 self.validated[key.name] = unicode(value)
             else:

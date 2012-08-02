@@ -41,8 +41,8 @@ class Parameter(object):
         '''
         Gets value from request
         '''
-        value = request.GET.get( self.name )  
-        return None if not value else self.convert(value)
+        value = request.GET.get( self.name )
+        return None if value==None else self.convert(value)
 
     def _default(self, value):
         '''
@@ -83,7 +83,7 @@ class Parameter(object):
             value = self._validate( value )
         except (ConversionError, InvalidParameterValue, RequiredParamMissing) as e:
             return {self.name: e}
-        return {self: value} if value else {}
+        return {self: value} if value!=None else {}
 
 
 class Logic(Parameter):
@@ -162,7 +162,6 @@ class AND(Logic):
         for k,v in together.iteritems():
             if isinstance(v, Exception): result.update( {k:v} )
         return result
-        #return {exception.alias: exception}
 
     def __str__(self):
         return '( %s and %s )' %(self.x, self.y)
