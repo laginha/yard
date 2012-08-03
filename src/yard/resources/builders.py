@@ -40,9 +40,9 @@ class JSONbuilder:
             return { method.__name__: [unicode(i) for i in result] }
         elif is_valuesset( result ):
             return { method.__name__: list( result ) }
-        elif isinstance(result, (int, str,unicode)):
+        elif isinstance(result, (int, str, unicode)):
             return { method.__name__: result }
-        return { method.__name__: json.dumps( self.__serialize(result) ) }
+        return { method.__name__: self.__serialize(result) }
     
     def __handle_tuple(self, resource, field ):
         '''
