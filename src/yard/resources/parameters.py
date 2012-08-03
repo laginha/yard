@@ -21,11 +21,11 @@ class ResourceParameters(dict):
         Updates parameters
         '''
         for key,value in params.iteritems():
-            if value!=None:
+            if isinstance(value, Exception):
+                self.__errors[key] = unicode(value)
+            else:
                 self[key.alias] = value
                 self.validated[key.name] = unicode(value)
-            else:
-                self.__errors[key] = unicode(value)
     
     def from_path(self):
         '''
