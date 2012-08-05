@@ -1,6 +1,6 @@
 # Pagination
 
-Although *Yard* does not paginate *QuerySet* based responses by default, it provides a way to set it up.
+Although *Yard* does not paginate by default, it provides a way to set it up for *QuerySet*, *list* and *ValueSet* based responses.
 
 <pre>
 class Books(Resource):

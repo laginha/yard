@@ -8,7 +8,7 @@ class Books(Resource):
         ...
 </pre>
 
-For *QuerySet* based responses *Yard* appends useful metadata by default:
+For *QuerySet*, *list* and *ValuesSet* based responses, *Yard* appends useful metadata by default:
 
 - **total_objects**: number of instances returned after filtering.
 - **parameters_considered**: parameters validated for filtering.
