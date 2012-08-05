@@ -40,13 +40,6 @@ class TestIntegerParam(unittest.TestCase):
         number = RANDOM.number()
         assert p._default(number) == number
         assert p._default(None) == default
-        
-        max_ = RANDOM.number()
-        p = param(default=lambda x: min(x,max_))
-        number = RANDOM.number(0,max_)
-        assert p._default(number) == number
-        assert p._default(RANDOM.number(max_,10)) == max_
-        assert p._default(None) == None
 
     def test_validate(self, param=IntegerParam):
         p = param()

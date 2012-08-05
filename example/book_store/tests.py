@@ -41,7 +41,7 @@ class Book_TestCase( unittest.TestCase ):
         
     def get(self, status=200, **params):
         response = self.client.get( '/books/', params )
-        assert response.status_code == status, "%s - %s" %(response.status_code, response.content)
+        assert response.status_code == status, "%s-%s - %s" %(status, response.status_code, response.content)
         try:
             jdict = json.loads( response.content )
             return jdict['Objects'] if 'Objects' in jdict else jdict
@@ -52,7 +52,7 @@ class Book_TestCase( unittest.TestCase ):
     def test_year_param(self):
         self.get( 200, year=1996 )
         self.get( 200, year=2005 )        
-        self.get( 404, year=2012 )
+        self.get( 200, year=2012 )
         
     
     def test_title_param(self):
@@ -64,7 +64,7 @@ class Book_TestCase( unittest.TestCase ):
         assert len(response) == 1, response
         assert int(response[0]['id']) == self.book2.id, (int(response[0]['id']), self.book1.id)
 
-        response = self.get( 404, title='Some title' )
+        response = self.get( title='Some title' )
         assert len(response) == 0, response
     
     
@@ -73,17 +73,17 @@ class Book_TestCase( unittest.TestCase ):
         assert len(response) == 1, response
         assert int(response[0]['id']) == self.book1.id, (int(response[0]['id']), self.book1.id)
         
-        response = self.get( 404, title='A Game of Thrones', year=2005 )
+        response = self.get( title='A Game of Thrones', year=2005 )
         assert len(response) == 0, response
         
         response = self.get( title='A Feast for Crows', year=2005 )
         assert len(response) == 1, response
         assert int(response[0]['id']) == self.book2.id, (int(response[0]['id']), self.book1.id)
 
-        response = self.get( 404, title='A Feast for Crows', year=1996 )
+        response = self.get( title='A Feast for Crows', year=1996 )
         assert len(response) == 0, response
         
-        response = self.get( 404, title='Some title', year=2012 )
+        response = self.get( title='Some title', year=2012 )
         assert len(response) == 0, response
         
     
@@ -103,7 +103,7 @@ class Book_TestCase( unittest.TestCase ):
         assert len(response) == 1, response
         response = self.get( offset=2, results=1 )
         assert len(response) == 1, response
-        response = self.get( 404, offset=3, results=1 )
+        response = self.get( offset=3, results=1 )
         assert len(response) == 0, response
         response = self.get( offset=0, results=2 )
         assert len(response) == 2, response
@@ -111,7 +111,7 @@ class Book_TestCase( unittest.TestCase ):
         assert len(response) == 2, response
         response = self.get( offset=2, results=2 )
         assert len(response) == 1, response
-        response = self.get( 404, offset=3, results=2 )
+        response = self.get( offset=3, results=2 )
         assert len(response) == 0, response
         
     
