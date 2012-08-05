@@ -77,7 +77,7 @@ Extra arguments:
 
 ### DateParam
 
-    DateParam( validate=lambda x: x<datetime.today().date(), formats='%d-%m-%Y')
+    DateParam( default=date.today, validate=lambda x: x<=date.today(), formats='%d-%m-%Y')
 
 Extra arguments:
 

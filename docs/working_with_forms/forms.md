@@ -42,3 +42,12 @@ In this example, the *year* parameter is allowed as well as the combined presenc
 As you have noticed, each form's parameter can be reused in different logic sentences. 
 
 
+### Tips
+
+For *DateParam* you may want to default it to the current day. Do it so the default value is callable, like this:
+
+    from datetime import date
+    DateParam( default = date.today )
+
+otherwise the default will correspond to the day in which the server was started.
+
