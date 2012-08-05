@@ -151,7 +151,7 @@ class BooleanParam(Parameter):
     '''
     Parameter for boolean values
     '''
-    def __init__(self, alias=None, required=False, default=True):
+    def __init__(self, alias=None, required=False, default=False):
         Parameter.__init__(self, alias=alias, required=required, default=default, validate=None)
         
     def convert(self, value):
