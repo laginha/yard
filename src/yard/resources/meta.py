@@ -3,11 +3,15 @@
 
 from django.db.models import Avg, Max, Min, Count
 from yard.exceptions  import NoMeta
+from yard.utils       import is_queryset
 
 
 class MetaDict(dict):
     def __init__(self, resources, page, params):
         self.resources = resources
+        if not is_queryset(self.resources):
+            self.paginated_objects = self.__paginated_list
+            self.total_objects     = self.__total_in_list
         self.params    = params
         self.page      = page
     
@@ -17,8 +21,14 @@ class MetaDict(dict):
     def total_objects(self):
         self['total_objects'] = self.resources.count()
     
+    def __total_in_list(self):
+        self['total_objects'] = len(self.resources)
+    
     def paginated_objects(self):
         self['paginated_objects'] = self.page.count()
+    
+    def __paginated_list(self):
+        self['paginated_objects'] = len(self.page)
     
     def validated_parameters(self):
         self['validated_parameters'] = self.params.validated

@@ -115,20 +115,25 @@ class Resource(object):
             return response
                                  
         if is_queryset(response):
-            content, exists = self.__resources_with_meta(response)
+            content = self.__resources_with_meta(response)
             return JsonResponse(content, status=status)
+        elif is_list(response):
+            content = self.__list_with_meta(response)
+            return JsonResponse(content, status=status)             
         elif is_modelinstance(response):
-            return JsonResponse(self.__resource_to_json(response), status=status)
+            content = self.__resource_to_json(response)
+            return JsonResponse(content, status=status)
         elif response == None:
             return HttpResponse(status=status)
         elif is_int(response):
             return HttpResponse(status=response)
-        elif is_str(response) or is_dict(response) or is_list(response):
+        elif is_str(response) or is_dict(response):
             return JsonResponse(response, status=status) 
         elif is_file(response):
             return FileResponse(response, status=status)        
         elif is_valuesset(response):
-            return JsonResponse(list(response), status=status)     
+            content = self.__list_with_meta(list(response))
+            return JsonResponse(content, status=status)
         else:
             return HttpResponse(str(response), status=status)          
 
@@ -139,10 +144,12 @@ class Resource(object):
         page    = self.__paginate( resources )
         objects = self.__resources_to_json( page )
         meta    = self.__meta.fetch(resources, page, self.__rparameters)
-        if not meta:
-            return objects, page.exists()
-        else:
-            return {'Objects': objects,'Meta': meta}, page.exists()
+        return objects if not meta else {'Objects': objects,'Meta': meta}
+    
+    def __list_with_meta(self, resources):
+        page = self.__paginate( response )
+        meta = self.__meta.fetch(response, page, self.__rparameters)
+        return page if not meta else {'Objects': page,'Meta': meta}
     
     def __paginate(self, resources):
         '''
