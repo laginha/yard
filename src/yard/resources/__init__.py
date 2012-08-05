@@ -147,6 +147,9 @@ class Resource(object):
         return objects if not meta else {'Objects': objects,'Meta': meta}
     
     def __list_with_meta(self, resources):
+        '''
+        Appends Meta data into list based response
+        '''
         page = self.__paginate( response )
         meta = self.__meta.fetch(response, page, self.__rparameters)
         return page if not meta else {'Objects': page,'Meta': meta}
