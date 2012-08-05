@@ -13,7 +13,8 @@ class Parameter(object):
         for k,v in locals().items():
             #set attributes dynamically
             setattr(self, k, v) if k != 'self' else None
-        self.name     = None
+        self.name       = None
+        self.is_default = False
     
     def __str__(self):
         return self.name if self.name else type(self)
@@ -52,9 +53,11 @@ class Parameter(object):
             if value==None and self.required:
                 raise RequiredParamMissing(self)
             return value
-        return self.default(value) if callable(self.default) else (
-            value if value!=None else self.default
-        )    
+        elif value!=None:
+            return value
+        else:
+            self.is_default = True
+            return self.default() if callable(self.default) else self.default
 
     def _validate(self, value):
         '''
@@ -147,10 +150,10 @@ class AND(Logic):
         '''
         Handles params banded together with AND
         '''
-        together = {}
+        together = ANDValues()
         for param in self.__dict__.values():
             value = param.get( request )
-            together.update( value  )
+            together.update( value )
         if not together:
             return {}
         if len(together)==self.size():
@@ -160,10 +163,24 @@ class AND(Logic):
         exception = AndParameterException( together.keys() )
         result    = {exception.alias: exception}
         for k,v in together.iteritems():
-            if isinstance(v, Exception): result.update( {k:v} )
+            if isinstance(v, Exception): 
+                result.update( {k:v} )
         return result
 
     def __str__(self):
         return '( %s and %s )' %(self.x, self.y)
+        
+        
+class ANDValues(dict):
+    def __init__(self):
+        self.defaults = 0
 
+    def __nonzero__(self):
+        return bool( len(self)-self.defaults )
+
+    def update(self, dic):
+        for key,value in dic.iteritems():
+            self[key] = value  
+            if hasattr(key, 'is_default'):
+                self.defaults += bool(key.is_default)
 
