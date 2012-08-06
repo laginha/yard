@@ -33,7 +33,7 @@ class Resource(object):
     def __init__(self, routes):
         self.__routes     = routes # maps http methods with respective views
         self.__meta       = ResourceMeta( self.Meta ) 
-        self.__page       = ResourcePage( self.Page )  
+        self.__page       = ResourcePage( self.page if hasattr(self, 'page') else self.Page )  
         self.parameters   = self.parameters() if self.parameters else (
                             self.Parameters() if self.Parameters else None )
   

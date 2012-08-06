@@ -3,6 +3,7 @@
 
 from yard.utils      import is_strfloat, is_strint
 from yard.exceptions import RequiredParamMissing, InvalidParameterValue, ConversionError, AndParameterException
+import inspect
 
 
 class Parameter(object):
@@ -53,11 +54,16 @@ class Parameter(object):
             if value==None and self.required:
                 raise RequiredParamMissing(self)
             return value
+        elif callable(self.default) and inspect.getargspec(self.default).args:
+            self.is_default = True
+            return self.default( value )
         elif value!=None:
             return value
         else:
             self.is_default = True
-            return self.default() if callable(self.default) else self.default
+            if callable(self.default):
+                return self.default()
+            return self.default
 
     def _validate(self, value):
         '''

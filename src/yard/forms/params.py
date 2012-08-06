@@ -6,7 +6,7 @@ from django.contrib.gis.geos import Point
 from yard.forms.parameter    import Parameter
 from yard.exceptions         import InvalidParameterValue, ConversionError
 from yard.utils              import is_iter, is_strint
-from datetime                import datetime
+from datetime                import datetime, time as Time
 import re, socket
 
 
@@ -100,22 +100,35 @@ class DateTimeParam(Parameter):
     '''
     Parameter for datetime values
     '''
-    def __init__(self, alias=None, required=False, default=None, validate=None,
-                 formats=['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d']):
-        self.formats = formats if is_iter(formats) else [formats,]
+    def __init__(self, alias=None, required=False, default=None, default_date=None, validate=None,
+                 formats=['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d'], time_formats=['%H:%M:%S', '%H:%M'] ):        
+        iter_        = lambda x: x if is_iter(x) else [x,]
+        self.formats = {'datetime': iter_( formats )}
+        if default_date!=None and default==None:
+            default              = self.__default_date
+            self.default_date    = default_date
+            self.formats['time'] = iter_( time_formats )
         Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
+    
+    def __default_date(self, value):
+        if isinstance(value, Time):
+            if callable(self.default_date):
+                return datetime.combine( self.default_date(), value )
+            return datetime.combine( self.default_date, value )
+        return value
     
     def convert(self, value, to_time=False, to_date=False):
         '''
         Converts to Datetime
         '''
-        for format in self.formats:
-            try:
-                dt = datetime.strptime( value, format )
-                return dt.time() if to_time else(
-                    dt.date() if to_date else dt ) 
-            except ValueError as e:
-                continue 
+        for key,formats in self.formats.iteritems():
+            for format in formats:
+                try:
+                    dt = datetime.strptime( value, format )
+                    if key=='time': return dt.time()
+                    return dt.time() if to_time else ( dt.date() if to_date else dt )
+                except ValueError as e:
+                    continue
         raise ConversionError(self, value)
         
 
