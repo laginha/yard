@@ -150,8 +150,8 @@ class Resource(object):
         '''
         Appends Meta data into list based response
         '''
-        page = self.__paginate( response )
-        meta = self.__meta.fetch(response, page, self.__rparameters)
+        page = self.__paginate( resources )
+        meta = self.__meta.fetch(resources, page, self.__rparameters)
         return page if not meta else {'Objects': page,'Meta': meta}
     
     def __paginate(self, resources):
