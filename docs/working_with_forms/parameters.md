@@ -4,7 +4,7 @@ All available parameter types have three core arguments:
 
 - **alias:** Parameter's name within server's logic. If not given the parameter's name is used instead.
 - **required:** Defines whether parameter is required or not.
-- **default:** Defines the default value if none given in http request.
+- **default:** Defines the default value for the *Parameter*. It can be a callable with no arguments (e.g. `default = date.today`) or with only one argument being the value given in the request (e.g. `default = lambda x: datetime.combine(date.today(),x)`).
 
 
 ### IntegerParam
