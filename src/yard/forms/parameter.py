@@ -145,20 +145,21 @@ class AND(Logic):
         for i in self.__dict__.values():
             length += i.size() if isinstance(i, AND) else 1
         return length
-       
+
     def get(self, request):
         '''
         Handles params banded together with AND
         '''
-        together = ANDValues()
+        together = {}
         for param in self.__dict__.values():
             value = param.get( request )
             together.update( value )
-        if not together:
-            return {}
         if len(together)==self.size():
             # returns params's values if all valid
             return together
+        if all([i.is_default if isinstance(i, Parameter) else False for i in together]):
+            # ignore if all values are the default
+            return {}
         # return exception otherwise
         exception = AndParameterException( together.keys() )
         result    = {exception.alias: exception}
@@ -169,18 +170,3 @@ class AND(Logic):
 
     def __str__(self):
         return '( %s and %s )' %(self.x, self.y)
-        
-        
-class ANDValues(dict):
-    def __init__(self):
-        self.defaults = 0
-
-    def __nonzero__(self):
-        return bool( len(self)-self.defaults )
-
-    def update(self, dic):
-        for key,value in dic.iteritems():
-            self[key] = value  
-            if hasattr(key, 'is_default'):
-                self.defaults += bool(key.is_default)
-
