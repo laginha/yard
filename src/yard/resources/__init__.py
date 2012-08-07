@@ -121,7 +121,7 @@ class Resource(object):
             content = self.__list_with_meta(response)
             return JsonResponse(content, status=status)             
         elif is_modelinstance(response):
-            content = self.__resource_to_json(response)
+            content = self.serialize(response)
             return JsonResponse(content, status=status)
         elif response == None:
             return HttpResponse(status=status)
@@ -168,7 +168,7 @@ class Resource(object):
         '''
         return [self.builder.to_json(i) for i in resources]       
 
-    def __resource_to_json(self, resource):
+    def serialize(self, resource):
         '''
         Creates json for given resource
         '''
