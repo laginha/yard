@@ -36,6 +36,10 @@
         <td>Defines content of JSON-response</td>
     </tr>
     <tr>
+        <td>generator</td>
+        <td>Defines content of JSON-response</td>
+    </tr>
+    <tr>
         <td>file</td>
         <td>Returns a HTTP-response as file like object</td>
     </tr>
@@ -69,7 +73,6 @@ class BookResource(Resource):
 <pre>
 class BookResource(Resource):
 
-    @staticmethod
     def create(self):
         return 401
 </pre>
@@ -77,7 +80,6 @@ class BookResource(Resource):
 <pre>
 class BookResource(Resource):
 
-    @staticmethod
     def show(self, book_id):
         return Book.objects.get(id=book_id)
 </pre>
