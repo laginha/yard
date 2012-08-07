@@ -6,7 +6,8 @@ from django.contrib.gis.geos             import GEOSGeometry
 from django.db.models.query              import QuerySet, ValuesQuerySet
 from django.db                           import models
 from django.http                         import HttpResponse
-import re, inspect
+from types                               import GeneratorType
+import re, inspect, types
 
 float_  = re.compile(r'^\-?[0-9]+\.[0-9]+$')
 
@@ -29,3 +30,4 @@ is_queryset      = lambda x: isinstance(x, QuerySet)
 is_valuesset     = lambda x: isinstance(x, ValuesQuerySet)
 is_modelinstance = lambda x: isinstance(x, models.Model)
 is_httpresponse  = lambda x: isinstance(x, HttpResponse)
+is_generator     = lambda x: isinstance(x, GeneratorType)

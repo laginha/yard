@@ -117,7 +117,7 @@ class Resource(object):
         if is_queryset(response):
             content = self.__resources_with_meta(response)
             return JsonResponse(content, status=status)
-        elif is_list(response):
+        elif is_generator(response) or is_list(response):
             content = self.__list_with_meta(response)
             return JsonResponse(content, status=status)             
         elif is_modelinstance(response):

@@ -3,18 +3,24 @@
 
 from django.db.models import Avg, Max, Min, Count
 from yard.exceptions  import NoMeta
-from yard.utils       import is_queryset
+from yard.utils       import is_list, is_generator
 
 
 class MetaDict(dict):
     def __init__(self, resources, page, params):
-        self.resources = resources
-        if not is_queryset(self.resources):
-            self.paginated_objects = self.__paginated_list
-            self.total_objects     = self.__total_in_list
+        self.resources = resources   
         self.params    = params
-        self.page      = page
+        self.page      = page 
+        if is_generator(self.resources):
+            self.total_objects     = self.__no_support
+            self.paginated_objects = self.__paginated_list
+        elif is_list(self.resources):
+            self.total_objects     = self.__total_in_list
+            self.paginated_objects = self.__paginated_list
     
+    def __no_support(self):
+        pass
+
     def with_errors(self):
         self.update( self.params.errors() )
     
