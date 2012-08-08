@@ -8,13 +8,18 @@ from django.http               import HttpResponse, HttpResponseNotFound, HttpRe
 from yard.exceptions           import RequiredParamMissing, HttpMethodNotAllowed, InvalidStatusCode
 from yard.forms                import Form
 from yard.utils                import *
-from yard.utils.http           import JsonResponse, FileResponse, HttpResponseUnauthorized
+from yard.utils.http           import JsonResponse, FileResponse, HttpResponseUnauthorized, JsonDebugResponse
 from yard.resources.parameters import ResourceParameters
 from yard.resources.builders   import JSONbuilder
 from yard.resources.templates  import ServerErrorTemplate
 from yard.resources.meta       import ResourceMeta
 from yard.resources.page       import ResourcePage
-import json, mimetypes
+import json, mimetypes, settings
+
+if not hasattr(settings, 'YARD_DEBUG'):
+    yard_debug = 'debug_toolbar' in settings.INSTALLED_APPS and settings.DEBUG==True
+    setattr(settings, 'YARD_DEBUG', yard_debug)
+    JSONRESPONSE = JsonDebugResponse if yard_debug else JsonResponse
 
 
 class Resource(object):
@@ -32,7 +37,7 @@ class Resource(object):
 
     def __init__(self, routes):
         self.__routes     = routes # maps http methods with respective views
-        self.__meta       = ResourceMeta( self.Meta ) 
+        self.__meta       = ResourceMeta( self.Meta )
         self.__page       = ResourcePage( self.page if hasattr(self, 'page') else self.Page )  
         self.parameters   = self.parameters() if self.parameters else (
                             self.Parameters() if self.Parameters else None )
@@ -100,7 +105,7 @@ class Resource(object):
         elif method == 'create':
             return view( **parameters )
         return view( parameters )
-       
+    
     def __response(self, response, status=200):
         '''
         Returns a HttpResponse according to given response
@@ -113,16 +118,16 @@ class Resource(object):
             response = response[1]
         elif is_httpresponse(response):
             return response
-                                 
+            
         if is_queryset(response):
             content = self.__resources_with_meta(response)
-            return JsonResponse(content, status=status)
-        elif is_generator(response) or is_list(response):
-            content = self.__list_with_meta(response)
-            return JsonResponse(content, status=status)             
+            return JSONRESPONSE(content, status=status)
         elif is_modelinstance(response):
             content = self.serialize(response)
-            return JsonResponse(content, status=status)
+            return JSONRESPONSE(content, status=status)
+        elif is_generator(response) or is_list(response):
+            content = self.__list_with_meta(response)
+            return JSONRESPONSE(content, status=status)             
         elif response == None:
             return HttpResponse(status=status)
         elif is_int(response):
@@ -133,9 +138,9 @@ class Resource(object):
             return FileResponse(response, status=status)        
         elif is_valuesset(response):
             content = self.__list_with_meta(list(response))
-            return JsonResponse(content, status=status)
+            return JSONRESPONSE(content, status=status)
         else:
-            return HttpResponse(str(response), status=status)          
+            return HttpResponse(str(response), status=status)
 
     def __resources_with_meta(self, resources):
         '''

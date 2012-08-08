@@ -61,3 +61,27 @@ class ProperJsonResponse:
             return JsonpResponse(*args, param=self.__jsonp_param, **kwargs) 
         return JsonResponse(*args, **kwargs)
 
+
+from settings import DEBUG_TOOLBAR_CONFIG
+TAG = DEBUG_TOOLBAR_CONFIG['TAG'] if 'TAG' in DEBUG_TOOLBAR_CONFIG else 'body'
+
+class JsonDebugResponse(HttpResponse):
+    '''
+    HTTP Response for debug purposes (django-debug-toolbar)
+    '''
+    def __init__(self, content='', mimetype=None, content_type=None, status=None):
+        content = json.dumps( content or [], indent=2 )
+        HttpResponse.__init__(self, content      = self.__json_to_html(content),
+                                    mimetype     = mimetype,
+                                    status       = status, 
+                                    content_type = content_type,)
+                                    
+    def __json_to_html(self, content):
+        content = content.replace('\n', '<br/>')
+        content = content.replace('  ','&nbsp;&nbsp;&nbsp;&nbsp;')
+        return "<%s>%s</%s>" %(TAG, content, TAG)
+
+
+    
+    
+    
