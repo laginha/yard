@@ -45,12 +45,12 @@ class Resource(object):
             self.request = request
             method = self.__method()
             if method == 'index':
+                self.builder = JSONbuilder( self.index_fields or self.fields )
                 self.__rparameters = self.__resource_parameters( parameters )
             else:
+                self.builder = JSONbuilder( self.show_fields or self.fields )
                 self.__rparameters = parameters
             response = self.__view( method, self.__rparameters )
-            fields   = self.index_fields if method=='index' else self.show_fields
-            self.builder = JSONbuilder( fields or self.fields )
             return self.__response( response )    
         except HttpMethodNotAllowed:
             # if http_method not allowed for this resource
@@ -142,7 +142,7 @@ class Resource(object):
         Appends Meta data into the json response
         '''
         page    = self.__paginate( resources )
-        objects = self.__resources_to_json( page )
+        objects = self.serialize_all( page )
         meta    = self.__meta.fetch(resources, page, self.__rparameters)
         return objects if not meta else {'Objects': objects,'Meta': meta}
     
@@ -162,7 +162,7 @@ class Resource(object):
         self.__rparameters.validated.update( paginated_resources[1] )
         return paginated_resources[0]
     
-    def __resources_to_json(self, resources):   
+    def serialize_all(self, resources):   
         '''
         Serializes each resource (within page) into json
         '''
