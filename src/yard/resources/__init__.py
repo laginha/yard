@@ -107,10 +107,10 @@ class Resource(object):
     
     def __get_builder(self, fields, parameters):
         if callable(fields):
-            self.__current_fields = fields(self.__rparameters)
-            return JSONbuilder( self.__current_fields )
-        self.__current_fields = fields
-        return JSONbuilder( self.__current_fields )
+            self.current_fields = fields(self.__rparameters)
+            return JSONbuilder( self.current_fields )
+        self.current_fields = fields
+        return JSONbuilder( self.current_fields )
     
     def __view(self, method, parameters):
         '''
@@ -137,7 +137,7 @@ class Resource(object):
             return response
             
         if is_queryset(response):
-            content = self.__resources_with_meta(response)
+            content = self.__queryset_with_meta(response)
             return JSONRESPONSE(content, status=status)
         elif is_modelinstance(response):
             content = self.serialize(response)
@@ -159,7 +159,7 @@ class Resource(object):
         else:
             return HttpResponse(str(response), status=status)
 
-    def __resources_with_meta(self, resources):
+    def __queryset_with_meta(self, resources):
         '''
         Appends Meta data into the json response
         '''
