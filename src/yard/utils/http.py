@@ -62,8 +62,12 @@ class ProperJsonResponse:
         return JsonResponse(*args, **kwargs)
 
 
-from settings import DEBUG_TOOLBAR_CONFIG
-TAG = DEBUG_TOOLBAR_CONFIG['TAG'] if 'TAG' in DEBUG_TOOLBAR_CONFIG else 'body'
+import settings
+if hasattr(settings, 'DEBUG_TOOLBAR_CONFIG'):
+    if 'TAG' in settings.DEBUG_TOOLBAR_CONFIG:
+        TAG = settings.DEBUG_TOOLBAR_CONFIG['TAG']
+TAG = 'body'
+
 
 class JsonDebugResponse(HttpResponse):
     '''
