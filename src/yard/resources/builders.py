@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
-#from django.db.models.fields.related import RelatedManager
-from django.forms.models             import model_to_dict
-from yard.utils                      import is_tuple, is_str, is_list, is_dict, is_geo_value
-from yard.utils                      import is_method, is_valuesset, is_queryset
+from django.forms.models import model_to_dict
+from yard.utils          import is_tuple, is_str, is_list, is_dict, is_geo_value
+from yard.utils          import is_method, is_valuesset, is_queryset
 import json
 
 
@@ -25,10 +24,11 @@ class JSONbuilder:
         '''
         Converts resource/model to dict according to fields
         '''
-        attrs = filter( is_str, self.fields )
-        json_ = model_to_dict( resource, attrs )
+        is_attr  = lambda x: is_str(x) and not callable(x)
+        keyvalue = lambda a,b: (a,self.__serialize(getattr(b,a)))
+        attrs    = filter( is_attr, self.fields )
         return dict( 
-            [ (a, self.__serialize(b)) for a,b in json_.iteritems() ]
+            [ keyvalue(i, resource) for i in attrs if hasattr(resource, i)]
         )
     
     def __handle_method(self, method, args):
@@ -82,8 +82,9 @@ class JSONbuilder:
         if not resource:
             return
         try:
-            json_ = self.__resource_to_dict( resource )
-            return self.__fields_to_json( resource, self.fields, json_ )
+            json_  = self.__resource_to_dict( resource )
+            fields = self.fields() if callable(self.fields) else self.fields
+            return self.__fields_to_json( resource, fields, json_ )
         except AttributeError as e:
             # resource is a RelatedManager
             builder = self.__class__( self.fields )
