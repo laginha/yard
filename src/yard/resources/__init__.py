@@ -20,14 +20,19 @@ if not hasattr(settings, 'YARD_DEBUG'):
     yard_debug = 'debug_toolbar' in settings.INSTALLED_APPS and settings.DEBUG==True
     setattr(settings, 'YARD_DEBUG', yard_debug)
     JSONRESPONSE = JsonDebugResponse if yard_debug else JsonResponse
+else:
+    JSONRESPONSE = JsonResponse
 
 
 class Resource(object):
     '''
     API Resource object
     '''
-    parameters = Parameters = None
-    fields = show_fields = index_fields = ()    
+    parameters = None
+    Parameters = None
+    fields       = ()
+    show_fields  = ()
+    index_fields = ()    
     
     class Meta(object):
         pass
@@ -39,6 +44,8 @@ class Resource(object):
         self.__routes     = routes # maps http methods with respective views
         self.__meta       = ResourceMeta( self.Meta )
         self.__page       = ResourcePage( self.page if hasattr(self, 'page') else self.Page )  
+        self.index_fields = self.index_fields if self.index_fields else self.fields
+        self.show_fields  = self.show_fields  if self.show_fields else self.fields
         self.parameters   = self.parameters() if self.parameters else (
                             self.Parameters() if self.Parameters else None )
   
@@ -50,11 +57,14 @@ class Resource(object):
             self.request = request
             method = self.__method()
             if method == 'index':
-                self.builder = JSONbuilder( self.index_fields or self.fields )
                 self.__rparameters = self.__resource_parameters( parameters )
-            else:
-                self.builder = JSONbuilder( self.show_fields or self.fields )
+                self.builder = self.__get_builder(self.index_fields, self.__rparameters)
+            elif method == 'show':
                 self.__rparameters = parameters
+                self.builder = self.__get_builder(self.show_fields, self.__rparameters)
+            else:
+                self.__rparameters = parameters
+                self.builder = self.__get_builder(self.fields, self.__rparameters)
             response = self.__view( method, self.__rparameters )
             return self.__response( response )    
         except HttpMethodNotAllowed:
@@ -94,6 +104,13 @@ class Resource(object):
             for i in self.parameters.get( self.request ):
                 resource_params.update( i )
         return resource_params
+    
+    def __get_builder(self, fields, parameters):
+        if callable(fields):
+            self.__current_fields = fields(self.__rparameters)
+            return JSONbuilder( self.__current_fields )
+        self.__current_fields = fields
+        return JSONbuilder( self.__current_fields )
     
     def __view(self, method, parameters):
         '''
@@ -178,3 +195,5 @@ class Resource(object):
         Creates json for given resource
         '''
         return self.builder.to_json(resource)
+        
+        

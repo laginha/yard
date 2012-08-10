@@ -11,11 +11,12 @@ class Parameter(object):
     Parent class to all Form's parameter types
     '''    
     def __init__(self, alias=None, validate=None, default=None, required=False, ignore_invalids=False):
-        for k,v in locals().items():
-            #set attributes dynamically
-            setattr(self, k, v) if k != 'self' else None
+        self.alias           = alias
+        self.validate        = validate
+        self.default         = default
+        self.required        = required
+        self.ignore_invalids = ignore_invalids
         self.name       = None
-        self.is_default = False
     
     def __str__(self):
         return self.name if self.name else type(self)
@@ -50,6 +51,7 @@ class Parameter(object):
         '''
         Returns/transforms value according to default value/function
         '''
+        self.is_default = False
         if self.default==None:
             if value==None and self.required:
                 raise RequiredParamMissing(self)
