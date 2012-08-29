@@ -256,15 +256,16 @@ class InstanceParam(Parameter):
     '''
     Parameter for model instances
     '''
-    def __init__(self, model, model_attribute, alias=None, required=False, default=None):
+    def __init__(self, model, model_attribute='pk', alias=None, required=False, default=None):
         self.model = model.objects
         self.model_attribute = model_attribute
-        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
+        Parameter.__init__(self, alias=alias, required=required, default=default)#, validate=validate)
         
     def convert(self, value):
         instance = self.model.filter( **{self.model_attribute: value} )
         if instance.exists():
             return instance[0]
+        raise ConversionError(self, value)
 
 
 class TimestampParam(Parameter):

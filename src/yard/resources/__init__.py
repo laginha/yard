@@ -21,7 +21,7 @@ if not hasattr(settings, 'YARD_DEBUG'):
     setattr(settings, 'YARD_DEBUG', yard_debug)
     JSONRESPONSE = JsonDebugResponse if yard_debug else JsonResponse
 else:
-    JSONRESPONSE = JsonResponse
+    JSONRESPONSE = JsonDebugResponse
 
 
 class Resource(object):
@@ -150,7 +150,7 @@ class Resource(object):
         elif is_int(response):
             return HttpResponse(status=response)
         elif is_str(response) or is_dict(response):
-            return JsonResponse(response, status=status) 
+            return JSONRESPONSE(response, status=status) 
         elif is_file(response):
             return FileResponse(response, status=status)        
         elif is_valuesset(response):

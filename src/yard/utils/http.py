@@ -63,10 +63,10 @@ class ProperJsonResponse:
 
 
 import settings
+TAG = 'body'
 if hasattr(settings, 'DEBUG_TOOLBAR_CONFIG'):
     if 'TAG' in settings.DEBUG_TOOLBAR_CONFIG:
         TAG = settings.DEBUG_TOOLBAR_CONFIG['TAG']
-TAG = 'body'
 
 
 class JsonDebugResponse(HttpResponse):
@@ -83,6 +83,8 @@ class JsonDebugResponse(HttpResponse):
     def __json_to_html(self, content):
         content = content.replace('\n', '<br/>')
         content = content.replace('  ','&nbsp;&nbsp;&nbsp;&nbsp;')
+        if TAG != 'body':
+            return "<body><%s>%s</%s></body>" %(TAG, content, TAG)
         return "<%s>%s</%s>" %(TAG, content, TAG)
 
 
