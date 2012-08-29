@@ -10,6 +10,7 @@ setup(
     url              = 'https://github.com/laginha/yard',
     description      = "Yet Another Resftul Django-app",
     packages         = find_packages(where='src'),
+    package_dir      = {'': 'src'},
     install_requires = [],
     extras_require   = {},
 )
