@@ -9,12 +9,7 @@ class ResourceParameters(dict):
         self.__errors  = {}
         self.__path    = params
         self.validated = {}
-        self.__update_nested( params )
-
-    def __update_nested(self, params):
-        for key,value in params.iteritems():
-            self[key] = value
-            self.validated[key] = unicode(value)
+        self.update( params )
 
     def update(self, params):
         '''
@@ -23,6 +18,9 @@ class ResourceParameters(dict):
         for key,value in params.iteritems():
             if isinstance(value, Exception):
                 self.__errors[key] = unicode(value)
+            elif isinstance(value, str):
+                self[key] = value
+                self.validated[key] = unicode(value)
             else:
                 self[key.alias] = value
                 self.validated[key.name] = unicode(value)
