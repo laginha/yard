@@ -18,7 +18,7 @@ class ResourceParameters(dict):
         for key,value in params.iteritems():
             if isinstance(value, Exception):
                 self.__errors[key] = unicode(value)
-            elif isinstance(value, str):
+            elif isinstance(key, str):
                 self[key] = value
                 self.validated[key] = unicode(value)
             else:
