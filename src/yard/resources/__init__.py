@@ -138,7 +138,8 @@ class Resource(object):
             return response
             
         if is_queryset(response):
-            content = self.__queryset_with_meta(response)
+            response = self.__optimize_queryset(response)
+            content  = self.__queryset_with_meta(response)
             return JSONRESPONSE(content, status=status)
         elif is_modelinstance(response):
             content = self.serialize(response)
@@ -159,6 +160,13 @@ class Resource(object):
             return JSONRESPONSE(content, status=status)
         else:
             return HttpResponse(str(response), status=status)
+
+    def __optimize_queryset(self):
+        '''
+        Optimize queryset according to current response fields
+        '''
+        related_models = [i[0] for i in self.current_fields if isinstance(i, tuple)]
+        return response.select_related( *related_models )
 
     def __queryset_with_meta(self, resources):
         '''
