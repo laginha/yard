@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 from django.http import HttpResponse
-import json, mimetypes
+import simplejson, mimetypes
 
 class HttpResponseUnauthorized(HttpResponse):
     '''
@@ -28,10 +28,11 @@ class JsonResponse(HttpResponse):
     Http Response with Json content type
     '''
     def __init__(self, content='', mimetype=None, status=None):
-        HttpResponse.__init__(self, content      = json.dumps( content or [], indent=2 ), 
+        content = simplejson.dumps( content or [], indent=2, ensure_ascii=False )
+        HttpResponse.__init__(self, content      = content, 
                                     mimetype     = mimetype, 
                                     status       = status, 
-                                    content_type = 'application/json', )
+                                    content_type = 'application/json; charset=utf-8', )
 
 
 class JsonpResponse(HttpResponse):
@@ -74,7 +75,7 @@ class JsonDebugResponse(HttpResponse):
     HTTP Response for debug purposes (django-debug-toolbar)
     '''
     def __init__(self, content='', mimetype=None, content_type=None, status=None):
-        content = json.dumps( content or [], indent=2 )
+        content = simplejson.dumps( content or [], indent=2, ensure_ascii=False )
         HttpResponse.__init__(self, content      = self.__json_to_html(content),
                                     mimetype     = mimetype,
                                     status       = status, 

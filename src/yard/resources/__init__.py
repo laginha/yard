@@ -18,10 +18,11 @@ import json, mimetypes, settings
 
 if not hasattr(settings, 'YARD_DEBUG'):
     yard_debug = 'debug_toolbar' in settings.INSTALLED_APPS and settings.DEBUG==True
-    setattr(settings, 'YARD_DEBUG', yard_debug)
+    #setattr(settings, 'YARD_DEBUG', yard_debug)
     JSONRESPONSE = JsonDebugResponse if yard_debug else JsonResponse
 else:
-    JSONRESPONSE = JsonDebugResponse
+    JSONRESPONSE = JsonDebugResponse if settings.YARD_DEBUG else JsonResponse
+    
 
 
 class Resource(object):

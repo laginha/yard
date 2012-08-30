@@ -3,7 +3,9 @@
 from django.forms.models import model_to_dict
 from yard.utils          import is_tuple, is_str, is_list, is_dict, is_geo_value
 from yard.utils          import is_method, is_valuesset, is_queryset
+from types               import NoneType
 import json
+
 
 
 class JSONbuilder:
@@ -17,8 +19,13 @@ class JSONbuilder:
         '''
         Converts to JSON-serializable object
         '''
-        return x if isinstance(x, (list,dict)) else (
-            json.loads(x.geojson) if is_geo_value(x) else unicode(x) )
+        print x, type(x)
+        if isinstance(x, (list,dict,NoneType)):
+            return x
+        elif is_geo_value(x):
+            return json.loads(x.geojson)
+        else: 
+            return unicode(x)
     
     def __resource_to_dict(self, resource):
         '''
@@ -83,6 +90,9 @@ class JSONbuilder:
             return
         try:
             json_  = self.__resource_to_dict( resource )
+            print '---'
+            print json_
+            print '---'
             fields = self.fields() if callable(self.fields) else self.fields
             return self.__fields_to_json( resource, fields, json_ )
         except AttributeError as e:
