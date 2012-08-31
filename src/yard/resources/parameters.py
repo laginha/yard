@@ -20,7 +20,7 @@ class ResourceParameters(dict):
         for key,value in params.iteritems():
             if isinstance(value, Exception):
                 self.__errors[key] = unicode(value)
-            elif isinstance(keu, Parameter):
+            elif isinstance(key, Parameter):
                 self[key.alias] = value
                 self.validated[key.name] = unicode(value)
             else:
