@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
+from yard.forms.parameter import Parameter
+
 
 class ResourceParameters(dict):
     '''
@@ -11,19 +13,20 @@ class ResourceParameters(dict):
         self.validated = {}
         self.update( params )
 
-    def update(self, params):
+    def update(self, params, hide=False):
         '''
         Updates parameters
         '''
         for key,value in params.iteritems():
             if isinstance(value, Exception):
                 self.__errors[key] = unicode(value)
-            elif isinstance(key, str):
-                self[key] = value
-                self.validated[key] = unicode(value)
-            else:
+            elif isinstance(keu, Parameter):
                 self[key.alias] = value
                 self.validated[key.name] = unicode(value)
+            else:
+                self[key] = value
+                if not hide:
+                    self.validated[key] = unicode(value)
     
     def from_path(self):
         '''

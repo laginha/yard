@@ -16,7 +16,7 @@ class Parameter(object):
         self.default         = default
         self.required        = required
         self.ignore_invalids = ignore_invalids
-        self.name       = None
+        self.name            = None
     
     def __str__(self):
         return self.name if self.name else type(self)
