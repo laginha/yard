@@ -161,7 +161,7 @@ class Resource(object):
         else:
             return HttpResponse(str(response), status=status)
 
-    def __optimize_queryset(self):
+    def __optimize_queryset(self, response):
         '''
         Optimize queryset according to current response fields
         '''
