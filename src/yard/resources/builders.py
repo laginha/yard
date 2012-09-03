@@ -2,8 +2,7 @@
 # encoding: utf-8
 from django.forms.models import model_to_dict
 from yard.utils          import is_tuple, is_str, is_list, is_dict, is_geo_value
-from yard.utils          import is_method, is_valuesset, is_queryset
-from types               import NoneType
+from yard.utils          import is_method, is_valuesset, is_queryset, is_serializable
 import json
 
 
@@ -19,12 +18,11 @@ class JSONbuilder:
         '''
         Converts to JSON-serializable object
         '''
-        if isinstance(x, (list,dict,NoneType)):
+        if is_serializable(x):
             return x
         elif is_geo_value(x):
             return json.loads(x.geojson)
-        else: 
-            return unicode(x)
+        return unicode(x)
     
     def __resource_to_dict(self, resource):
         '''
@@ -46,8 +44,6 @@ class JSONbuilder:
             return { method.__name__: [unicode(i) for i in result] }
         elif is_valuesset( result ):
             return { method.__name__: list( result ) }
-        elif isinstance(result, (int, str, unicode)):
-            return { method.__name__: result }
         return { method.__name__: self.__serialize(result) }
     
     def __handle_tuple(self, resource, field ):

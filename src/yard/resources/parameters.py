@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from yard.forms.parameter import Parameter
+from yard.utils           import is_serializable
 
 
 class ResourceParameters(dict):
@@ -22,11 +23,11 @@ class ResourceParameters(dict):
                 self.__errors[key] = unicode(value)
             elif isinstance(key, Parameter):
                 self[key.alias] = value
-                self.validated[key.name] = unicode(value)
+                self.validated[key.name] = value if is_serializable(value) else unicode(value)
             else:
                 self[key] = value
                 if not hide:
-                    self.validated[key] = unicode(value)
+                    self.validated[key] = value if is_serializable(value) else unicode(value)
     
     def from_path(self):
         '''
