@@ -262,10 +262,13 @@ class InstanceParam(Parameter):
         Parameter.__init__(self, alias=alias, required=required, default=default)#, validate=validate)
         
     def convert(self, value):
-        instance = self.model.filter( **{self.model_attribute: value} )
-        if instance.exists():
-            return instance[0]
-        raise ConversionError(self, value)
+        try:
+            instance = self.model.filter( **{self.model_attribute: value} )
+            if instance.exists():
+                return instance[0]
+            raise ConversionError(self, value)
+        except ValueError:
+            raise ConversionError(self, value)
 
 
 class TimestampParam(Parameter):
