@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
-from django.forms.models import model_to_dict
-from yard.utils          import is_tuple, is_str, is_list, is_dict, is_geo_value
-from yard.utils          import is_method, is_valuesset, is_queryset, is_serializable
+from yard.utils import is_tuple, is_geo_value, is_relatedmanager
+from yard.utils import is_method, is_valuesset, is_queryset, is_serializable
 import json
-
 
 
 class JSONbuilder:
@@ -12,30 +10,54 @@ class JSONbuilder:
     Responsible for creating the JSON response
     '''
     def __init__(self, fields):
-        self.fields = fields
+        self.fields = fields() if callable(fields) else fields
+    
+    def to_json(self, resource):
+        '''
+        Builds JSON for resource according to fields attribute
+        '''
+        if not resource: 
+            return
+        elif is_relatedmanager( resource ):
+            return [self.to_json( i ) for i in resource.all()]
+        return self.__fields_to_json( resource )
         
-    def __serialize(self, x):
+    def __fields_to_json(self, resource):
         '''
-        Converts to JSON-serializable object
+        Builds (sub) json response according to given fields and resource
         '''
-        if is_serializable(x):
-            return x
-        elif is_geo_value(x):
-            return json.loads(x.geojson)
-        return unicode(x)
-    
-    def __resource_to_dict(self, resource):
+        json_ = {}
+        for field in self.fields:
+            json_.update( self.__handle_field(resource, field) )
+        return json_
+
+    def __handle_field(self, resource, field):
         '''
-        Converts resource/model to dict according to fields
+        Handler for each field
         '''
-        is_attr  = lambda x: is_str(x) and not callable(x)
-        keyvalue = lambda a,b: (a,self.__serialize(getattr(b,a)))
-        attrs    = filter( is_attr, self.fields )
-        return dict( 
-            [ keyvalue(i, resource) for i in attrs if hasattr(resource, i)]
-        )
-    
-    def __handle_method(self, method, args):
+        if is_tuple( field ):
+            return self.__handle_tuple_field( resource, field )
+        return self.__handle_string_field( resource, field )
+
+    def __handle_tuple_field(self, resource, field ):
+        '''
+        Handle fields of type tuple - subfields
+        '''
+        sub_resource = getattr( resource, field[0], None )
+        builder      = self.__class__( field[1] ) # build sub-json
+        return { field[0]: builder.to_json( sub_resource ) }
+
+    def __handle_string_field(self, resource, field):
+        '''
+        Handle fields of type string
+        '''
+        args      = field.split()
+        attribute = getattr( resource, args[0], None )
+        if is_method( attribute ):
+            return self.__handle_method_field( attribute, args[1:] )
+        return {args[0]: self.__serialize( attribute )}
+
+    def __handle_method_field(self, method, args):
         '''
         Handle fields of type str that are instance method
         '''
@@ -45,49 +67,16 @@ class JSONbuilder:
         elif is_valuesset( result ):
             return { method.__name__: list( result ) }
         return { method.__name__: self.__serialize(result) }
-    
-    def __handle_tuple(self, resource, field ):
+        
+    def __serialize(self, x):
         '''
-        Handle fields of type tuple - subfields
+        Converts to JSON-serializable object
         '''
-        sub_resource = getattr( resource, field[0], None )
-        # build sub-json
-        return {
-            field[0]: self.__class__( field[1] ).to_json( sub_resource )
-        }
-    
-    def __handler(self, resource, field):
-        '''
-        Handler for each field
-        '''
-        if is_tuple( field ):
-            return self.__handle_tuple( resource, field )
-        #split method name from arguments
-        args   = field.split()
-        method = getattr( resource, args[0], None )
-        if not is_method( method ):
-            return {}
-        return self.__handle_method( method, args[1:] )
-    
-    def __fields_to_json(self, resource, fields, dic={}):
-        '''
-        Builds (sub) json response according to given fields and resource
-        '''
-        for field in fields:
-            dic.update( self.__handler(resource, field) )
-        return dic
-    
-    def to_json(self, resource):
-        '''
-        Builds JSON for resource according to fields attribute
-        '''
-        if not resource:
-            return
-        try:
-            json_  = self.__resource_to_dict( resource )
-            fields = self.fields() if callable(self.fields) else self.fields
-            return self.__fields_to_json( resource, fields, json_ )
-        except AttributeError as e:
-            # resource is a RelatedManager
-            builder = self.__class__( self.fields )
-            return [builder.to_json( i ) for i in resource.all()]   
+        if is_serializable(x):
+            return x
+        elif is_geo_value(x):
+            return json.loads(x.geojson)
+        elif is_relatedmanager(x):
+            return [unicode(i) for i in x.all()]
+        return unicode(x)
+
