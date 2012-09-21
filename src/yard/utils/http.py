@@ -63,7 +63,7 @@ class ProperJsonResponse:
         return JsonResponse(*args, **kwargs)
 
 
-import settings
+from django.conf import settings
 TAG = 'body'
 if hasattr(settings, 'DEBUG_TOOLBAR_CONFIG'):
     if 'TAG' in settings.DEBUG_TOOLBAR_CONFIG:

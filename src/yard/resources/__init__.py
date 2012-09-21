@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+from django.conf               import settings
 from django.core.exceptions    import ObjectDoesNotExist
 from django.core.paginator     import Paginator, EmptyPage
 from django.core               import serializers
@@ -14,7 +15,7 @@ from yard.resources.builders   import JSONbuilder
 from yard.resources.templates  import ServerErrorTemplate
 from yard.resources.meta       import ResourceMeta
 from yard.resources.page       import ResourcePage
-import json, mimetypes, settings
+import json, mimetypes
 
 if not hasattr(settings, 'YARD_DEBUG'):
     yard_debug = 'debug_toolbar' in settings.INSTALLED_APPS and settings.DEBUG==True
