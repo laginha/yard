@@ -9,7 +9,7 @@ from django.http               import HttpResponse, HttpResponseNotFound, HttpRe
 from yard.exceptions           import RequiredParamMissing, HttpMethodNotAllowed, InvalidStatusCode
 from yard.forms                import Form
 from yard.utils                import *
-from yard.utils.http           import JsonResponse, FileResponse, HttpResponseUnauthorized, JsonDebugResponse
+from yard.utils.http           import ProperJsonResponse, JsonResponse, FileResponse, HttpResponseUnauthorized, JsonDebugResponse
 from yard.resources.parameters import ResourceParameters
 from yard.resources.builders   import JSONbuilder
 from yard.resources.templates  import ServerErrorTemplate
@@ -17,13 +17,6 @@ from yard.resources.meta       import ResourceMeta
 from yard.resources.page       import ResourcePage
 import json, mimetypes
 
-if not hasattr(settings, 'YARD_DEBUG'):
-    yard_debug = 'debug_toolbar' in settings.INSTALLED_APPS and settings.DEBUG==True
-    #setattr(settings, 'YARD_DEBUG', yard_debug)
-    JSONRESPONSE = JsonDebugResponse if yard_debug else JsonResponse
-else:
-    JSONRESPONSE = JsonDebugResponse if settings.YARD_DEBUG else JsonResponse
-    
 
 
 class Resource(object):
@@ -43,6 +36,11 @@ class Resource(object):
         pass
 
     def __init__(self, routes):
+        if not hasattr(settings, 'YARD_DEBUG'):
+            yard_debug = 'debug_toolbar' in settings.INSTALLED_APPS and settings.DEBUG==True
+            self.JsonClassResponse = JsonDebugResponse if yard_debug else ProperJsonResponse
+        else:
+            self.JsonClassResponse = JsonDebugResponse if settings.YARD_DEBUG else ProperJsonResponse
         self.__routes     = routes # maps http methods with respective views
         self.__meta       = ResourceMeta( self.Meta )
         self.__page       = ResourcePage( self.page if hasattr(self, 'page') else self.Page )  
@@ -68,6 +66,7 @@ class Resource(object):
                 self.__rparameters = parameters
                 self.builder = self.__get_builder(self.fields, self.__rparameters)
             response = self.__view( method, self.__rparameters )
+            self.JsonResponse = self.JsonClassResponse( request )
             return self.__response( response )    
         except HttpMethodNotAllowed:
             # if http_method not allowed for this resource
@@ -141,24 +140,24 @@ class Resource(object):
         if is_queryset(response):
             response = self.select_related(response)
             content  = self.__queryset_with_meta(response)
-            return JSONRESPONSE(content, status=status)
+            return self.JsonResponse(content, status=status)
         elif is_modelinstance(response):
             content = self.serialize(response)
-            return JSONRESPONSE(content, status=status)
+            return self.JsonResponse(content, status=status)
         elif is_generator(response) or is_list(response):
             content = self.__list_with_meta(response)
-            return JSONRESPONSE(content, status=status)             
+            return self.JsonResponse(content, status=status)             
         elif response == None:
             return HttpResponse(status=status)
         elif is_int(response):
             return HttpResponse(status=response)
         elif is_str(response) or is_dict(response):
-            return JSONRESPONSE(response, status=status) 
+            return self.JsonResponse(response, status=status) 
         elif is_file(response):
             return FileResponse(response, status=status)        
         elif is_valuesset(response):
             content = self.__list_with_meta(list(response))
-            return JSONRESPONSE(content, status=status)
+            return self.JsonResponse(content, status=status)
         else:
             return HttpResponse(str(response), status=status)
 

@@ -40,11 +40,11 @@ class JsonpResponse(HttpResponse):
     Http Response with Jsonp content type
     '''
     def __init__(self, content='', mimetype=None, status=None, param='callback'):
-        content = json.dumps( content or [], indent=2 )
+        content = simplejson.dumps( content or [], indent=2, ensure_ascii=False )
         HttpResponse.__init__(self, content      = "%s(%s)" %(param, content), 
                                     mimetype     = mimetype,
                                     status       = status, 
-                                    content_type = 'text/javascript; charset=utf-8', )
+                                    content_type = 'application/javascript; charset=utf-8', )
 
 
 class ProperJsonResponse:
@@ -55,7 +55,7 @@ class ProperJsonResponse:
         self.__jsonp_param = None
         for param in ['callback', 'jsonp']:
             if param in request.GET:
-                self.__jsonp_param = param
+                self.__jsonp_param = request.GET.get(param)
                 
     def __call__(self, *args, **kwargs):
         if self.__jsonp_param:
