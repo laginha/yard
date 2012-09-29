@@ -66,7 +66,10 @@ class Resource(object):
                 self.__rparameters = parameters
                 self.builder = self.__get_builder(self.fields, self.__rparameters)
             response = self.__view( method, self.__rparameters )
-            self.JsonResponse = self.JsonClassResponse( request )
+            if self.JsonClassResponse == ProperJsonResponse:
+                self.JsonResponse = self.JsonClassResponse( request )
+            else:
+                self.JsonResponse = self.JsonClassResponse
             return self.__response( response )    
         except HttpMethodNotAllowed:
             # if http_method not allowed for this resource
@@ -86,6 +89,7 @@ class Resource(object):
         except InvalidStatusCode as e:
             # status code given is not int
             return ServerErrorTemplate(e)
+
 
     def __method(self):
         '''
