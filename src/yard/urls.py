@@ -8,15 +8,15 @@ from django.views.decorators.csrf import csrf_exempt
 collection = {'get':'index', 'post':'create'}
 single     = {'get':'show', 'put':'update', 'post':'update', 'delete':'destroy'}
 
-def include_resource(resource):
+def include_resource(resource, single_name=None, collection_name=None):
     '''
     include resource urls for single and collection access
     '''
     urlpatterns = patterns('',
         # url for resource collection access
-        url( r'^/(?P<id>[0-9]+)/$', csrf_exempt(resource(single)) ),
+        url( r'^/(?P<id>[0-9]+)/?$', csrf_exempt(resource(single)), name=single_name ),
         # url for single resource access
-        url( r'^/$',                csrf_exempt(resource(collection)) ),
+        url( r'^/?$',                csrf_exempt(resource(collection)), name=collection_name ),
     )
     return include( urlpatterns )
 
