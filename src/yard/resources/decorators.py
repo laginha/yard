@@ -5,39 +5,41 @@ def validate(f):
     '''
     Check if resource parameters is valid
     '''
-    def wrapper(self, params):
+    def wrapper(self, request, params):
         if not params.is_valid():
             return params.errors()
-        return f(self, params)
+        return f(self, request, params)
     return wrapper
 
+
 def login_required(f):
-    def wrapper(self, *args, **kwargs):
-        if self.request.user.is_authenticated():
-            return f(self, *args, **kwargs)
+    def wrapper(self, request, *args, **kwargs):
+        if request.user.is_authenticated():
+            return f(self, request, *args, **kwargs)
         else:
             return 401
     return wrapper
+
 
 class validateForm(object):
     def __init__(self, form):
         self.form   = form
         
     def __call__(self, f):    
-        def wrapper(klass, *args, **kwargs):
+        def wrapper(klass, request, *args, **kwargs):
             
             def validate(*form_args):
                 form = self.form(*form_args)
                 if form.is_valid():
-                    klass.form = form
-                    return f(klass, *args, **kwargs)
+                    request.form = form
+                    return f(klass, request, *args, **kwargs)
                 return 400
                 
-            request = klass.request
             if not hasattr(request, "FILES"): 
                 return validate( request.REQUEST )
             return validate( request.REQUEST, request.FILES )
         return wrapper
+        
         
 class exceptionHandling(object):
     def __init__(self, exception, return_value=400):
