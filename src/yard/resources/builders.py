@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-from yard.utils import is_tuple, is_geo_value, is_relatedmanager
+from yard.utils import is_tuple, is_geo_value, is_relatedmanager, is_manyrelatedmanager
 from yard.utils import is_method, is_valuesset, is_queryset, is_serializable
 import json
 
@@ -18,7 +18,7 @@ class JSONbuilder:
         '''
         if not resource: 
             return
-        elif is_relatedmanager( resource ):
+        elif is_relatedmanager(resource) or is_manyrelatedmanager(resource):
             return [self.to_json( i ) for i in resource.all()]
         return self.__fields_to_json( resource )
         
@@ -76,7 +76,7 @@ class JSONbuilder:
             return x
         elif is_geo_value(x):
             return json.loads(x.geojson)
-        elif is_relatedmanager(x):
+        elif is_relatedmanager(x) or is_manyrelatedmanager(x):
             return [unicode(i) for i in x.all()]
         return unicode(x)
 
