@@ -1,8 +1,23 @@
 #!/usr/bin/env python
 # encoding: utf-8
-
+from django.conf import settings
 from django.http import HttpResponse
 import simplejson, mimetypes
+
+
+# INDENTATION 
+if hasattr(settings, 'INDENT_JSON') and settings.INDENT_JSON:
+    INDENT = 2
+else:
+    INDENT = 2 if settings.DEBUG else None
+
+# DEBUG TOOLBAR 
+if hasattr(settings, 'DEBUG_TOOLBAR_CONFIG'):
+    TAG = settings.DEBUG_TOOLBAR_CONFIG.get('TAG', 'body') 
+else:
+    TAG = 'body'    
+
+
 
 class HttpResponseUnauthorized(HttpResponse):
     '''
@@ -28,7 +43,7 @@ class JsonResponse(HttpResponse):
     Http Response with Json content type
     '''
     def __init__(self, content='', mimetype=None, status=None):
-        content = simplejson.dumps( content or [], indent=2, ensure_ascii=False )
+        content = simplejson.dumps( content or [], indent=INDENT, ensure_ascii=False )
         HttpResponse.__init__(self, content      = content, 
                                     mimetype     = mimetype, 
                                     status       = status, 
@@ -40,7 +55,7 @@ class JsonpResponse(HttpResponse):
     Http Response with Jsonp content type
     '''
     def __init__(self, content='', mimetype=None, status=None, param='callback'):
-        content = simplejson.dumps( content or [], indent=2, ensure_ascii=False )
+        content = simplejson.dumps( content or [], indent=INDENT, ensure_ascii=False )
         HttpResponse.__init__(self, content      = "%s(%s)" %(param, content), 
                                     mimetype     = mimetype,
                                     status       = status, 
@@ -63,19 +78,12 @@ class ProperJsonResponse:
         return JsonResponse(*args, **kwargs)
 
 
-from django.conf import settings
-TAG = 'body'
-if hasattr(settings, 'DEBUG_TOOLBAR_CONFIG'):
-    if 'TAG' in settings.DEBUG_TOOLBAR_CONFIG:
-        TAG = settings.DEBUG_TOOLBAR_CONFIG['TAG']
-
-
 class JsonDebugResponse(HttpResponse):
     '''
     HTTP Response for debug purposes (django-debug-toolbar)
     '''
     def __init__(self, content='', mimetype=None, content_type=None, status=None):
-        content = simplejson.dumps( content or [], indent=2, ensure_ascii=False )
+        content = simplejson.dumps( content or [], indent=INDENT, ensure_ascii=False )
         HttpResponse.__init__(self, content      = self.__json_to_html(content),
                                     mimetype     = mimetype,
                                     status       = status, 
@@ -89,6 +97,12 @@ class JsonDebugResponse(HttpResponse):
         return "<%s>%s</%s>" %(TAG, content, TAG)
 
 
-    
-    
-    
+# JSON RESPONSE
+if hasattr(settings, 'YARD_DEBUG_TOOLBAR'):
+    JSONResponse = JsonDebugResponse if settings.YARD_DEBUG_TOOLBAR else ProperJsonResponse
+else:
+    if 'debug_toolbar' in settings.INSTALLED_APPS and settings.DEBUG==True:
+        JSONResponse = JsonDebugResponse
+    else:
+        JSONResponse = ProperJsonResponse
+

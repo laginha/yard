@@ -9,7 +9,7 @@ from django.http               import HttpResponse, HttpResponseNotFound, HttpRe
 from yard.exceptions           import RequiredParamMissing, HttpMethodNotAllowed, InvalidStatusCode
 from yard.forms                import Form
 from yard.utils                import *
-from yard.utils.http           import ProperJsonResponse, JsonResponse, FileResponse, HttpResponseUnauthorized, JsonDebugResponse
+from yard.utils.http           import FileResponse, HttpResponseUnauthorized, JSONResponse, ProperJsonResponse
 from yard.resources.parameters import ResourceParameters
 from yard.resources.builders   import JSONbuilder
 from yard.resources.templates  import ServerErrorTemplate
@@ -36,11 +36,6 @@ class Resource(object):
         pass
 
     def __init__(self, routes):
-        if not hasattr(settings, 'YARD_DEBUG'):
-            yard_debug = 'debug_toolbar' in settings.INSTALLED_APPS and settings.DEBUG==True
-            self.JsonClassResponse = JsonDebugResponse if yard_debug else ProperJsonResponse
-        else:
-            self.JsonClassResponse = JsonDebugResponse if settings.YARD_DEBUG else ProperJsonResponse
         self.__routes     = routes # maps http methods with respective views
         self.__meta       = ResourceMeta( self.Meta )
         self.__page       = ResourcePage( self.page if hasattr(self, 'page') else self.Page )  
@@ -66,10 +61,10 @@ class Resource(object):
                 self.__rparameters = parameters
                 self.builder = self.__get_builder(self.fields, self.__rparameters)
             response = self.__view( method, self.__rparameters )
-            if self.JsonClassResponse == ProperJsonResponse:
-                self.JsonResponse = self.JsonClassResponse( request )
+            if JSONResponse == ProperJsonResponse:
+                self.JsonResponse = JSONResponse( request )
             else:
-                self.JsonResponse = self.JsonClassResponse
+                self.JsonResponse = JSONResponse
             return self.__response( response )    
         except HttpMethodNotAllowed:
             # if http_method not allowed for this resource
