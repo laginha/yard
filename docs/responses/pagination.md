@@ -11,7 +11,7 @@ class Books(Resource):
             'default': 25,         
         }
     
-    def index(self, params):
+    def index(self, request, params):
         # params does not include the 'offset' parameter
         ...
 </pre>

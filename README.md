@@ -64,23 +64,23 @@ class Books(Resource):
             'limit': 50,
         }
 
-    def index(self, params):
+    def index(self, request, params):
         #GET /resource/
         return Book.objects.filter( **params )
 
-    def show(self, book_id):
+    def show(self, request, book_id):
         #GET /resource/:id/
         return Book.objects.get( id=book_id )
 
-    def create(self):
+    def create(self, request):
         #POST /resource/
         return 401, 'You are not authorize'
 
-    def update(self, book_id):
+    def update(self, request, book_id):
         #PUT /resource/:id/
         ...
 
-    def destroy(self, book_id):
+    def destroy(self, request, book_id):
         #DELETE /resource/:id/
         ...
 </pre>

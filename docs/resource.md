@@ -14,10 +14,10 @@ class MyResource(Resource):
     parameters = ...
     fields     = ...
 
-    def index(self, params):
+    def index(self, request, params):
         return {'foo':'bar'}
 
-    def show(self, book_id):
+    def show(self, request, book_id):
         return 404
 </pre>
 

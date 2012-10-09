@@ -73,14 +73,14 @@ class BookResource(Resource):
 <pre>
 class BookResource(Resource):
 
-    def create(self):
+    def create(self, request):
         return 401
 </pre>
 
 <pre>
 class BookResource(Resource):
 
-    def show(self, book_id):
+    def show(self, request, book_id):
         return Book.objects.get(id=book_id)
 </pre>
 

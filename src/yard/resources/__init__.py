@@ -203,7 +203,7 @@ class Resource(object):
 
     def serialize_all(self, resources, fields):
         builder = JSONbuilder( fields )
-        return self.__serialize_all( resource, builder )
+        return self.__serialize_all( resources, builder )
 
     def __serialize(self, resource, builder):
         '''
