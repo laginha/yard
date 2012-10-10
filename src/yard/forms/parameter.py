@@ -51,21 +51,24 @@ class Parameter(object):
         '''
         Returns/transforms value according to default value/function
         '''
+        def inspect_args(func):
+            try:
+                return inspect.getargspec(self.default).args
+            except TypeError:
+                return None
+                
         self.is_default = False
         if self.default==None:
             if value==None and self.required:
                 raise RequiredParamMissing(self)
             return value
-        elif callable(self.default) and inspect.getargspec(self.default).args:
+        elif callable(self.default) and inspect_args(self.default):
             self.is_default = True
             return self.default( value )
         elif value!=None:
             return value
-        else:
-            self.is_default = True
-            if callable(self.default):
-                return self.default()
-            return self.default
+        self.is_default = True
+        return self.default() if callable(self.default) else self.default
 
     def _validate(self, value):
         '''

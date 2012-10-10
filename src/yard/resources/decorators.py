@@ -5,19 +5,18 @@ def validate(f):
     '''
     Check if resource parameters is valid
     '''
-    def wrapper(self, request, params):
+    def wrapper(klass, request, params):
         if not params.is_valid():
             return params.errors()
-        return f(self, request, params)
+        return f(klass, request, params)
     return wrapper
 
 
 def login_required(f):
-    def wrapper(self, request, *args, **kwargs):
+    def wrapper(klass, request, *args, **kwargs):
         if request.user.is_authenticated():
-            return f(self, request, *args, **kwargs)
-        else:
-            return 401
+            return f(klass, request, *args, **kwargs)
+        return 401
     return wrapper
 
 

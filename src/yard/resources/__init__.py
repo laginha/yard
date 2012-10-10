@@ -6,7 +6,7 @@ from django.core.exceptions    import ObjectDoesNotExist
 from django.core.paginator     import Paginator, EmptyPage
 from django.core               import serializers
 from django.http               import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
-from yard.exceptions           import RequiredParamMissing, HttpMethodNotAllowed, InvalidStatusCode
+from yard.exceptions           import RequiredParamMissing, HttpMethodNotAllowed, InvalidStatusCode, MethodNotImplemented
 from yard.forms                import Form
 from yard.utils                import *
 from yard.utils.http           import FileResponse, HttpResponseUnauthorized, JSONResponse, ProperJsonResponse
@@ -67,9 +67,9 @@ class Resource(object):
         except RequiredParamMissing as e:
             # if required param missing from request
             return HttpResponseBadRequest()
-        except AttributeError as e:
+        except MethodNotImplemented as e:
             # if view not implemented
-            return HttpResponseNotFound(str(e))
+            return HttpResponseNotFound()
         except ObjectDoesNotExist:
             # if return model instance does not exist
             return HttpResponseNotFound()
@@ -110,6 +110,8 @@ class Resource(object):
         '''
         Runs desired view according to method
         '''
+        if not hasattr(self, method):
+            raise MethodNotImplemented(method)
         view = getattr( self, method )
         if method in ['show', 'update', 'destroy']:
             return view( request, parameters.pop('id'), **parameters ) 

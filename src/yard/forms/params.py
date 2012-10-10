@@ -104,19 +104,33 @@ class DateTimeParam(Parameter):
                  formats=['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d'], time_formats=['%H:%M:%S', '%H:%M'] ):        
         iter_        = lambda x: x if is_iter(x) else [x,]
         self.formats = {'datetime': iter_( formats )}
-        if default_date!=None and default==None:
-            default              = self.__default_date
+        if default_date!=None:
             self.default_date    = default_date
             self.formats['time'] = iter_( time_formats )
+            if default == None:
+                default = self.__default_date_only
+            else:       
+                default = self.__default_with_default_date( default )
         Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
     
-    def __default_date(self, value):
+    def __default_date_only(self, value):
         if isinstance(value, Time):
             if callable(self.default_date):
                 return datetime.combine( self.default_date(), value )
             return datetime.combine( self.default_date, value )
         return value
-    
+        
+    def __default_with_default_date(self, default_value):
+        def default(value):
+            if value==None:
+                return default_value() if callable(default_value) else default_value
+            elif isinstance(value, Time):
+                if callable(self.default_date):
+                    return datetime.combine( self.default_date(), value )
+                return datetime.combine( self.default_date, value )
+            return value
+        return default
+           
     def convert(self, value, to_time=False, to_date=False):
         '''
         Converts to Datetime
