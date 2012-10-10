@@ -33,13 +33,13 @@ class TestIntegerParam(unittest.TestCase):
     def test_default(self, param=IntegerParam):
         p = param()
         for i in range(-RANDOM.number(),RANDOM.number()):
-            assert p._default(i) == i
+            assert p._default(i)[0] == i
         
         default = RANDOM.number()
         p = param(default=default)
         number = RANDOM.number()
-        assert p._default(number) == number
-        assert p._default(None) == default
+        assert p._default(number)[0] == number
+        assert p._default(None)[0] == default
 
     def test_validate(self, param=IntegerParam):
         p = param()
@@ -118,9 +118,9 @@ class TestCharParam(unittest.TestCase):
     def test_default(self, param=CharParam):
         default = RANDOM.string()
         p = param(default=default)
-        assert p._default(None) == default
+        assert p._default(None)[0] == default
         string = RANDOM.string()
-        assert p._default(string) == string
+        assert p._default(string)[0] == string
         
     def test_validate(self, param=CharParam):
         max_ = RANDOM.number()
@@ -139,9 +139,9 @@ class TestRegexParam(unittest.TestCase):
     def test_default(self):
         default = RANDOM.string()
         p = RegexParam(r'.*', default=default)
-        assert p._default(None) == default
+        assert p._default(None)[0] == default
         string = RANDOM.string()
-        assert p._default(string) == string
+        assert p._default(string)[0] == string
     
     def test_validate(self, param=CharParam):
         p = RegexParam(r'[0-9]*')
@@ -163,9 +163,9 @@ class TestDateTimeParam(unittest.TestCase):
     def test_default(self, param=DateTimeParam):
         today = datetime.today()
         p = param(default=today)
-        assert p._default(None) == today
+        assert p._default(None)[0] == today
         string = RANDOM.string()
-        assert p._default(string) == string
+        assert p._default(string)[0] == string
 
 
 class TestDateParam(TestDateTimeParam):
@@ -202,9 +202,9 @@ class TestBooleanParam(unittest.TestCase):
     def test_default(self, param=BooleanParam):
         default = RANDOM.boolean()
         p = BooleanParam(default=default)
-        assert p._default(None) == default, str(p._default(None))
+        assert p._default(None)[0] == default, str(p._default(None))
         boolean = RANDOM.boolean()
-        assert p._default(boolean) == boolean
+        assert p._default(boolean)[0] == boolean
         
 
 class TestChoiceParam(unittest.TestCase):

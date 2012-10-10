@@ -56,19 +56,19 @@ class Parameter(object):
                 return inspect.getargspec(self.default).args
             except TypeError:
                 return None
-                
-        self.is_default = False
+        
+        is_default = True
         if self.default==None:
             if value==None and self.required:
                 raise RequiredParamMissing(self)
-            return value
+            return value, not is_default
         elif callable(self.default) and inspect_args(self.default):
-            self.is_default = True
-            return self.default( value )
+            return self.default( value ), is_default
         elif value!=None:
-            return value
-        self.is_default = True
-        return self.default() if callable(self.default) else self.default
+            return value, not is_default
+        if callable(self.default):
+            return self.default(), is_default 
+        return self.default, is_default
 
     def _validate(self, value):
         '''
@@ -87,17 +87,26 @@ class Parameter(object):
                 self.name  = k
                 self.alias = self.alias if self.alias else k
 
-    def get(self, request):
+    def get_value_and_info(self, request):
         '''
-        Handles a normal/single param
+        Handles a normal/single param (returns value and if it is default or not)
         '''
         try:
             value = self._value( request )
-            value = self._default( value )
+            value, is_default = self._default( value )
             value = self._validate( value )
         except (ConversionError, InvalidParameterValue, RequiredParamMissing) as e:
-            return {self.name: e}
-        return {self: value} if value!=None else {}
+            return {self.name: e}, is_default
+        if value!=None:
+            return {self: value}, is_default 
+        return {}, is_default
+        
+    def get(self, request):
+        '''
+        Handles a normal/single param (returns only value)
+        '''
+        value, is_default = self.get_value_and_info(request)
+        return value
 
 
 class Logic(Parameter):
@@ -129,15 +138,19 @@ class OR(Logic):
     '''
     Relates two parameters through boolean 'or'
     '''  
-    def get(self, request):
+    def get_value_and_info(self, request):
         '''
         Handles params banded together with OR
         '''
         for param in self.__dict__.values():
-            value = param.get( request )
+            value, is_default = param.get_value_and_info( request )
             # returns the first valid value
-            if value: return value
-        return {}
+            if value: return value, is_default
+        return {}, False
+        
+    def get(self, request):
+        value, is_default = self.get_value_and_info( request )
+        return value
 
     def __str__(self):
         return '( %s or %s )' %(self.x, self.y)
@@ -156,28 +169,34 @@ class AND(Logic):
         for i in self.__dict__.values():
             length += i.size() if isinstance(i, AND) else 1
         return length
-
+        
+    def get_value_and_info(self, request):
+        together, are_default = {}, []
+        for param in self.__dict__.values():
+            value, is_default = param.get_value_and_info( request )
+            together.update( value )
+            are_default.append( is_default if isinstance(value, Parameter) else False )
+        if len(together)==self.size():
+            # returns params's values if all valid
+            return together, all(are_default)
+        if not together:
+            if all(are_default): 
+                # ignore if all values are the default
+                return {}, True
+            return {}, False
+        # return exception otherwise
+        params = []
+        for k,v in together.iteritems():
+            params += v.params if isinstance(v, Exception) else [k]
+        exception = AndParameterException( params )
+        return {exception.alias: exception}, False
+        
     def get(self, request):
         '''
         Handles params banded together with AND
         '''
-        together = {}
-        for param in self.__dict__.values():
-            value = param.get( request )
-            together.update( value )
-        if len(together)==self.size():
-            # returns params's values if all valid
-            return together
-        if all([i.is_default if isinstance(i, Parameter) else False for i in together]):
-            # ignore if all values are the default
-            return {}
-        # return exception otherwise
-        exception = AndParameterException( together.keys() )
-        result    = {exception.alias: exception}
-        for k,v in together.iteritems():
-            if isinstance(v, Exception): 
-                result.update( {k:v} )
-        return result
+        value, is_default = self.get_value_and_info( request )
+        return value
 
     def __str__(self):
         return '( %s and %s )' %(self.x, self.y)
