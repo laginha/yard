@@ -91,6 +91,7 @@ class Parameter(object):
         '''
         Handles a normal/single param (returns value and if it is default or not)
         '''
+        is_default = False
         try:
             value = self._value( request )
             value, is_default = self._default( value )
@@ -174,22 +175,25 @@ class AND(Logic):
         together, are_default = {}, []
         for param in self.__dict__.values():
             value, is_default = param.get_value_and_info( request )
-            together.update( value )
-            are_default.append( is_default if isinstance(value, Parameter) else False )
+            if value:
+                together.update( value )
+                are_default.append( is_default )
+        all_defaults = all(are_default)
         if len(together)==self.size():
             # returns params's values if all valid
-            return together, all(are_default)
-        if not together:
-            if all(are_default): 
-                # ignore if all values are the default
-                return {}, True
-            return {}, False
+            return together, all_defaults
+        if not together or all_defaults: 
+            # ignore if all values are the default
+            return {}, all_defaults
         # return exception otherwise
         params = []
         for k,v in together.iteritems():
-            params += v.params if isinstance(v, Exception) else [k]
+            if isinstance(v, AndParameterException):
+                params += v.params  
+            else:
+                params.append( k )
         exception = AndParameterException( params )
-        return {exception.alias: exception}, False
+        return {self.__str__(): exception}, False
         
     def get(self, request):
         '''
