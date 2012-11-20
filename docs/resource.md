@@ -3,7 +3,7 @@
 The *Resource* object represents the resource data you wish to provide access to. Its main purposes are:
 
 - organize the different crud methods into its instance methods. 
-- simplify your http responses, returning JSON whenever possible (see [responses.md](responses.md)).
+- simplify your http responses, returning JSON whenever possible (see [responses.md](responses/support.md)).
 - structure your JSON resource response, according to class attribute *fields* (see [fields.md](fields.md))..
 - parse input according to class attribute *parameters* (see [forms.md](working_with_forms/forms.md)).
 
