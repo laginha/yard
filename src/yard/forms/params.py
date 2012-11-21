@@ -2,12 +2,17 @@
 # encoding: utf-8
 
 from django.forms            import EmailField
-from django.contrib.gis.geos import Point
 from yard.forms.parameter    import Parameter
 from yard.exceptions         import InvalidParameterValue, ConversionError
 from yard.utils              import is_iter, is_strint
 from datetime                import datetime, time as Time
 import re, socket
+
+try:
+    from django.contrib.gis.geos import Point
+except ImportError:
+    import sys
+    sys.stdout.write("Warning: Could not find the GEOS library.\n")
 
 
 class IntegerParam(Parameter):
