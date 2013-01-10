@@ -7,7 +7,7 @@ from yard.forms.parameter    import Parameter
 from yard.exceptions         import InvalidParameterValue, ConversionError
 from yard.utils              import is_iter, is_strint
 from datetime                import datetime, time as Time
-import re, socket
+import re, socket, math
 
 
 class IntegerParam(Parameter):
@@ -83,7 +83,10 @@ class FloatParam(IntegerParam):
         Converts to float
         '''
         try:
-            return float(value)
+            converted = float(value)
+            if math.isnan( converted ):
+                raise ConversionError(self, value)
+            return converted
         except ValueError:
             raise ConversionError(self, value)
 
@@ -229,6 +232,8 @@ class PointParam(Parameter):
         '''
         try:
             x, y = [float(i) for i in value.split(',')]
+            if math.isnan( x ) or math.isnan( y ):
+                raise ConversionError(self, value)
             return Point(y, x) if self.latitude_first else Point(x, y)
         except ValueError:
             raise ConversionError(self, value)
@@ -294,7 +299,10 @@ class TimestampParam(Parameter):
     
     def convert(self, value):
         try:
-            return datetime.fromtimestamp( float(value) )
+            converted = float(value)
+            if math.isnan( converted ):
+                 raise ConversionError(self, value)
+            return datetime.fromtimestamp( converted )
         except ValueError:
             raise ConversionError(self, value)
         
