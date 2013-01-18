@@ -201,6 +201,11 @@ class Resource(object):
         '''
         Serializes each resource (within page) into json
         '''
+        l=[]
+        for i in resources:
+            print "============"
+            l.append( builder.to_json(i) )
+        return l
         return [builder.to_json(i) for i in resources]       
 
     def serialize_all(self, resources, fields):

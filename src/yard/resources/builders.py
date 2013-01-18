@@ -62,10 +62,10 @@ class JSONbuilder:
         Handle fields of type str that are instance method
         '''
         result = method( *args )
-        if is_queryset( result ):
-            return { method.__name__: [unicode(i) for i in result] }
-        elif is_valuesset( result ):
+        if is_valuesset( result ):
             return { method.__name__: list( result ) }
+        elif is_queryset( result ):
+            return { method.__name__: [unicode(i) for i in result] }
         return { method.__name__: self.__serialize(result) }
         
     def __serialize(self, x):
