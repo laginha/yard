@@ -56,9 +56,10 @@ class ResourcePage(object):
         return resources[offset:offset+number]
     
     def __paginate_generator(self, resources, offset, number):
-        for i in range(offset): resources.next()
         objects = []
         try:
+            for i in range(offset): 
+                resources.next()
             for i in range(number):
                 objects.append( resources.next() )
             return objects
