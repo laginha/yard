@@ -106,3 +106,11 @@ class NoMeta(Exception):
     For when no meta is desired for the QuerySet based json-response
     '''
     pass
+
+
+class VersionException(Exception):
+    '''
+    For when no default nor latest resource version is given
+    '''
+    def __str__(self):
+        return "No default nor latest version known"
