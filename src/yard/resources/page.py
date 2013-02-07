@@ -7,8 +7,12 @@ from yard.utils            import is_generator
 
 class ResourcePage(object):
     __defaults = [
-        ('offset_parameter', None),
-        ('results_per_page', None),
+        ('offset_parameter', 'offset'),
+        ('results_per_page', {
+            'parameter': 'results',
+            'default': 25,
+            'limit': 50,
+        }),
     ]
 
     def __init__(self, page):
@@ -25,7 +29,10 @@ class ResourcePage(object):
         if not self.results_per_page or not self.offset_parameter:
             self.select = lambda request,resources: (resources, {})
         else:
-            self.__default = self.results_per_page['default']
+            if 'default' in self.results_per_page:
+                self.__default = self.results_per_page['default'] 
+            else:
+                self.__default = self.__defaults['results_per_page']['default']
             if 'parameter' not in self.results_per_page:
                 self.__number = lambda request: (self.__default, [])
             if 'limit' not in self.results_per_page:
