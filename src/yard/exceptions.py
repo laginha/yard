@@ -85,9 +85,9 @@ class NoMeta(Exception):
     pass
 
 
-class NoDefaultVersion(Exception):
+class VersionException(Exception):
     '''
-    For when no default version was defined
+    For when no default nor latest resource version is given
     '''
     def __str__(self):
-        return "Default version unknown"
+        return "No default nor latest version known"

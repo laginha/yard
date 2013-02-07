@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
+from yard.exceptions import VersionException
 
 class ResourceVersions(object):
 
@@ -17,5 +18,5 @@ class ResourceVersions(object):
             return getattr(self, 'default')(request, **kwargs)
         if hasattr(self, 'latest'):
             return getattr(self, 'latest')(request, **kwargs)
-        raise Exception()     
+        raise VersionException()     
                 
