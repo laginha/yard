@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
-from yard.utils import is_tuple
-from .params.base import Parameter
+from yard.utils           import is_tuple
+from yard.forms.parameter import Parameter
 
 
 class Form(object):
