@@ -1,12 +1,19 @@
-from yard.resources import Resource
+from yard import forms, version, resources
 from models import Book
-from params import BookParameters
+    
+    
+class BookResource(resources.Resource):
+    fields = ['id', 'title', 'publication_date', 'genres', 
+             ('author', ('name','age','gender_')) ]
 
+    class Parameters(forms.Form):
+        year   = forms.IntegerParam( alias='publication_date__year', min_value=1970, max_value=2012 )
+        title  = forms.CharParam()
+        genre  = forms.CharParam( alias='genres' )
+        author = forms.CharParam( alias='author__id' )
+        house  = forms.CharParam( alias='publishing_house__id' ) 
 
-class Books(Resource):
-    parameters = BookParameters
-    fields     = ['id', 'title', 'publication_date', 'genres', 
-                 ('author', ('name','age','gender_')) ]
+        __logic__ = year, title, genre & (author|house)    
     
     class Meta:
         with_errors = True
@@ -14,11 +21,11 @@ class Books(Resource):
         average = (('average_pages', 'number_of_pages'),)
 
     class Page:
-        offset_parameter = 'offset' #Required
-        results_per_page = {
-            'parameter': 'results', #Optional
-            'default': 25,          #Required
-            'limit': 50,            #Optional
+        offset_parameter = 'offset'
+        results_per_page = {        
+            'parameter': 'results', 
+            'default': 25,          
+            'limit': 50,            
         }
         
     def index(self, request, params):
@@ -41,3 +48,12 @@ class Books(Resource):
     def destroy(self, request, book_id):
         #HttpResponse('You are not authorize', status=401)
         return 401, 'You are not authorize'
+
+
+class BookResourceV2(BookResource):
+    fields = ['title']
+
+
+class BookResourceVersions(version.ResourceVersions):
+    v1 = default = BookResource
+    v2 = latest = BookResourceV2    
