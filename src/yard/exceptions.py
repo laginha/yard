@@ -110,7 +110,7 @@ class NoMeta(Exception):
 
 class VersionException(Exception):
     '''
-    For when no default nor latest resource version were defined
+    For when no default nor latest resource version is given
     '''
     def __str__(self):
         return "No default nor latest version known"
