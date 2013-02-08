@@ -7,10 +7,13 @@ from yard.utils       import is_list, is_generator
 
 
 class MetaDict(dict):
-    def __init__(self, resources, page, params):
+    def __init__(self, request, resources, page, params):
+        self.request   = request
         self.resources = resources   
         self.params    = params
         self.page      = page 
+        self._page_count     = None
+        self._resource_count = None
         if is_generator(self.resources):
             self.total_objects     = self.__no_support
             self.paginated_objects = self.__paginated_list
@@ -18,20 +21,57 @@ class MetaDict(dict):
             self.total_objects     = self.__total_in_list
             self.paginated_objects = self.__paginated_list
     
+    @property
+    def page_count(self):
+        if self._page_count == None:
+            self._page_count = self.page.count()
+        return self._page_count
+        
+    @property
+    def resource_count(self):
+        if self._resource_count == None:
+            self._resource_count = self.resources.count()
+        return self._resource_count
+    
     def __no_support(self):
         pass
 
     def with_errors(self):
         self.update( self.params.errors() )
     
+    def __page_uri(self, offset, params):
+        dic_to_query = lambda x,y: "%s&%s=%s" % (x, y[0], y[1] if y[0]!='offset' else offset) 
+        query = reduce(dic_to_query, self.request.GET.items(), '?')
+        return self.request.path + "?" + query[2:]
+    
+    def next_page(self):
+        params = self.params.validated
+        if not self.page_count:
+            self['next_page'] = None
+        elif self.page_count < params['results']:
+            self['next_page'] = None
+        else:
+            next_offset = params['offset'] + self.page_count
+            self['next_page'] = self.__page_uri(next_offset, params)
+        
+    def previous_page(self):
+        params = self.params.validated
+        offset = min( self.resource_count, params['offset'] )
+        previous_offset = offset - (self.page_count or params['results'])
+        if previous_offset < 0 and offset <= 0:
+            self['previous_page'] = None
+        else:
+            previous_offset = max( previous_offset, 0 )
+            self['previous_page'] = self.__page_uri(previous_offset, params)
+    
     def total_objects(self):
-        self['total_objects'] = self.resources.count()
+        self['total_objects'] = self.resource_count
     
     def __total_in_list(self):
         self['total_objects'] = len(self.resources)
     
     def paginated_objects(self):
-        self['paginated_objects'] = self.page.count()
+        self['paginated_objects'] = self.page_count
     
     def __paginated_list(self):
         self['paginated_objects'] = len(self.page)
@@ -70,6 +110,8 @@ class ResourceMeta(object):
         ('validated_parameters',  True),
         ('total_objects',         True),
         ('paginated_objects',     True),
+        ('next_page',             True),
+        ('previous_page',         True),
         ('average',               None),
         ('minimum',               None),
         ('maximum',               None),
@@ -83,9 +125,9 @@ class ResourceMeta(object):
         for k,v in self.__defaults:
             setattr(self, k, getattr(meta,k) if hasattr(meta, k) else v)
                       
-    def fetch(self, resources, page, params):
+    def fetch(self, request, resources, page, params):
         try:
-            meta = MetaDict( resources, page, params )
+            meta = MetaDict( request, resources, page, params )
             self.__fetch_defaults( meta ) 
             self.__fetch_new_meta( meta )
             return meta

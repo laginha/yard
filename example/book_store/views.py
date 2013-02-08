@@ -1,8 +1,16 @@
 from yard import forms, version, resources
-from models import Book
+from models import Book, Author
+
+class AuthorResource(resources.Resource):
+    model  = Author
+    fields = ['name']
+    
+    def show(self, request, author_id):
+        return Author.objects.get( pk=author_id )
     
     
 class BookResource(resources.Resource):
+    model  = Book
     fields = ['id', 'title', 'publication_date', 'genres', 
              ('author', ('name','age','gender_')) ]
 
@@ -16,7 +24,6 @@ class BookResource(resources.Resource):
         __logic__ = year, title, genre & (author|house)    
     
     class Meta:
-        with_errors = True
         maximum = (('longest_title', 'title'),)
         average = (('average_pages', 'number_of_pages'),)
 
@@ -51,7 +58,7 @@ class BookResource(resources.Resource):
 
 
 class BookResourceV2(BookResource):
-    fields = ['title']
+    fields = ['title', 'author', 'publication_date']
 
 
 class BookResourceVersions(version.ResourceVersions):

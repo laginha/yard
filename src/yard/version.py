@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from yard.exceptions import VersionException
+from yard.resources import Resource
 
 class ResourceVersions(object):
 
-    def __init__(self, routes):
+    def __init__(self, api, routes):
         for name,version in self.__class__.__dict__.iteritems():
-            if name not in ['__module__', '__main__', '__doc__']:
-                setattr(self, name, version(routes))
+            if callable(version) and issubclass(version, Resource):
+                setattr(self, name, version(api, routes))
 
     def __call__(self, request, **kwargs):
         if 'version' in request.META or 'version' in request.GET:

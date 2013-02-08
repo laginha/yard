@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from yard.utils import is_tuple, is_geo_value, is_relatedmanager, is_manyrelatedmanager
-from yard.utils import is_method, is_valuesset, is_queryset, is_serializable
+from yard.utils import is_method, is_valuesset, is_queryset, is_serializable, is_modelinstance
 import json
 
 
@@ -9,8 +9,9 @@ class JSONbuilder:
     '''
     Responsible for creating the JSON response
     '''
-    def __init__(self, fields):
+    def __init__(self, api, fields):
         self.fields = fields() if callable(fields) else fields
+        self.api    = api
     
     def to_json(self, resource):
         '''
@@ -44,7 +45,7 @@ class JSONbuilder:
         Handle fields of type tuple - subfields
         '''
         sub_resource = getattr( resource, field[0], None )
-        builder      = self.__class__( field[1] ) # build sub-json
+        builder      = self.__class__( self.api, field[1] ) # build sub-json
         return { field[0]: builder.to_json( sub_resource ) }
 
     def __handle_string_field(self, resource, field):
@@ -78,5 +79,7 @@ class JSONbuilder:
             return json.loads(x.geojson)
         elif is_relatedmanager(x) or is_manyrelatedmanager(x):
             return [unicode(i) for i in x.all()]
+        elif is_modelinstance(x):
+            return self.api.get_uri(x)
         return unicode(x)
 
