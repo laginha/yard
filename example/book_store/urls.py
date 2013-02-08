@@ -1,8 +1,12 @@
 from django.conf.urls.defaults import patterns, include, url
 from views     import *
-from yard.urls import include_resource
+from yard.api import Api
+
+api = Api()
+api.include( 'books', BookResourceVersions )
+api.include( 'authors', AuthorResource )
 
 urlpatterns = patterns('',
-    url( r'^books',  include_resource( BookResourceVersions ) ),
-    #url( r'^books',  include_resource( BookResource ) ),
+    url( r'^', include( api.urls ) )
 )
+
