@@ -30,7 +30,8 @@ class Resource(object):
     class Page(object):
         pass
 
-    def __init__(self, routes):
+    def __init__(self, api, routes):
+        self.__api        = api
         self.__routes     = routes # maps http methods with respective views
         self.__meta       = ResourceMeta( self.Meta )
         self.__page       = ResourcePage( self.page if hasattr(self, 'page') else self.Page )  
@@ -79,5 +80,140 @@ class Resource(object):
 class CRUDonlyMobileDrivenResource(CRUDonlyResource):
     json_builder_class = JSONbuilderForMobile
 
-class MobileDrivenResource(Resource):
-    json_builder_class = JSONbuilderForMobile
+    def __method(self, request):
+        '''
+        Checks if http_method within possible routes
+        '''
+        http_method = request.method.lower()
+        if http_method not in self.__routes:
+            raise HttpMethodNotAllowed( http_method )
+        return self.__routes[http_method]
+    
+    def __resource_parameters(self, request, parameters):
+        '''
+        Gets parameters from resource request
+        '''
+        resource_params = ResourceParameters( parameters )
+        if self.__parameters:
+            for i in self.__parameters.get( request ):
+                resource_params.update( i )
+        return resource_params
+    
+    def __get_builder(self, fields, parameters):
+        if callable(fields):
+            current_fields = fields(parameters)
+            return JSONbuilder( self.__api, current_fields ), current_fields
+        return JSONbuilder( self.__api, fields ), fields
+    
+    def __view(self, request, method, parameters):
+        '''
+        Runs desired view according to method
+        '''
+        if not hasattr(self, method):
+            raise MethodNotImplemented(method)
+        view = getattr( self, method )
+        if method in ['show', 'update', 'destroy']:
+            return view( request, parameters.pop('pk'), **parameters ) 
+        elif method == 'create':
+            return view( request, **parameters )
+        return view( request, parameters )
+    
+    def __response(self, request, response, current_fields, resource_parameters, builder):
+        '''
+        Returns a HttpResponse according to given response
+        '''
+        status = 200
+        if is_tuple(response) and len(response)>1:
+            if is_int(response[0]):
+                status = response[0]
+            else:
+                raise InvalidStatusCode(response[0])
+            response = response[1]
+        elif is_httpresponse(response):
+            return response
+            
+        if is_queryset(response):
+            response = self.select_related(response, current_fields)
+            content  = self.__queryset_with_meta(request, response, resource_parameters, builder)
+            return self.__json_response(request)(content, status=status)
+        elif is_modelinstance(response):
+            content = self.__serialize(response, builder)
+            return self.__json_response(request)(content, status=status)
+        elif is_generator(response) or is_list(response):
+            content = self.__list_with_meta(request, response, resource_parameters)
+            return self.__json_response(request)(content, status=status)             
+        elif response == None:
+            return HttpResponse(status=status)
+        elif is_int(response):
+            return HttpResponse(status=response)
+        elif is_str(response) or is_dict(response):
+            return self.__json_response(request)(response, status=status) 
+        elif is_file(response):
+            return FileResponse(response, status=status)        
+        elif is_valuesset(response):
+            content = self.__list_with_meta(request, list(response), resource_parameters)
+            return self.__json_response(request)(content, status=status)
+        else:
+            return HttpResponse(str(response), status=status)
+
+    def __json_response(self, request):
+        '''
+        Get Json response object
+        '''
+        if JSONResponse==ProperJsonResponse:
+            return JSONResponse(request)
+        return JSONResponse
+
+    def select_related(self, resources, current_fields):
+        '''
+        Optimize queryset according to current response fields
+        '''
+        related_models = [i[0] for i in current_fields if isinstance(i, tuple)]
+        return resources.select_related( *related_models )
+
+    def __queryset_with_meta(self, request, resources, resource_parameters, builder):
+        '''
+        Appends Meta data into the json response
+        '''
+        page    = self.__paginate( request, resources, resource_parameters )
+        objects = self.__serialize_all( page, builder )
+        meta    = self.__meta.fetch(request, resources, page, resource_parameters)
+        return objects if not meta else {'Objects': objects,'Meta': meta}
+    
+    def __list_with_meta(self, request, resources, resource_parameters):
+        '''
+        Appends Meta data into list based response
+        '''
+        page = self.__paginate( request, resources, resource_parameters )
+        meta = self.__meta.fetch(request, resources, page, resource_parameters)
+        return page if not meta else {'Objects': page,'Meta': meta}
+    
+    def __paginate(self, request, resources, resource_parameters):
+        '''
+        Return page of resources according to default or parameter values
+        '''
+        page_resources, page_parameters = self.__page.select( request, resources )
+        resource_parameters.validated.update( page_parameters )
+        return page_resources
+    
+    def __serialize_all(self, resources, builder):   
+        '''
+        Serializes each resource (within page) into json
+        '''
+        return [builder.to_json(i) for i in resources]       
+
+    def serialize_all(self, resources, fields):
+        builder = JSONbuilder( fields )
+        return self.__serialize_all( resources, builder )
+
+    def __serialize(self, resource, builder):
+        '''
+        Creates json for given resource
+        '''
+        return builder.to_json(resource)
+        
+    def serialize(self, resource, fields):
+        builder = JSONbuilder( fields )
+        return self.__serialize( resource, builder )
+        
+        
