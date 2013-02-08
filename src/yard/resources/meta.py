@@ -10,79 +10,73 @@ from yard.resources.page import ResourcePage
 class MetaDict(dict):
     def __init__(self, request, resources, page, params):
         self.request   = request
-        self.resources = resources
+        self.resources = resources   
         self.params    = params
-        self.page      = page
+        self.page      = page 
         self._page_count     = None
         self._resource_count = None
-        self.__results_name  = ResourcePage.defaults[0][1]
-        self.__offset_name   = ResourcePage.defaults[1][1]['parameter']
         if is_generator(self.resources):
-            self.total_objects = self.__no_support
-            self.previous_page = self.__no_support
-
-    #TEMPORARY
-    def add_page_class(self, page_class):
-        self.__results_name = page_class.results_per_page['parameter']
-        self.__offset_name  = page_class.offset_parameter
-
+            self.total_objects     = self.__no_support
+            self.paginated_objects = self.__paginated_list
+        elif is_list(self.resources):
+            self.total_objects     = self.__total_in_list
+            self.paginated_objects = self.__paginated_list
+    
     @property
     def page_count(self):
         if self._page_count == None:
-            if isinstance(self.page, (list, tuple)) or is_generator(self.resources):
-                self._page_count = len( self.page )
-            else:
-                self._page_count = self.page.count()
+            self._page_count = self.page.count()
         return self._page_count
-
+        
     @property
     def resource_count(self):
         if self._resource_count == None:
-            if isinstance(self.resources, (list, tuple)):
-                self._resource_count = len( self.resources )
-            else:
-                self._resource_count = self.resources.count()
+            self._resource_count = self.resources.count()
         return self._resource_count
-
+    
     def __no_support(self):
         pass
 
     def with_errors(self):
         self.update( self.params.errors() )
-
-    def __page_uri(self, offset):
-        dic_to_query = lambda x,y: "%s&%s=%s" % (x, y[0], y[1])
-        get = self.request.GET.copy()
-        get[self.__offset_name] = offset
-        query_string = reduce(dic_to_query, get.items(), '?')[2:]
-        return self.request.path + "?" + query_string
-
+    
+    def __page_uri(self, offset, params):
+        dic_to_query = lambda x,y: "%s&%s=%s" % (x, y[0], y[1] if y[0]!='offset' else offset) 
+        query = reduce(dic_to_query, self.request.GET.items(), '?')
+        return self.request.path + "?" + query[2:]
+    
     def next_page(self):
         params = self.params.validated
         if not self.page_count:
             self['next_page'] = None
-        elif self.page_count < params[ self.__results_name ]:
+        elif self.page_count < params['results']:
             self['next_page'] = None
         else:
-            next_offset = params[ self.__offset_name ] + self.page_count
-            self['next_page'] = self.__page_uri(next_offset)
-
+            next_offset = params['offset'] + self.page_count
+            self['next_page'] = self.__page_uri(next_offset, params)
+        
     def previous_page(self):
         params = self.params.validated
-        offset = min( self.resource_count, params[ self.__offset_name ] )
-        previous_offset = offset - (self.page_count or params[ self.__results_name ])
+        offset = min( self.resource_count, params['offset'] )
+        previous_offset = offset - (self.page_count or params['results'])
         if previous_offset < 0 and offset <= 0:
             self['previous_page'] = None
         else:
             previous_offset = max( previous_offset, 0 )
-            self['previous_page'] = self.__page_uri(previous_offset)
-
+            self['previous_page'] = self.__page_uri(previous_offset, params)
+    
     def total_objects(self):
         self['total_objects'] = self.resource_count
-
+    
+    def __total_in_list(self):
+        self['total_objects'] = len(self.resources)
+    
     def paginated_objects(self):
         self['paginated_objects'] = self.page_count
-
+    
+    def __paginated_list(self):
+        self['paginated_objects'] = len(self.page)
+    
     def validated_parameters(self):
         self['validated_parameters'] = self.params.validated
 
@@ -131,12 +125,11 @@ class ResourceMeta(object):
         ]
         for k,v in self.__defaults:
             setattr(self, k, getattr(meta,k) if hasattr(meta, k) else v)
-
+                      
     def fetch(self, request, resources, page, params):
         try:
             meta = MetaDict( request, resources, page, params )
-            meta.add_page_class( self.page_class ) #TEMPORARY
-            self.__fetch_defaults( meta )
+            self.__fetch_defaults( meta ) 
             self.__fetch_new_meta( meta )
             return meta
         except NoMeta:

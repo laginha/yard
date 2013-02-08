@@ -30,7 +30,7 @@ class Resource(object):
         pass
 
     def __init__(self, api, routes):
-        self._api         = api
+        self.__api        = api
         self.__routes     = routes # maps http methods with respective views
         self.__meta       = ResourceMeta( self.Meta )
         self.__page       = ResourcePage( self.page if hasattr(self, 'page') else self.Page )  
@@ -99,9 +99,9 @@ class Resource(object):
     def __get_builder(self, fields, parameters):
         if callable(fields):
             current_fields = fields(parameters)
-            return JSONbuilder( self._api, current_fields ), current_fields
-        return JSONbuilder( self._api, fields ), fields
-
+            return JSONbuilder( self.__api, current_fields ), current_fields
+        return JSONbuilder( self.__api, fields ), fields
+    
     def __view(self, request, method, parameters):
         '''
         Runs desired view according to method
@@ -110,7 +110,7 @@ class Resource(object):
             raise MethodNotImplemented(method)
         view = getattr( self, method )
         if method in ['show', 'update', 'destroy']:
-            return view( request, parameters.pop('pk'), **parameters )
+            return view( request, parameters.pop('pk'), **parameters ) 
         elif method == 'create':
             return view( request, **parameters )
         return view( request, parameters )
@@ -172,33 +172,28 @@ class Resource(object):
         '''
         Appends Meta data into the json response
         '''
-        if hasattr(resource_parameters, 'validated'):
-            page = self.__paginate( request, resources, resource_parameters )
-            objects = self.__serialize_all( page, builder )
-            meta = self.__meta.fetch(request, resources, page, resource_parameters)
-            return objects if not meta else {'Objects': objects,'Meta': meta}
-        return self.__serialize_all( resources, builder )
-
-    def __list_with_meta(self, request, resources, resource_parameters, builder):
+        page    = self.__paginate( request, resources, resource_parameters )
+        objects = self.__serialize_all( page, builder )
+        meta    = self.__meta.fetch(request, resources, page, resource_parameters)
+        return objects if not meta else {'Objects': objects,'Meta': meta}
+    
+    def __list_with_meta(self, request, resources, resource_parameters):
         '''
         Appends Meta data into list based response
         '''
-        if hasattr(resource_parameters, 'validated'):
-            page = self.__paginate( request, resources, resource_parameters )
-            objects = [self.__serialize(i, builder) if is_modelinstance(i) else i for i in page]
-            meta = self.__meta.fetch(request, resources, page, resource_parameters)
-            return objects if not meta else {'Objects': objects,'Meta': meta}
-        return [self.__serialize(i, builder) if is_modelinstance(i) else i for i in resources]
-
+        page = self.__paginate( request, resources, resource_parameters )
+        meta = self.__meta.fetch(request, resources, page, resource_parameters)
+        return page if not meta else {'Objects': page,'Meta': meta}
+    
     def __paginate(self, request, resources, resource_parameters):
         '''
         Return page of resources according to default or parameter values
         '''
-        page_resources, page_parameters = self.__pagination.select( request, resources )
+        page_resources, page_parameters = self.__page.select( request, resources )
         resource_parameters.validated.update( page_parameters )
         return page_resources
-
-    def __serialize_all(self, resources, builder):
+    
+    def __serialize_all(self, resources, builder):   
         '''
         Serializes each resource (within page) into json
         '''

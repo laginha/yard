@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-from django.core.urlresolvers import NoReverseMatch
-from yard.utils import is_tuple, is_geo_value, is_relatedmanager, is_manyrelatedmanager, is_genericrelatedobjectmanager
+from yard.utils import is_tuple, is_geo_value, is_relatedmanager, is_manyrelatedmanager
 from yard.utils import is_method, is_valuesset, is_queryset, is_serializable, is_modelinstance
 import json
 
@@ -49,7 +48,7 @@ class JSONbuilder:
         Handle fields of type tuple - subfields
         '''
         sub_resource = getattr( resource, field[0], None )
-        builder = self.__class__( self.api, field[1] )
+        builder      = self.__class__( self.api, field[1] ) # build sub-json
         return { field[0]: builder.to_json( sub_resource ) }
 
     def __handle_string_field(self, resource, field):
@@ -87,6 +86,6 @@ class JSONbuilder:
         elif is_relatedmanager(x) or is_manyrelatedmanager(x) or is_genericrelatedobjectmanager(x):
             return [unicode(i) for i in x.all()]
         elif is_modelinstance(x):
-            return self.api.get_uri(x) or unicode(x)
+            return self.api.get_uri(x)
         return unicode(x)
 
