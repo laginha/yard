@@ -58,11 +58,9 @@ class MetaDict(dict):
         params = self.params.validated
         if not self.page_count:
             self['next_page'] = None
-        #elif self.page_count < params['results']:
         elif self.page_count < params[ self.__results_name ]:
             self['next_page'] = None
         else:
-            #next_offset = params['offset'] + self.page_count
             next_offset = params[ self.__offset_name ] + self.page_count
             self['next_page'] = self.__page_uri(next_offset)
         

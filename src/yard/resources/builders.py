@@ -48,8 +48,9 @@ class JSONbuilder:
         Handle fields of type tuple - subfields
         '''
         sub_resource = getattr( resource, field[0], None )
-        builder      = self.__class__( self.api, field[1] ) # build sub-json
-        return { field[0]: builder.to_json( sub_resource ) }
+        sub_json = self.__class__( self.api, field[1] ).to_json( sub_resource )
+        sub_json['resource_uri'] = self.api.get_uri( sub_resource )
+        return { field[0]: sub_json }
 
     def __handle_string_field(self, resource, field):
         '''
@@ -86,6 +87,6 @@ class JSONbuilder:
         elif is_relatedmanager(x) or is_manyrelatedmanager(x) or is_genericrelatedobjectmanager(x):
             return [unicode(i) for i in x.all()]
         elif is_modelinstance(x):
-            return self.api.get_uri(x)
+            return self.api.get_uri(x) or unicode(x)
         return unicode(x)
 
