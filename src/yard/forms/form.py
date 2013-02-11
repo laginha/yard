@@ -8,9 +8,11 @@ class Form(object):
     '''
     Form for acceptable Resource parameters
     '''
-    def __init__(self):
-        self.__attributes = self.__class__.__dict__ 
-        if hasattr(self, '__logic__'):
+    
+    def __init__(self, parameters):
+        self.__attributes = parameters.__dict__
+        if '__logic__' in self.__attributes:
+            self.__logic__ = self.__attributes['__logic__']
             if is_tuple( self.__logic__ ):
                 self.__set_names( self.__logic__ )
             elif isinstance(self.__logic__, Parameter):
@@ -19,7 +21,7 @@ class Form(object):
         else:
             self.__logic__ = [p for n,p in self.__attributes.items() if n not in ('__module__', '__doc__')]
             self.__set_names( self.__logic__ )
-        
+    
     def __str__(self):
         return ' + '.join( [str(param) for param in self.__logic__] )
 
