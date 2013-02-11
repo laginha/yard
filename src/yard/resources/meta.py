@@ -15,12 +15,19 @@ class MetaDict(dict):
         self.page      = page 
         self._page_count     = None
         self._resource_count = None
+        self.__results_name  = ResourcePage.defaults[0][1]
+        self.__offset_name   = ResourcePage.defaults[1][1]['parameter']
         if is_generator(self.resources):
             self.total_objects     = self.__no_support
             self.paginated_objects = self.__paginated_list
         elif is_list(self.resources):
             self.total_objects     = self.__total_in_list
             self.paginated_objects = self.__paginated_list
+    
+    #TEMPORARY
+    def add_page_class(self, page_class):
+        self.__results_name = page_class.results_per_page['parameter']
+        self.__offset_name  = page_class.offset_parameter 
     
     @property
     def page_count(self):
@@ -40,30 +47,34 @@ class MetaDict(dict):
     def with_errors(self):
         self.update( self.params.errors() )
     
-    def __page_uri(self, offset, params):
-        dic_to_query = lambda x,y: "%s&%s=%s" % (x, y[0], y[1] if y[0]!='offset' else offset) 
-        query = reduce(dic_to_query, self.request.GET.items(), '?')
-        return self.request.path + "?" + query[2:]
+    def __page_uri(self, offset):
+        dic_to_query = lambda x,y: "%s&%s=%s" % (x, y[0], y[1]) 
+        get = self.request.GET.copy()
+        get[self.__offset_name] = offset
+        query_string = reduce(dic_to_query, get.items(), '?')[2:]
+        return self.request.path + "?" + query_string
     
     def next_page(self):
         params = self.params.validated
         if not self.page_count:
             self['next_page'] = None
-        elif self.page_count < params['results']:
+        #elif self.page_count < params['results']:
+        elif self.page_count < params[ self.__results_name ]:
             self['next_page'] = None
         else:
-            next_offset = params['offset'] + self.page_count
-            self['next_page'] = self.__page_uri(next_offset, params)
+            #next_offset = params['offset'] + self.page_count
+            next_offset = params[ self.__offset_name ] + self.page_count
+            self['next_page'] = self.__page_uri(next_offset)
         
     def previous_page(self):
         params = self.params.validated
-        offset = min( self.resource_count, params['offset'] )
-        previous_offset = offset - (self.page_count or params['results'])
+        offset = min( self.resource_count, params[ self.__offset_name ] )
+        previous_offset = offset - (self.page_count or params[ self.__results_name ])
         if previous_offset < 0 and offset <= 0:
             self['previous_page'] = None
         else:
             previous_offset = max( previous_offset, 0 )
-            self['previous_page'] = self.__page_uri(previous_offset, params)
+            self['previous_page'] = self.__page_uri(previous_offset)
     
     def total_objects(self):
         self['total_objects'] = self.resource_count
@@ -129,6 +140,7 @@ class ResourceMeta(object):
     def fetch(self, request, resources, page, params):
         try:
             meta = MetaDict( request, resources, page, params )
+            meta.add_page_class( self.page_class ) #TEMPORARY
             self.__fetch_defaults( meta ) 
             self.__fetch_new_meta( meta )
             return meta
