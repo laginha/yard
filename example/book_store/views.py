@@ -14,7 +14,7 @@ class BookResource(resources.Resource):
     fields = ['id', 'title', 'publication_date', 'genres', 
              ('author', ('name','age','gender_')) ]
 
-    class Parameters(forms.Form):
+    class Parameters:
         year   = forms.IntegerParam( alias='publication_date__year', min_value=1970, max_value=2012 )
         title  = forms.CharParam()
         genre  = forms.CharParam( alias='genres' )
@@ -27,7 +27,7 @@ class BookResource(resources.Resource):
         maximum = (('longest_title', 'title'),)
         average = (('average_pages', 'number_of_pages'),)
 
-    class Page:
+    class Pagination:
         offset_parameter = 'offset'
         results_per_page = {        
             'parameter': 'results', 
