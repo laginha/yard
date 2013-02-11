@@ -25,7 +25,7 @@ class Resource(object):
     
     class Meta(object):
         pass
-
+    
     class Pagination(object):
         pass
 
@@ -33,13 +33,12 @@ class Resource(object):
         self.__api        = api
         self.__routes     = routes # maps http methods with respective views
         self.__meta       = ResourceMeta( self.Meta )
-        self.__page       = ResourcePage( self.page if hasattr(self, 'page') else self.Page )
-        self.__meta.page_class = self.__page #TEMPORARY 
+        self.__pagination = ResourcePage( self.Pagination )
+        self.__parameters = Form( self.Parameters ) if hasattr(self, "Parameters") else None
         self.fields       = self.fields if hasattr(self, "fields") else ()
         self.index_fields = self.index_fields if hasattr(self, "index_fields") else self.fields
         self.show_fields  = self.show_fields  if hasattr(self, "show_fields") else self.fields
-        self.__parameters = self.parameters() if hasattr(self, "parameters") else (
-                                self.Parameters() if hasattr(self, "Parameters") else None )
+        self.__meta.page_class = self.__pagination #TEMPORARY 
   
     def __call__(self, request, **parameters):
         '''
@@ -190,7 +189,7 @@ class Resource(object):
         '''
         Return page of resources according to default or parameter values
         '''
-        page_resources, page_parameters = self.__page.select( request, resources )
+        page_resources, page_parameters = self.__pagination.select( request, resources )
         resource_parameters.validated.update( page_parameters )
         return page_resources
     
