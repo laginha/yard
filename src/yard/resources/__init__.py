@@ -32,7 +32,8 @@ class Resource(object):
         self.__api        = api
         self.__routes     = routes # maps http methods with respective views
         self.__meta       = ResourceMeta( self.Meta )
-        self.__page       = ResourcePage( self.page if hasattr(self, 'page') else self.Page )  
+        self.__page       = ResourcePage( self.page if hasattr(self, 'page') else self.Page )
+        self.__meta.page_class = self.__page #TEMPORARY 
         self.fields       = self.fields if hasattr(self, "fields") else ()
         self.index_fields = self.index_fields if hasattr(self, "index_fields") else self.fields
         self.show_fields  = self.show_fields  if hasattr(self, "show_fields") else self.fields
