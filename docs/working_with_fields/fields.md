@@ -180,4 +180,3 @@ class BookResource(resources.Resource):
         }
     }    
 ```
-
