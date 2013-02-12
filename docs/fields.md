@@ -137,4 +137,3 @@ class BookResource(resources.Resource):
     show_fields  = ('id', 'title', ('author', ('name',)) )
     
 ```
-
