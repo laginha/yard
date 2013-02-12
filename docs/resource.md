@@ -9,7 +9,7 @@ The *Resource* object represents the resource data you wish to provide access to
 
 In the end, your resource might look like this: 
 
-<pre>
+```python
 class MyResource(Resource):
     parameters = ...
     fields     = ...
@@ -19,17 +19,17 @@ class MyResource(Resource):
 
     def show(self, request, book_id):
         return 404
-</pre>
+```
 
 For the resource to be accessible you will need to include it in the url patterns:
 
-<pre>
+```python
 from yard.urls import include_resource
 
 urlpatterns = patterns('',
     url( r'^myresource', include_resource( My_Resource ) ),
 )
-</pre>
+``
 
 
 ## CRUD instance methods

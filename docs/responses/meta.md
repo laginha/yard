@@ -1,19 +1,19 @@
 # Metadata
 
-<pre>
+```python
 class Books(Resource):
 
     class Meta:
         with_errors = True
         ...
-</pre>
+```
 
 For *QuerySet*, *list* and *ValuesSet* based responses, *Yard* appends useful metadata by default:
 
 - **total_objects**: number of instances returned after filtering.
 - **parameters_considered**: parameters validated for filtering.
 
-<pre>
+```javascript
 {
   "Objects": [
     {
@@ -29,7 +29,7 @@ For *QuerySet*, *list* and *ValuesSet* based responses, *Yard* appends useful me
     "parameters_considered": {}, 
   }
 }
-</pre>
+``
 
 
 ## Meta Options

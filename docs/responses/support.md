@@ -63,24 +63,24 @@
 
 ## Examples
 
-<pre>
+```python
 class BookResource(Resource):
 
     def create(self):
         return 401, 'Not Authorize'
-</pre>
+```
 
-<pre>
+```python
 class BookResource(Resource):
 
     def create(self, request):
         return 401
-</pre>
+```
 
-<pre>
+```python
 class BookResource(Resource):
 
     def show(self, request, book_id):
         return Book.objects.get(id=book_id)
-</pre>
+```
 

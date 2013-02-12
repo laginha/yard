@@ -2,7 +2,7 @@
 
 Although *Yard* does not paginate by default, it provides a way to set it up for *QuerySet*, *list* and *ValueSet* based responses.
 
-<pre>
+```python
 class Books(Resource):
     
     class Page:                    
@@ -14,7 +14,7 @@ class Books(Resource):
     def index(self, request, params):
         # params does not include the 'offset' parameter
         ...
-</pre>
+```
 
 
 ## Page Options

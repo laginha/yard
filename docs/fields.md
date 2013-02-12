@@ -10,17 +10,17 @@ Also, *Yard* allows you to define different *fields* for the *show* and *index* 
 
 In the example below the resource named *BookResource* implements the *show* method which returns a QueryField for base model *Book*.
 
-<pre>
+```python
 class BookResource(Resource):
     fields = ('id', 'title', ('author', ('name',)) )
     
     def show(self, book_id):
         return Book.objects.filter(id=book_id)
-</pre>
+```
 
 The API client, whenever requesting *GET: http://example/books/id/*, will receive a JSON response built according to the specified *fields* attribute.
 
-<pre>
+```javascript
 [ 
     { "id": "8",
       "name": "A Game of Thrones",
@@ -29,7 +29,7 @@ The API client, whenever requesting *GET: http://example/books/id/*, will receiv
       }
     } 
 ]
-</pre>
+```
 
 
 
@@ -37,7 +37,7 @@ The API client, whenever requesting *GET: http://example/books/id/*, will receiv
 
 *Fields* elements of type string can also indicate instance methods. This is a good way to include data into the JSON response which can't be specified directly through model's attributes.
 
-<pre>
+```python
 class Book(models.Model):
     ...
     genres = models.ManyToManyField( Genre )
@@ -47,7 +47,7 @@ class Book(models.Model):
 
 class Book(Resource):
     fields = ('id', 'title', 'book_genres', ('author', ('name',)) )
-</pre>
+``
 
 The instance method can be callable with arguments. You just need to indicate the argument in front of the instance method name, within the string field
 

@@ -11,7 +11,7 @@ The second argument of the *index* method is a ResourceParameters instance. It p
 - **from_path():**  Returns dictionary of parameters of type path, as defined in the url pattern.
 - **from_query():** Returns dictionary of parameters of type query.
 
-<pre>
+```python
 class BookResource(Resource):
     parameters = BookParameters
 
@@ -19,14 +19,14 @@ class BookResource(Resource):
         if params.is_valid():
             return Book.objects.filter( **params )
         return params.errors()
-</pre>
+```
 
 In the example above, *filter* is executed only if *params* is valid. However, such verification can be ignored since only the validated parameters are added to the ResourceParameters instance. In this case, any error that might have occurred is ignored.
 
-<pre>
+```python
 class BookResource(Resource):
     parameters = BookParameters
 
     def index(self, request, params):
         return Book.objects.filter( **params )
-</pre>
+``
