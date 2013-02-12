@@ -147,7 +147,7 @@ class Resource(object):
             return self.__json_response(request)(content, status=status)
         elif is_generator(response) or is_list(response):
             content = self.__list_with_meta(request, response, resource_parameters, builder)
-            return self.__json_response(request)(content, status=status)
+            return self.__json_response(request)(content, status=status)             
         elif response == None:
             return HttpResponse(status=status)
         elif is_int(response):
@@ -183,13 +183,14 @@ class Resource(object):
         meta    = self.__meta.fetch(request, resources, page, resource_parameters)
         return objects if not meta else {'Objects': objects,'Meta': meta}
     
-    def __list_with_meta(self, request, resources, resource_parameters):
+    def __list_with_meta(self, request, resources, resource_parameters, builder):
         '''
         Appends Meta data into list based response
         '''
-        page = self.__paginate( request, resources, resource_parameters )
-        meta = self.__meta.fetch(request, resources, page, resource_parameters)
-        return page if not meta else {'Objects': page,'Meta': meta}
+        page    = self.__paginate( request, resources, resource_parameters )
+        objects = [self.serialize(i, builder) if is_modelinstance(i) else i for i in page]
+        meta    = self.__meta.fetch(request, resources, page, resource_parameters)
+        return objects if not meta else {'Objects': objects,'Meta': meta}
     
     def __paginate(self, request, resources, resource_parameters):
         '''
