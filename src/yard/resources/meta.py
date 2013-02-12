@@ -19,10 +19,6 @@ class MetaDict(dict):
         self.__offset_name   = ResourcePage.defaults[1][1]['parameter']
         if is_generator(self.resources):
             self.total_objects     = self.__no_support
-            self.paginated_objects = self.__paginated_list
-        elif is_list(self.resources):
-            self.total_objects     = self.__total_in_list
-            self.paginated_objects = self.__paginated_list
     
     #TEMPORARY
     def add_page_class(self, page_class):
@@ -32,13 +28,19 @@ class MetaDict(dict):
     @property
     def page_count(self):
         if self._page_count == None:
-            self._page_count = self.page.count()
+            if isinstance(self.page, (list, len)):
+                self._page_count = len( self.page )
+            else:
+                self._page_count = self.page.count()
         return self._page_count
         
     @property
     def resource_count(self):
         if self._resource_count == None:
-            self._resource_count = self.resources.count()
+            if isinstance(self.resources, (list, tuple)) or is_generator(self.resources):
+                self._resource_count = len( self.resources )
+            else:
+                self._resource_count = self.resources.count()
         return self._resource_count
     
     def __no_support(self):
@@ -76,16 +78,10 @@ class MetaDict(dict):
     
     def total_objects(self):
         self['total_objects'] = self.resource_count
-    
-    def __total_in_list(self):
-        self['total_objects'] = len(self.resources)
-    
+
     def paginated_objects(self):
         self['paginated_objects'] = self.page_count
-    
-    def __paginated_list(self):
-        self['paginated_objects'] = len(self.page)
-    
+
     def validated_parameters(self):
         self['validated_parameters'] = self.params.validated
 
