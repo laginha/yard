@@ -32,8 +32,8 @@ class Api(object):
         if hasattr(resource_class, 'model'):
             self.__mapping[ resource_class.model ] = resource_name
 
-    def extend(self, to_include):
-        self.__urlpatterns.append( include(to_include) )
+    def extend(self, path, to_include):
+        self.__urlpatterns.append( url(path, include(to_include)) )
 
     def get_uri(self, model):
         if model.__class__ in self.__mapping:
