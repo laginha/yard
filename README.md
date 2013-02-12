@@ -15,7 +15,7 @@ Other frameworks and applications, more mature and solid, such as [Django-Piston
 ## Usage
 
 *urls.py*
-<pre>
+```python
 from django.conf.urls.defaults import patterns, include, url
 from views     import Books
 from yard.urls import include_resource
@@ -23,10 +23,10 @@ from yard.urls import include_resource
 urlpatterns = patterns('django_yard.app.views.',
     url( r'^books', include_resource( Books ) ),
 )
-</pre>
+```
 
 *params.py*
-<pre>
+```python
 from yard.forms import *    
 
 class BookParameters(Form):
@@ -37,10 +37,10 @@ class BookParameters(Form):
     house  = CharParam( alias='publishing_house__id' ) 
 
     __logic__ = year, title, genre & (author|house)
-</pre>
+```
 
 *views.py*
-<pre>
+```python
 from yard.resources import Resource
 from models import Book
 
@@ -83,7 +83,7 @@ class Books(Resource):
     def destroy(self, request, book_id):
         #DELETE /resource/:id/
         ...
-</pre>
+```
 
 For more information, check the [documentation](docs/index.md).
 
