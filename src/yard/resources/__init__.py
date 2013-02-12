@@ -206,7 +206,7 @@ class Resource(object):
         return [builder.to_json(i) for i in resources]
 
     def serialize_all(self, resources, fields):
-        builder = JSONbuilder( self._api, fields )
+        builder = JSONbuilder( self.__api, fields )
         return self.__serialize_all( resources, builder )
 
     def __serialize(self, resource, builder):
@@ -216,6 +216,6 @@ class Resource(object):
         return builder.to_json(resource)
 
     def serialize(self, resource, fields):
-        builder = JSONbuilder( self._api, fields )
+        builder = JSONbuilder( self.__api, fields )
         return self.__serialize( resource, builder )
 
