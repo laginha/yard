@@ -9,11 +9,11 @@ from yard.version import ResourceVersions
 class Api(object):
     __collection = {'get':'index', 'post':'create'}
     __single     = {'get':'show', 'put':'update', 'post':'update', 'delete':'destroy'}
-    
+
     def __init__(self):
         self.__urlpatterns = []
         self.__mapping = {}
-    
+
     def include(self, resource_name, resource_class, single_name=None, collection_name=None):
         def single_pattern():
             path     = r'^%s/(?P<pk>[0-9]+)/?$' %resource_name
@@ -31,12 +31,15 @@ class Api(object):
         self.__urlpatterns.append( collection_pattern() )
         if hasattr(resource_class, 'model'):
             self.__mapping[ resource_class.model ] = resource_name
-    
+
+    def extend(self, to_include):
+        self.__urlpatterns.append( include(to_include) )
+
     def get_uri(self, model):
         if model.__class__ in self.__mapping:
             resource_name = self.__mapping[ model.__class__ ]
             return reverse( "single."+resource_name, kwargs={'pk':model.pk} )
-        
+
     @property
     def urls(self):
-        return patterns( '', *self.__urlpatterns )    
+        return patterns( '', *self.__urlpatterns )
