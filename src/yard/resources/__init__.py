@@ -22,10 +22,10 @@ class Resource(object):
     '''
     API Resource object
     '''
-    
+
     class Meta(object):
         pass
-    
+
     class Pagination(object):
         pass
 
@@ -44,8 +44,8 @@ class Resource(object):
         self.fields       = get_fields()
         self.index_fields = self.index_fields if hasattr(self, "index_fields") else self.fields
         self.show_fields  = self.show_fields  if hasattr(self, "show_fields") else self.fields
-        self.__meta.page_class = self.__pagination #TEMPORARY 
-  
+        self.__meta.page_class = self.__pagination #TEMPORARY
+
     def __call__(self, request, **parameters):
         '''
         Called in every request made to Resource
@@ -107,7 +107,7 @@ class Resource(object):
             current_fields = fields(parameters)
             return JSONbuilder( self.__api, current_fields ), current_fields
         return JSONbuilder( self.__api, fields ), fields
-    
+
     def __view(self, request, method, parameters):
         '''
         Runs desired view according to method
@@ -116,7 +116,7 @@ class Resource(object):
             raise MethodNotImplemented(method)
         view = getattr( self, method )
         if method in ['show', 'update', 'destroy']:
-            return view( request, parameters.pop('pk'), **parameters ) 
+            return view( request, parameters.pop('pk'), **parameters )
         elif method == 'create':
             return view( request, **parameters )
         return view( request, parameters )
@@ -135,10 +135,7 @@ class Resource(object):
         elif is_httpresponse(response):
             return response
 
-        if is_valuesset(response):
-            content = self.__list_with_meta(request, list(response), resource_parameters, builder)
-            return self.__json_response(request)(content, status=status)
-        elif is_queryset(response):
+        if is_queryset(response):
             response = self.select_related(response, current_fields)
             content  = self.queryset_with_meta(request, response, resource_parameters, builder)
             return self.__json_response(request)(content, status=status)
@@ -147,7 +144,7 @@ class Resource(object):
             return self.__json_response(request)(content, status=status)
         elif is_generator(response) or is_list(response):
             content = self.__list_with_meta(request, response, resource_parameters, builder)
-            return self.__json_response(request)(content, status=status)             
+            return self.__json_response(request)(content, status=status)
         elif response == None:
             return HttpResponse(status=status)
         elif is_int(response):
@@ -156,6 +153,9 @@ class Resource(object):
             return self.__json_response(request)(response, status=status)
         elif is_file(response):
             return FileResponse(response, status=status)
+        elif is_valuesset(response):
+            content = self.__list_with_meta(request, list(response), resource_parameters)
+            return self.__json_response(request)(content, status=status)
         else:
             return HttpResponse(str(response), status=status)
 
@@ -182,16 +182,16 @@ class Resource(object):
         objects = self.__serialize_all( page, builder )
         meta    = self.__meta.fetch(request, resources, page, resource_parameters)
         return objects if not meta else {'Objects': objects,'Meta': meta}
-    
+
     def __list_with_meta(self, request, resources, resource_parameters, builder):
         '''
         Appends Meta data into list based response
         '''
         page    = self.__paginate( request, resources, resource_parameters )
-        objects = [self.serialize(i, builder) if is_modelinstance(i) else i for i in page]
+        objects = [self.__serialize(i, builder) if is_modelinstance(i) else i for i in page]
         meta    = self.__meta.fetch(request, resources, page, resource_parameters)
         return objects if not meta else {'Objects': objects,'Meta': meta}
-    
+
     def __paginate(self, request, resources, resource_parameters):
         '''
         Return page of resources according to default or parameter values
@@ -199,8 +199,8 @@ class Resource(object):
         page_resources, page_parameters = self.__pagination.select( request, resources )
         resource_parameters.validated.update( page_parameters )
         return page_resources
-    
-    def __serialize_all(self, resources, builder):   
+
+    def __serialize_all(self, resources, builder):
         '''
         Serializes each resource (within page) into json
         '''
