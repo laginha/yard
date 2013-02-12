@@ -72,23 +72,17 @@ resulting in the following *JSON* response:
 resulting in the following *JSON* response:
 
 ```javascript
-{
-    "Objects": [
-        {
-            "id": "1", 
-            "author": {
-            	"id": 1
-                "name": "George R.R. Martin", 
-            }, 
-            "title": "A Feast for Crows"
-        }, 
-        ...
-    ], 
-    "Meta": {
-        ...
-    }
-}
+[ 
+    { "id": "8",
+      "title": "A Game of Thrones",
+      "author": {
+          "id": 1,
+          "name": "George R.R. Martin",
+      }
+    } 
+]
 ```
+
 
 ## Instance methods in fields
 
@@ -116,6 +110,7 @@ class Book(resources.Resource):
     }
 ```
 
+The instance method can be callable with arguments. You just need to indicate the argument in front of the instance method name, within the string field
 
 Beware, *Yard* deals differently according to the object type returned by instance methods:
 
