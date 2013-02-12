@@ -47,7 +47,7 @@ class Book(models.Model):
 
 class Book(Resource):
     fields = ('id', 'title', 'book_genres', ('author', ('name',)) )
-``
+```
 
 The instance method can be callable with arguments. You just need to indicate the argument in front of the instance method name, within the string field
 
