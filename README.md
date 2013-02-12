@@ -89,13 +89,3 @@ class BooksResource(resources.Resource):
 - Django Debug Toolbar support
 
 For more information, check the [documentation](docs/index.md).
-
-
-## Motivations
-
-I've been working with a fairly complex project, with equally complex API design. *Django forms* weren't enough for what i needed, i still had too much code on my resources validating the input parameters. That was when I started to developed my own resource, inspired by the [Dagny](https://github.com/zacharyvoase/dagny) project, that would relieve my views from the ugliness of input validations.
-
-With a few extra inspirations, *Yard* was born.
-
-Other frameworks and applications, more mature and solid, such as [Tastypie](http://django-tastypie.readthedocs.org/en/latest/) and [Django-Rest-Framework](http://django-rest-framework.org/), can be enough for most needs. But i think *Yard* brings something new. In the end, I'm just having fun really and keeping it simple.
-
