@@ -27,10 +27,7 @@ class JSONbuilder:
         '''
         Builds (sub) json response according to given fields and resource
         '''
-        try:
-            json_ = {'resource_uri': self.api.get_uri( resource )}
-        except NoReverseMatch:
-            json_ = {}
+        json_ = {'resource_uri': self.api.get_uri( resource )}
         for field in self.fields:
             json_.update( self.__handle_field(resource, field) )
         return json_
@@ -48,9 +45,8 @@ class JSONbuilder:
         Handle fields of type tuple - subfields
         '''
         sub_resource = getattr( resource, field[0], None )
-        sub_json = self.__class__( self.api, field[1] ).to_json( sub_resource )
-        sub_json['resource_uri'] = self.api.get_uri( sub_resource )
-        return { field[0]: sub_json }
+        builder = self.__class__( self.api, field[1] )
+        return { field[0]: builder.to_json( sub_resource ) }
 
     def __handle_string_field(self, resource, field):
         '''
