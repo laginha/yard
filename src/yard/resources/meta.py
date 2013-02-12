@@ -28,7 +28,7 @@ class MetaDict(dict):
     @property
     def page_count(self):
         if self._page_count == None:
-            if isinstance(self.page, (list, len)):
+            if isinstance(self.page, (list, tuple)):
                 self._page_count = len( self.page )
             else:
                 self._page_count = self.page.count()
