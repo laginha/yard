@@ -91,4 +91,3 @@ class BooksResource(resources.Resource):
 - Django Debug Toolbar support
 
 For more information, check the [documentation](docs/index.md).
-
