@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Yard by laginha</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Yard</h1>
+          <h2>Yet Another Restful Django Framework</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/laginha/yard/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/laginha/yard/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/laginha/yard" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>Yet Another Restful Django Framework</h1>
+
+<p><em>Yard</em> is an API oriented framework that aims to simplify the developer's work when implementing complex API design*. It provides a neat, familiar and easy way to control the logic for acceptable parameters in each http-GET-request.</p>
+
+<h2>Motivations</h2>
+
+<p>I've been working with a fairly complex project, with equally complex API design. Django forms weren't enough for what i needed, i still had too much code on my resources validating the input parameters. That was when I started to developed my own resource, inspired by the <a href="https://github.com/zacharyvoase/dagny">Dagny</a> project, that would relieve my views from the ugliness of input validations.</p>
+
+<p>With a few extra inspirations, Yard was born.</p>
+
+<p>Other frameworks and applications, more mature and solid, such as <a href="https://bitbucket.org/jespern/django-piston/wiki/Home">Django-Piston</a>, <a href="http://django-tastypie.readthedocs.org/en/latest/">Tastypie</a> and <a href="http://django-rest-framework.org/">Django-Rest-Framework</a>, can be enough for most needs. But i think Yard brings something new. In the end, I'm just having fun really and keeping it simple.</p>
+
+<h2>Usage</h2>
+
+<p><em>urls.py</em></p>
+
+<div class="highlight"><pre><span class="kn">from</span> <span class="nn">django.conf.urls.defaults</span> <span class="kn">import</span> <span class="n">patterns</span><span class="p">,</span> <span class="n">include</span><span class="p">,</span> <span class="n">url</span>
+<span class="kn">from</span> <span class="nn">views</span>     <span class="kn">import</span> <span class="n">Books</span>
+<span class="kn">from</span> <span class="nn">yard.urls</span> <span class="kn">import</span> <span class="n">include_resource</span>
+
+<span class="n">urlpatterns</span> <span class="o">=</span> <span class="n">patterns</span><span class="p">(</span><span class="s">'django_yard.app.views.'</span><span class="p">,</span>
+    <span class="n">url</span><span class="p">(</span> <span class="s">r'^books'</span><span class="p">,</span> <span class="n">include_resource</span><span class="p">(</span> <span class="n">Books</span> <span class="p">)</span> <span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+
+<p><em>params.py</em></p>
+
+<div class="highlight"><pre><span class="kn">from</span> <span class="nn">yard.forms</span> <span class="kn">import</span> <span class="o">*</span>    
+
+<span class="k">class</span> <span class="nc">BookParameters</span><span class="p">(</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">year</span>   <span class="o">=</span> <span class="n">IntegerParam</span><span class="p">(</span> <span class="n">alias</span><span class="o">=</span><span class="s">'publication_date_year'</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">1970</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">2012</span> <span class="p">)</span>
+    <span class="n">title</span>  <span class="o">=</span> <span class="n">CharParam</span><span class="p">(</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span> <span class="p">)</span>
+    <span class="n">genre</span>  <span class="o">=</span> <span class="n">CharParam</span><span class="p">(</span> <span class="n">alias</span><span class="o">=</span><span class="s">'genres'</span> <span class="p">)</span>
+    <span class="n">author</span> <span class="o">=</span> <span class="n">CharParam</span><span class="p">(</span> <span class="n">alias</span><span class="o">=</span><span class="s">'author__id'</span> <span class="p">)</span>
+    <span class="n">house</span>  <span class="o">=</span> <span class="n">CharParam</span><span class="p">(</span> <span class="n">alias</span><span class="o">=</span><span class="s">'publishing_house__id'</span> <span class="p">)</span> 
+
+    <span class="n">__logic_</span> <span class="o">=</span> <span class="n">year</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">genre</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">author</span><span class="o">|</span><span class="n">house</span><span class="p">)</span>
+</pre></div>
+
+<p><em>views.py</em></p>
+
+<div class="highlight"><pre><span class="kn">from</span> <span class="nn">yard.resources</span> <span class="kn">import</span> <span class="n">Resource</span>
+<span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">Book</span>
+
+<span class="k">class</span> <span class="nc">Books</span><span class="p">(</span><span class="n">Resource</span><span class="p">):</span>
+    <span class="c"># used in the index method</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="n">BookParameters</span>
+    <span class="c"># used in the index and show methods</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">(</span> <span class="s">'id'</span><span class="p">,</span> <span class="s">'title'</span><span class="p">,</span> <span class="s">'publication_date'</span><span class="p">,</span> <span class="s">'genres'</span><span class="p">,</span> <span class="p">(</span><span class="s">'author'</span><span class="p">,</span> <span class="p">(</span><span class="s">'name'</span><span class="p">,</span> <span class="s">'age'</span><span class="p">,))</span> <span class="p">)</span>
+
+    <span class="c"># index's response metadata</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">maximum</span> <span class="o">=</span> <span class="p">((</span><span class="s">'longest_title'</span><span class="p">,</span> <span class="s">'title'</span><span class="p">),)</span>
+        <span class="n">average</span> <span class="o">=</span> <span class="p">((</span><span class="s">'average_pages'</span><span class="p">,</span> <span class="s">'number_of_pages'</span><span class="p">),)</span>
+
+    <span class="c"># index's pagination configuration  </span>
+    <span class="k">class</span> <span class="nc">Page</span><span class="p">:</span>
+        <span class="n">offset_parameter</span> <span class="o">=</span> <span class="s">'offset'</span>
+        <span class="n">results_per_page</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">'parameter'</span><span class="p">:</span> <span class="s">'results'</span><span class="p">,</span>
+            <span class="s">'default'</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+            <span class="s">'limit'</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="c">#GET /resource/</span>
+        <span class="k">return</span> <span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span> <span class="o">**</span><span class="n">params</span> <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">book_id</span><span class="p">):</span>
+        <span class="c">#GET /resource/:id/</span>
+        <span class="k">return</span> <span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="nb">id</span><span class="o">=</span><span class="n">book_id</span> <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="c">#POST /resource/</span>
+        <span class="k">return</span> <span class="mi">401</span><span class="p">,</span> <span class="s">'You are not authorize'</span>
+
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">book_id</span><span class="p">):</span>
+        <span class="c">#PUT /resource/:id/</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">book_id</span><span class="p">):</span>
+        <span class="c">#DELETE /resource/:id/</span>
+        <span class="o">...</span>
+</pre></div>
+        </section>
+
+        <footer>
+          Yard is maintained by <a href="https://github.com/laginha">laginha</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
