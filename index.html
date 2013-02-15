@@ -55,7 +55,7 @@
 
 <h2>Usage</h2>
 
-<p>Each of your <code>API URL</code> (in <code>urls.py</code>) should point to the respective resource.</p>
+<p>Each of your <code>API URLs</code> (in <code>urls.py</code>) should point to the respective resource.</p>
 
 <p><em>urls.py</em></p>
 
@@ -68,7 +68,7 @@
 <span class="p">)</span>
 </pre></div>
 
-<p>For input validation, you should create a form for your resource in <code>params.py</code>.</p>
+<p>For input validation, you should create a <code>Form</code> for each of your resources in <code>params.py</code>.</p>
 
 <p><em>params.py</em></p>
 
@@ -89,7 +89,7 @@
     <span class="n">__logic_</span> <span class="o">=</span> <span class="n">year</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">genre</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">author</span><span class="o">|</span><span class="n">house</span><span class="p">)</span>
 </pre></div>
 
-<p>Finally, you set the desired views for each created resource</p>
+<p>Finally, in <code>views.py</code> you define the resources and set the desired views for each of them.</p>
 
 <p><em>views.py</em></p>
 
@@ -136,7 +136,7 @@
 
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
         <span class="c">#POST /resource/</span>
-        <span class="k">return</span> <span class="mi">401</span><span class="p">,</span> <span class="s">'You are not authorize'</span>
+        <span class="k">return</span> <span class="mi">401</span><span class="p">,</span> <span class="s">'You are not authorized'</span>
 
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">book_id</span><span class="p">):</span>
         <span class="c">#PUT /resource/:id/</span>
@@ -147,7 +147,7 @@
         <span class="o">...</span>
 </pre></div>
 
-<p>For more details on how to use this project, please check the <strong><a href="https://github.com/laginha/yard">Github page</a></strong></p>
+<p>For more details on how to use this project, please check the <strong><a href="https://github.com/laginha/yard">Github page</a></strong>.</p>
         </section>
 
         <footer>
