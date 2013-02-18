@@ -11,10 +11,10 @@ class ResourceVersions(object):
                 setattr(self, name, version(api, routes))
 
     def __call__(self, request, **kwargs):
-        if 'version' in request.META or 'version' in request.GET:
-            requested_version = request.META.get('version', request.GET['version'])
-            if hasattr(self, requested_version):
-                return getattr(self, requested_version)(request, **kwargs)
+        version = re.findall(r'.*version=(.*)', request.META.get('HTTP_ACCEPT', ''))
+        requested_version = version[0] if version else request.GET.get('version')
+        if version and hasattr(self, requested_version):
+            return getattr(self, requested_version)(request, **kwargs)
         if hasattr(self, 'default'):
             return getattr(self, 'default')(request, **kwargs)
         if hasattr(self, 'latest'):
