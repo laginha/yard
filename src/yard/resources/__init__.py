@@ -32,7 +32,7 @@ class Resource(object):
         pass
 
     def __init__(self, api, routes):
-        self.__api        = api
+        self._api         = api
         self.__routes     = routes # maps http methods with respective views
         self.__meta       = ResourceMeta( self.Meta )
         self.__pagination = ResourcePage( self.Pagination )
@@ -110,8 +110,8 @@ class CRUDonlyMobileDrivenResource(CRUDonlyResource):
     def __get_builder(self, fields, parameters):
         if callable(fields):
             current_fields = fields(parameters)
-            return JSONbuilder( self.__api, current_fields ), current_fields
-        return JSONbuilder( self.__api, fields ), fields
+            return JSONbuilder( self._api, current_fields ), current_fields
+        return JSONbuilder( self._api, fields ), fields
 
     def __view(self, request, method, parameters):
         '''
@@ -212,7 +212,7 @@ class CRUDonlyMobileDrivenResource(CRUDonlyResource):
         return [builder.to_json(i) for i in resources]
 
     def serialize_all(self, resources, fields):
-        builder = JSONbuilder( self.__api, fields )
+        builder = JSONbuilder( self._api, fields )
         return self.__serialize_all( resources, builder )
 
     def __serialize(self, resource, builder):
@@ -222,6 +222,6 @@ class CRUDonlyMobileDrivenResource(CRUDonlyResource):
         return builder.to_json(resource)
 
     def serialize(self, resource, fields):
-        builder = JSONbuilder( self.__api, fields )
+        builder = JSONbuilder( self._api, fields )
         return self.__serialize( resource, builder )
 
