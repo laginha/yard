@@ -19,5 +19,10 @@ class ResourceVersions(object):
             return getattr(self, 'default')(request, **kwargs)
         if hasattr(self, 'latest'):
             return getattr(self, 'latest')(request, **kwargs)
-        raise VersionException()     
+        raise VersionException()
+    
+    @classmethod    
+    def get_resource_attribute(self, attr):
+        resource = getattr(self, 'latest', getattr(self, 'default'))
+        return getattr(resource, attr, None) 
                 
