@@ -32,21 +32,22 @@ class Resource(object):
         pass
 
     def __init__(self, api, routes):
-        def get_fields():
-            if hasattr(self, "fields"):
-                return self.fields
-            elif not hasattr(self, "model"):
-                return ()
-            return [i.name for i in self.model._meta.fields if i.name not in ['mymodel_ptr']]
         self.__api        = api
         self.__routes     = routes # maps http methods with respective views
         self.__meta       = ResourceMeta( self.Meta )
         self.__pagination = ResourcePage( self.Pagination )
         self.__parameters = Form( self.Parameters ) if hasattr(self, "Parameters") else None
-        self.fields       = get_fields()
+        self.fields       = self.__get_fields()
         self.index_fields = self.index_fields if hasattr(self, "index_fields") else self.fields
         self.show_fields  = self.show_fields  if hasattr(self, "show_fields") else self.fields
         self.__meta.page_class = self.__pagination #TEMPORARY
+
+    def __get_fields(self):
+        if hasattr(self, "fields"):
+            return self.fields
+        elif not hasattr(self, "model"):
+            return ()
+        return [i.name for i in self.model._meta.fields if i.name not in ['mymodel_ptr']]
 
     def __call__(self, request, **parameters):
         '''
