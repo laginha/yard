@@ -1,10 +1,10 @@
-# Parameters
+# List of params
 
 All available parameter types have three core arguments:
 
 - **alias:** Parameter's name within server's logic. If not given the parameter's name is used instead.
 - **required:** Defines whether parameter is required or not.
-- **default:** Defines the default value for the *Parameter*. It can be a callable with no arguments (e.g. `default = date.today`) or with only one argument being the value given in the request (e.g. `default = lambda x: datetime.combine(date.today(),x)`).
+- **default:** Defines the default value for the `Parameter`. It can be callable with no arguments (e.g. `default = date.today`) or with only one argument which is the value given in the request (e.g. `default = lambda x: datetime.combine(date.today(),x)`).
 
 
 ### IntegerParam
@@ -65,24 +65,21 @@ Extra arguments:
 - **max_value:** Defines the maximum value allowed.
 
 
-### DateTimeParam
-
-    DateTimeParam( validate=lambda x: x<datetime.today(), formats='%d-%m-%Y')
-
-Extra arguments:
-
-- **validate:** Single-argument callable function used for parameter value validation.
-- **formats:**  String or a list of Datetime formats as specified in the python's standard library. Defaults to ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d'].
-
-
 ### DateParam
 
-    DateParam( default=date.today, validate=lambda x: x<=date.today(), formats='%d-%m-%Y')
+    DateParam( validate=lambda x: x<=date.today(), formats='%d-%m-%Y')
+
+You may want to default it to the current day. Do it so the default value is callable, like this:
+
+    from datetime import date
+    DateParam( default = date.today )
+
+otherwise the default will correspond to the day in which the server was started.
 
 Extra arguments:
 
 - **validate:** Single-argument callable function used for parameter value validation.
-- **formats:**  String or a list of Datetime formats as specified in the python's standard library. Defaults to ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d'].
+- **formats:**  String or a list of Datetime formats as specified in the python's standard library. Defaults to `['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d']`.
 
 
 ### TimeParam
@@ -92,7 +89,17 @@ Extra arguments:
 Extra arguments:
 
 - **validate:** Single-argument callable function used for parameter value validation.
-- **formats:**  String or a list of Datetime formats as specified in the python's standard library. Defaults to ['%Y-%m-%d'].
+- **formats:**  String or a list of Datetime formats as specified in the python's standard library. Defaults to `['%Y-%m-%d']`.
+
+
+### DateTimeParam
+
+    DateTimeParam( validate=lambda x: x<datetime.today(), formats='%d-%m-%Y')
+
+Extra arguments:
+
+- **validate:** Single-argument callable function used for parameter value validation.
+- **formats:**  String or a list of Datetime formats as specified in the python's standard library. Defaults to `['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d']`.
 
 
 ### BooleanParam

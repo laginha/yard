@@ -1,12 +1,26 @@
-#Index
+# Index
+
+### Usage
 
 - [Resource](resource.md)
-    - [fields](fields.md)
-    - Responses
-        - [Supported return types](responses/support.md)
-        - [Metadata](responses/meta.md)
-        - [Pagination](response/pagination.md)
-    - Working with Forms
-        - [Forms](working_with_forms/forms.md)
-            - [parameters](working_with_forms/parameters.md) 
-        - [ResourceParameters](working_with_forms/resource_parameters.md)
+	- [Supported return types](support.md)
+		- [HttpResponses](utils/http_responses.md)
+	- [Parameters](working_with_parameters/parameters.md)
+    	- [List of params](working_with_parameters/params.md) 
+	    - [The params argument](working_with_parameters/resource_parameters.md)
+	- [Fields](fields.md)
+		- [hypermedia](hypermedia.md)
+	- [Pagination](pagination.md)
+	- [Metadata](meta.md)
+- [Versioning](versioning.md)
+
+### Utils
+
+- [Decorators](utils/decorators.md)
+- [Settings](utils/settings.md)
+- [Resource Object](utils/resource_object.md)
+- [Api Object](utils/api_object.md)
+
+
+
+

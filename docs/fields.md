@@ -1,43 +1,88 @@
 # Fields
 
-The *fields* attribute is responsible for defining which returned model's attributes are to be included in the JSON response (only used for **index** and **show** methods only). If not defined all model's attributes will be used.
+The `fields` attribute is responsible for defining which returned model instance's attributes are to be included in the *JSON* response (only used for `index` and `show` methods only). 
 
-For this attribute is expected a tuple of strings and tuples. While the former type indicates a model attribute's name, the latter is meant to dive into a foreign key instance as follows:
+if the `model` attribute is defined in the `Resource`, `fields` defaults to all model's attributes.
 
-    ('name of the fk attribute',('fk intance attribute1', 'fk intance attribute2'))
 
-Also, *Yard* allows you to define different *fields* for the *show* and *index* methods, by means of *show\_fields* and *index\_fields* attributes.
+## Instance attributes in fields
 
-In the example below the resource named *BookResource* implements the *show* method which returns a QueryField for base model *Book*.
+<pre>
+```python 
+from yard import resources
 
-```python
-class BookResource(Resource):
-    fields = ('id', 'title', ('author', ('name',)) )
-    
-    def show(self, book_id):
-        return Book.objects.filter(id=book_id)
+class BookResource(resources.Resource):
+    fields = ('id', 'title', 'author')
 ```
+</pre>
 
-The API client, whenever requesting *GET: http://example/books/id/*, will receive a JSON response built according to the specified *fields* attribute.
+The API-client, whenever requesting a resource collection (`index`), will receive a *JSON* response built according to the specified `fields` attribute.
 
-```javascript
-[ 
-    { "id": "8",
-      "name": "A Game of Thrones",
-      "author": {
-          "name": "George R.R. Martin",
-      }
-    } 
-]
+<pre>
+{
+    "Objects": [
+        {
+            "id": "1", 
+            "author": "George R.R. Martin",
+            "title": "A Feast for Crows"
+        }, 
+        ...
+    ], 
+    "Meta": {
+        ...
+    }
+}
+</pre>
+
+
+## Foreign keys in fields
+
+It is also possible to dive into a foreign key instance, as follows:
+
+<pre>
+```python 
+from yard import resources
+
+class BookResource(resources.Resource):
+    fields = ('id', 'title', 
+                ('author', ('id', 'name',)) 
+    )
 ```
+</pre>
 
+resulting in the following *JSON* response:
+
+<pre>
+{
+    "Objects": [
+        {
+            "id": "1", 
+            "author": {
+            	"id": 1
+                "name": "George R.R. Martin", 
+            }, 
+            "title": "A Feast for Crows"
+        }, 
+        ...
+    ], 
+    "Meta": {
+        ...
+    }
+}
+</pre>
 
 
 ## Instance methods in fields
 
-*Fields* elements of type string can also indicate instance methods. This is a good way to include data into the JSON response which can't be specified directly through model's attributes.
+`fields` elements can also indicate instance methods. This is a good way to include data into the *JSON* response which can't be specified directly through model's attributes.
 
+The instance method can be callable with arguments. You just need to indicate the arguments in front of the instance method name: `method_name arg0 arg1`.
+
+<pre>
 ```python
+from django import models
+from yard import resources
+
 class Book(models.Model):
     ...
     genres = models.ManyToManyField( Genre )
@@ -45,24 +90,22 @@ class Book(models.Model):
     def book_genres(self):
         return self.genres.all()
 
-class Book(Resource):
-    fields = ('id', 'title', 'book_genres', ('author', ('name',)) )
+class Book(resources.Resource):
+    fields = ('id', 'title', 'author', 'book_genres')
 ```
+</pre>
 
-The instance method can be callable with arguments. You just need to indicate the argument in front of the instance method name, within the string field
 
-    fields = 'method arg0 arg1'
-
-*Yard* deals differently with different object types returned by instance methods:
+Beware, *Yard* deals differently according to the object type returned by instance methods:
 
 <table border="1">
     <tr>
-        <th>Allowed types</th>
+        <th>Object types</th>
         <th>Process</th>
     </tr>
     <tr>
         <td>ValuesQuerySet</td>
-        <td>Converts to json</td>
+        <td>Converts to list</td>
     </tr>
     <tr>
         <td>QuerySet</td>
@@ -73,7 +116,42 @@ The instance method can be callable with arguments. You just need to indicate th
         <td> - </td>
     </tr>
     <tr>
-        <td>other (e.g. model instance)</td>
-        <td>Unicodes value</td>
+        <td>Other (e.g. model instance)</td>
+        <td>Converts to unicode</td>
     </tr>
 </table>
+
+
+## Dynamic fields
+
+Some times it is required that the resource's representation to depend on the given input in the request. For that purpose, the `fields` attribute can be callable and should expect the validated parameters (`ResourceParameters`) as it argument.
+
+<pre>
+```python 
+from yard import resources
+
+class BookResource(resources.Resource):
+    
+    def fields(self, params):
+        if params.pop('withauthor', False):
+            return ('id', 'title')
+        return ('id', 'title', 'author')
+```
+</pre>
+
+
+## Show and index fields
+
+*Yard* allows you to define different *JSON* representation for the `show` and `index` methods, by means of `show\_fields` and `index\_fields` attributes. These attributes have priority over the `fields` attribute.
+
+<pre>
+```python 
+from yard import resources
+
+class BookResource(resources.Resource):
+    index_fields = ('id',)
+    show_fields  = ('id', 'title', ('author', ('name',)) )
+    
+```
+</pre>
+

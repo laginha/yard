@@ -6,10 +6,7 @@ import simplejson, mimetypes
 
 
 # INDENTATION 
-if hasattr(settings, 'INDENT_JSON') and settings.INDENT_JSON:
-    INDENT = 2
-else:
-    INDENT = 2 if settings.DEBUG else None
+INDENT = getattr(settings, 'INDENT_JSON', 2) if settings.DEBUG else None
 
 # DEBUG TOOLBAR 
 if hasattr(settings, 'DEBUG_TOOLBAR_CONFIG'):
@@ -98,11 +95,6 @@ class JsonDebugResponse(HttpResponse):
 
 
 # JSON RESPONSE
-if hasattr(settings, 'YARD_DEBUG_TOOLBAR'):
-    JSONResponse = JsonDebugResponse if settings.YARD_DEBUG_TOOLBAR else ProperJsonResponse
-else:
-    if 'debug_toolbar' in settings.INSTALLED_APPS and settings.DEBUG==True:
-        JSONResponse = JsonDebugResponse
-    else:
-        JSONResponse = ProperJsonResponse
-
+YARD_DEBUG_TOOLBAR = 'debug_toolbar' in settings.INSTALLED_APPS and settings.DEBUG==True
+YARD_DEBUG_TOOLBAR = getattr(settings, 'YARD_DEBUG_TOOLBAR', YARD_DEBUG_TOOLBAR)
+JSONResponse       = JsonDebugResponse if YARD_DEBUG_TOOLBAR else ProperJsonResponse

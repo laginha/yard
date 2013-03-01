@@ -1,18 +1,22 @@
 # Resource
 
-The *Resource* object represents the resource data you wish to provide access to. Its main purposes are:
+The `Resource` object represents the resource data you wish to provide access to. Its main purposes are:
 
-- organize the different crud methods into its instance methods. 
-- simplify your http responses, returning JSON whenever possible (see [responses.md](responses/support.md)).
-- structure your JSON resource response, according to class attribute *fields* (see [fields.md](fields.md))..
-- parse input according to class attribute *parameters* (see [forms.md](working_with_forms/forms.md)).
+- Organize the different *CRUD* methods into its instance methods. 
+- Simplify your [responses](support.md), returning *JSON* whenever possible.
+- Structure your *JSON* response, according to class attribute [*fields*](fields.md).
+- Parse input according to class attribute [*Parameters*](working_with_forms/parameters.md).
 
-In the end, your resource might look like this: 
 
+## Basic Usage
+
+### Create the Resource
+
+<pre>
 ```python
-class MyResource(Resource):
-    parameters = ...
-    fields     = ...
+from yard import resources
+
+class FooResource(resources.Resource):
 
     def index(self, request, params):
         return {'foo':'bar'}
@@ -20,19 +24,10 @@ class MyResource(Resource):
     def show(self, request, book_id):
         return 404
 ```
-
-For the resource to be accessible you will need to include it in the url patterns:
-
-```python
-from yard.urls import include_resource
-
-urlpatterns = patterns('',
-    url( r'^myresource', include_resource( My_Resource ) ),
-)
-``
+</pre>
 
 
-## CRUD instance methods
+#### CRUD instance methods
 
 <table border="1">
     <tr>
@@ -48,7 +43,7 @@ urlpatterns = patterns('',
     <tr>
         <td>show</td>
         <td>Get</td>
-        <td>/myresource/:id/</td>
+        <td>/myresource/:pk/</td>
     </tr>
     <tr>
         <td>create</td>
@@ -58,14 +53,65 @@ urlpatterns = patterns('',
     <tr>
         <td>update</td>
         <td>Put</td>
-        <td>/myresource/:id/</td>
+        <td>/myresource/:pk/</td>
     </tr>
     <tr>
         <td>destroy</td>
         <td>Delete</td>
-        <td>/myresource/:id/</td>
+        <td>/myresource/:pk/</td>
     </tr>
 </table>
 
 If any of these methods is not implemented, *Yard* returns *Not Found* whenever requested.
+
+
+### Create the API
+
+Add the `Resource` objects to an `Api` which will be responsible for generating the *urlpatterns*.
+
+<pre>
+```python
+from yard.api import Api
+
+api = Api()
+api.include( r'foo', FooResource )
+```
+</pre>
+
+If you want to add the `urlpatterns` of some other *urls.py*, you need to use the `extend` method. 
+
+<pre>
+```python
+api.extend( r'someapp', 'path.to.someapp.urls' )
+```
+</pre>
+
+
+### Add to Urlpatterns
+
+After including all the `Resource` objects, declare the `urlpatterns` variable in *urls.py* with the `Api` instance.
+
+<pre>
+```python
+urlpatterns = api.urlpatterns
+```
+</pre>
+
+<pre>
+```python    
+from django.conf.urls.defaults import patterns
+
+urlpatterns = patterns('',
+    ...
+    *api.urlpatterns
+)
+```
+</pre>
+
+
+### Request resource
+
+Once added `api.urlpatterns` to the `urlpatterns`, the `FooResource` is accessible to your HTTP client:
+
+	http://example.com/foo/
 
