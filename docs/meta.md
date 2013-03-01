@@ -1,6 +1,6 @@
 # Metadata
 
-For **index**'s `QuerySet`, list of model instances and `ValuesSet` based responses, *Yard* appends useful metadata by default.
+For `QuerySet`, list of model instances and `ValuesSet` based responses, *Yard* appends useful metadata by default.
 
 
 ## Meta Options
@@ -93,6 +93,7 @@ Custom-made meta option needs to be callable with a single argument, which is a 
 
 ### with meta
 
+<pre>
 ```python
 from yard import resources    
     
@@ -101,8 +102,9 @@ class BookResource(resources.Resource):
         validated_parameters = False
         maximum = (('longest_title', 'title'),)
 ```
+</pre>
 
-```javascript
+<pre>
 {
     "Objects": [
         {
@@ -123,10 +125,11 @@ class BookResource(resources.Resource):
         "longest_title": "A Feast for Crows",
     }
 }
-```
+</pre>
 
 ### without meta
 
+<pre>
 ```python
 from yard import resources    
     
@@ -134,8 +137,9 @@ class BookResource(resources.Resource):
     class Meta:
         no_meta = True
 ```
+</pre>
 
-```javascript
+<pre>
 [
     {
         "publication_date": "2005-10-17", 
@@ -146,4 +150,4 @@ class BookResource(resources.Resource):
     },
     ...
 ]
-```
+</pre>

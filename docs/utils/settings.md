@@ -1,10 +1,15 @@
 # Settings
 
-## General
+### JSON_INDENT
 
-### DEFAULT\_STATUS_CODE
+Defines the number of spaces for *JSON* response indentation. Although it might be useful for debugging puposes, it is not recommended for production environments.
 
-Defines the default status code of the *HTTP* response. Defaults to `200`.
+    JSON_INDENT = 4
 
-    DEFAULT_STATUS_CODE = 201
 
+### YARD_DEBUG_TOOLBAR
+
+If set to `True`, the resource returns a `JsonDebugResponse` whenever possible, which is useful while in develop mode. (*Django Debug Toolbar* integration).
+If set to `False`, the resource returns a `ProperJsonResponse` whenever possible.
+
+    YARD_DEBUG_TOOLBAR = False

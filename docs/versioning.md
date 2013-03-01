@@ -7,6 +7,7 @@ One of the most important features related to REST APIs is versioning. When a re
 
 The example below `BookResourceV2` and `BookResourceV3` are new versions (subclasses) of `BookResource` and each one is expected to be available through versioning.
 
+<pre>
 ```python
 from yard import resources
 
@@ -18,29 +19,28 @@ class BookResourceV2(BookResource):
     fields = ('id', 'title')
     
 class BookResourceV3(BookResource):
-    list_fields = ('id',)
+    index_fields = ('id',)
 ```    
+</pre>
 
 
 ### ResourceVersions
 
-This class is responsible for resource versioning. Each subclass of `ResourceVersions` requires the `default` attribute. This will be used whenever no version is mentioned in the HTTP request.
+This class is responsible for resource versioning. Each subclass of `ResourceVersions` requires at least one of two attributes: `default` and `latest`. Each one can be used whenever no version is mentioned in the HTTP request, although the former has precedence over the later.
 
+<pre>
 ```python
 from yard import versions
 
 class BookResourceVersions(version.ResourceVersions):
-    versions = {
-        '1.0': BookResource,
-        '2.0': BookResourceV2,
-        '3.0': BookResourceV3,
-    }
-    default = '2.0'
-    latest  = '3.0'
+    v1 = BookResource
+    v2 = default = BookResourceV2
+    v3 = latest  = BookResourceV3
 ```    
+</pre>
 
 *urls.py*
-
+<pre>
 ```python
 from yard.api import Api
 
@@ -48,22 +48,19 @@ api = Api()
 api.include( 'books', BookResourceVersions )
 urlpatterns = api.urlpatterns
 ```
+</pre>
 
 In this way the `BookResourceVersions` replies to:
 
-- version *1.0*, that corresponds to the `BookResource` representation.
-- version *2.0* and *default*, that corresponds to the `BookResourceV2` representation.
-- version *3.0* and *latest*, that corresponds to the `BookResourceV3` representation.
+- version *v1*, that corresponds to the `BookResource` representation.
+- version *v2* and *default*, that corresponds to the `BookResourceV2` representation.
+- version *v3* and *latest*, that corresponds to the `BookResourceV3` representation.
 
 
 ### Requesting data
 
 The specific *version* of a resource can be mentioned as a request query input
 
-    http://example.com/books/?version=1.0
+    http://example.com/books/?version=v1
 
-or it can be stated in the *Accept* header of the request
-
-    ACCEPT: version=1.0
-
-    ACCEPT: application/json; version=1.0
+or it can be stated in the *Accept* header of the request.

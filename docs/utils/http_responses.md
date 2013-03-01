@@ -5,26 +5,12 @@ In case you prefer to use Http Response explicitly, *Yard* offers a small number
 
 ## JSON responses
 
-Regarding *JSON* responses, *yard* does not apply any indentation for response efficiency purposes.
+Regarding *JSON* responses, *yard* applies indentation if setting's `DEBUG` set to `True` in order to make it easy for the developer to see and validate the *JSON* representation while in develop mode. Otherwise, *JSON* is returned without indentation for response efficiency purposes. 
 
-If you use Chrome, install [JSONView](https://chrome.google.com/webstore/detail/jsonview/chklaanhfefbnpoihckbnefhakgolnmc) in order to make it easy to debug the *JSON* response on the browser.
+By default, the indentation is set to two spaces, however it can be overwritten using `INDENT_JSON` setting.
 
 
 ### JsonResponse
-
-Http Response with *JSON* or *JSONP* content type, according to context.
-
-    JsonResponse( json_serializable_content, context=request )
-
-Expected arguments:
-
-- **content** 
-- **status** (optional)
-- **mimetype** (optional)   
-- **context** (optional)   
-
-
-### JSONResponse
 
 Http Response with *JSON* content type.
 
@@ -37,7 +23,7 @@ Expected arguments:
 - **mimetype** (optional)
 
 
-### JSONPResponse
+### JsonpResponse
 
 Http Response with *JSONP* content type. Use this for *AJAX* requests.
 
@@ -48,6 +34,35 @@ Expected arguments:
 - **content** 
 - **status** (optional)
 - **mimetype** (optional)
+
+
+### ProperJsonResponse
+
+Http Response with *JSON* or *JSONP* content type, according to the request.
+
+    ProperJsonResponse( request )( json_serializable_content )
+
+Expected arguments:
+
+- **content** 
+- **status** (optional)
+- **mimetype** (optional)   
+
+
+### JsonDebugResponse
+
+HTTP Response recommended for debug purposes, which makes use of *Django Debug Toolbar* project.
+
+    JsonDebugResponse( json_serializable_content )
+
+Expected arguments:
+
+- **content** 
+- **status** (optional)
+- **mimetype** (optional)
+- **content_type** (optional)
+
+By default *Yard* returns a `JsonDebugResponse` if *Django Debug Toolbar* application is in the `INSTALLED_APPS` and if `DEBUG` is set to `True`. This behavior can be overwritten by using the setting `YARD_DEBUG_TOOLBAR`.
 
 
 ## Other Responses
@@ -61,6 +76,5 @@ Http Response with file content. The mimetype of the response is filled automati
 Expected arguments:
 
 - **content** 
-- **filename** (optional)
 - **status** (optional)
 - **content_type** (optional)

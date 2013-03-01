@@ -12,6 +12,7 @@ The `Resource` object represents the resource data you wish to provide access to
 
 ### Create the Resource
 
+<pre>
 ```python
 from yard import resources
 
@@ -23,6 +24,7 @@ class FooResource(resources.Resource):
     def show(self, request, book_id):
         return 404
 ```
+</pre>
 
 
 #### CRUD instance methods
@@ -57,11 +59,6 @@ class FooResource(resources.Resource):
         <td>destroy</td>
         <td>Delete</td>
         <td>/myresource/:pk/</td>
-    </tr>
-    <tr>
-        <td>option</td>
-        <td>Option</td>
-        <td>/myresource/ and /myresource/:pk/</td>
     </tr>
 </table>
 
@@ -106,6 +103,57 @@ urlpatterns = patterns('',
     *api.urlpatterns
 )
 ```
+
+
+### Request resource
+
+Once added `api.urlpatterns` to the `urlpatterns`, the `FooResource` is accessible to your HTTP client:
+
+	http://example.com/foo/
+
+
+### Create the API
+
+Add the `Resource` objects to an `Api` which will be responsible for generating the *urlpatterns*.
+
+<pre>
+```python
+from yard.api import Api
+
+api = Api()
+api.include( r'foo', FooResource )
+```
+</pre>
+
+If you want to add the `urlpatterns` of some other *urls.py*, you need to use the `extend` method. 
+
+<pre>
+```python
+api.extend( r'someapp', 'path.to.someapp.urls' )
+```
+</pre>
+
+
+### Add to Urlpatterns
+
+After including all the `Resource` objects, declare the `urlpatterns` variable in *urls.py* with the `Api` instance.
+
+<pre>
+```python
+urlpatterns = api.urlpatterns
+```
+</pre>
+
+<pre>
+```python    
+from django.conf.urls.defaults import patterns
+
+urlpatterns = patterns('',
+    ...
+    *api.urlpatterns
+)
+```
+</pre>
 
 
 ### Request resource
