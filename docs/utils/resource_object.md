@@ -9,7 +9,6 @@ Serialize a model instance according to given fields.
 
     self.serialize( ModelInstance, fields )
 
-<pre>
 ```python
 from yard import resources
 
@@ -22,7 +21,6 @@ class BookResource(resources.Resource):
             "Book": self.serialize( book, self.fields )
         }
 ```
-</pre>
 
 
 ### serialize_all
