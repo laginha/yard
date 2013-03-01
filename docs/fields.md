@@ -60,6 +60,26 @@ resulting in the following *JSON* response:
 ]
 ```
 
+resulting in the following *JSON* response:
+
+<pre>
+{
+    "Objects": [
+        {
+            "id": "1", 
+            "author": {
+            	"id": 1
+                "name": "George R.R. Martin", 
+            }, 
+            "title": "A Feast for Crows"
+        }, 
+        ...
+    ], 
+    "Meta": {
+        ...
+    }
+}
+</pre>
 
 ## Instance methods in fields
 
@@ -81,7 +101,6 @@ class Book(models.Model):
 class Book(resources.Resource):
     fields = ('id', 'title', 'author', 'book_genres')
 ```
-
 
 Beware, *Yard* deals differently according to the object type returned by instance methods:
 
@@ -124,7 +143,6 @@ class BookResource(resources.Resource):
         return ('id', 'title', 'author')
 ```
 
-
 ## Show and index fields
 
 *Yard* allows you to define different *JSON* representation for the `show` and `index` methods, by means of `show\_fields` and `index\_fields` attributes. These attributes have priority over the `fields` attribute.
@@ -137,4 +155,3 @@ class BookResource(resources.Resource):
     show_fields  = ('id', 'title', ('author', ('name',)) )
     
 ```
-
