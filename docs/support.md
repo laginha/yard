@@ -1,10 +1,8 @@
-# Responses
-
-## Supported return types
+# Supported return types
 
 <table border="1">
     <tr>
-        <th>Support Type</th>
+        <th>Object Type</th>
         <th>Description</th>
     </tr>
     <tr>
@@ -64,23 +62,28 @@
 ## Examples
 
 <pre>
-class BookResource(Resource):
+```python
+from yard import resources
 
+class BookResource(resources.Resource):
     def create(self):
         return 401, 'Not Authorize'
+```
 </pre>
 
 <pre>
-class BookResource(Resource):
-
-    def create(self, request):
+```python
+class BookResource(resources.Resource):
+    def destroy(self, request):
         return 401
+```
 </pre>
 
 <pre>
-class BookResource(Resource):
-
+```python
+class BookResource(resources.Resource):
     def show(self, request, book_id):
         return Book.objects.get(id=book_id)
+```
 </pre>
 

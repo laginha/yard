@@ -9,60 +9,54 @@ I've been working with a fairly complex project, with equally complex API design
 
 With a few extra inspirations, *Yard* was born.
 
-Other frameworks and applications, more mature and solid, such as [Django-Piston](https://bitbucket.org/jespern/django-piston/wiki/Home), [Tastypie](http://django-tastypie.readthedocs.org/en/latest/) and [Django-Rest-Framework](http://django-rest-framework.org/), can be enough for most needs. But i think *Yard* brings something new. In the end, I'm just having fun really and keeping it simple.
+Other frameworks and applications, more mature and solid, such as [Tastypie](http://django-tastypie.readthedocs.org/en/latest/) and [Django-Rest-Framework](http://django-rest-framework.org/), can be enough for most needs. But i think *Yard* brings something new. In the end, I'm just having fun really and keeping it simple.
+
+## Install
+
+*Yard* is available on Pypi:
+
+    pip install yard-framework
+    
+You can also install from source:
+
+    python setup.py install
 
 
 ## Usage
 
 *urls.py*
 <pre>
-from django.conf.urls.defaults import patterns, include, url
-from views     import Books
-from yard.urls import include_resource
+```python
+from views    import AuthorResource, BookResource
+from yard.api import Api
 
-urlpatterns = patterns('django_yard.app.views.',
-    url( r'^books', include_resource( Books ) ),
-)
-</pre>
+api = Api()
+api.include( 'books', BookResource )
+api.include( 'authors', AuthorResource )
 
-*params.py*
-<pre>
-from yard.forms import *    
-
-class BookParameters(Form):
-    year   = IntegerParam( alias='publication_date__year', min=1970, max=2012 )
-    title  = CharParam( required=True )
-    genre  = CharParam( alias='genres' )
-    author = CharParam( alias='author__id' )
-    house  = CharParam( alias='publishing_house__id' ) 
-
-    __logic__ = year, title, genre & (author|house)
+urlpatterns = api.urlpatterns
+```
 </pre>
 
 *views.py*
 <pre>
-from yard.resources import Resource
+```python
+from yard import resources, forms
 from models import Book
 
-class Books(Resource):
-    # used in the index method
-    parameters = BookParameters
+class BooksResource(resources.Resource):
+    # model associated with the resource
+    model = Book
     # used in the index and show methods
     fields = ( 'id', 'title', 'publication_date', 'genres', ('author', ('name', 'age',)) )
     
-    # index's response metadata
-    class Meta:
-        maximum = (('longest_title', 'title'),)
-        average = (('average_pages', 'number_of_pages'),)
-    
-    # index's pagination configuration  
-    class Page:
-        offset_parameter = 'offset'
-        results_per_page = {
-            'parameter': 'results',
-            'default': 25,
-            'limit': 50,
-        }
+    class Parameters:
+        year   = forms.IntegerParam( alias='publication_date__year', min=1970, max=2012 )
+        title  = forms.CharParam( required=True )
+        genre  = forms.CharParam( alias='genres' )
+        author = forms.CharParam( alias='author__id' )
+        house  = forms.CharParam( alias='publishing_house__id' )
+        __logic__ = year, title, genre & (author|house)
 
     def index(self, request, params):
         #GET /resource/
@@ -83,7 +77,19 @@ class Books(Resource):
     def destroy(self, request, book_id):
         #DELETE /resource/:id/
         ...
+```
 </pre>
+
+## Main features
+
+- Resource and API oriented 
+- Complex API logic
+- Hypermedia API
+- JSON serialization
+- Pagination
+- Metadata
+- Resource versioning
+- Django Debug Toolbar support
 
 For more information, check the [documentation](docs/index.md).
 
