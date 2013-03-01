@@ -69,3 +69,4 @@ class BookResource(resources.Resource):
     def index(self, request, params):
         return Book.objects.filter( **params )
 ```
+

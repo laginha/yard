@@ -82,8 +82,6 @@ class Book(resources.Resource):
     fields = ('id', 'title', 'author', 'book_genres')
 ```
 
-The instance method can be callable with arguments. You just need to indicate the argument in front of the instance method name, within the string field
-
 Beware, *Yard* deals differently according to the object type returned by instance methods:
 
 <table border="1">
