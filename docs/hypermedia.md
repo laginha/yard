@@ -27,6 +27,7 @@ In practice, every returned resource or nested resource contains in its *JSON* r
 
 For this to work properly both resources, books and authors, must exist in the `Api`.
 
+<pre>
 ```python
 from yard.api import Api
 
@@ -34,12 +35,15 @@ api = Api()
 api.include( r'books', BooksResource )
 api.include( r'authors', AuthorsResource)
 ```
+</pre>
 
 and at least the `AuthorsResource` (because `author` is referenced by `book`) must have the `model` attribute defined.
 
+<pre>
 ```python  
 from yard import resources
 
 class AuthorsResource(resources.Resource):    
     model = Author
 ```
+</pre>

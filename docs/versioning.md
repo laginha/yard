@@ -7,6 +7,7 @@ One of the most important features related to REST APIs is versioning. When a re
 
 The example below `BookResourceV2` and `BookResourceV3` are new versions (subclasses) of `BookResource` and each one is expected to be available through versioning.
 
+<pre>
 ```python
 from yard import resources
 
@@ -20,12 +21,14 @@ class BookResourceV2(BookResource):
 class BookResourceV3(BookResource):
     index_fields = ('id',)
 ```    
+</pre>
 
 
 ### ResourceVersions
 
 This class is responsible for resource versioning. Each subclass of `ResourceVersions` requires at least one of two attributes: `default` and `latest`. Each one can be used whenever no version is mentioned in the HTTP request, although the former has precedence over the later.
 
+<pre>
 ```python
 from yard import versions
 
@@ -34,9 +37,10 @@ class BookResourceVersions(version.ResourceVersions):
     v2 = default = BookResourceV2
     v3 = latest  = BookResourceV3
 ```    
+</pre>
 
 *urls.py*
-
+<pre>
 ```python
 from yard.api import Api
 
@@ -44,6 +48,7 @@ api = Api()
 api.include( 'books', BookResourceVersions )
 urlpatterns = api.urlpatterns
 ```
+</pre>
 
 In this way the `BookResourceVersions` replies to:
 
