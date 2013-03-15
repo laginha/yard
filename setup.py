@@ -13,4 +13,5 @@ setup(
     package_dir      = {'': 'src'},
     install_requires = ['simplejson'],
     extras_require   = {},
+    zip_safe         = False,
 )
