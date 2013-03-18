@@ -1,6 +1,5 @@
-from django.conf.urls.defaults import patterns, include, url
-from views     import *
 from yard.api import Api
+from .resources import AuthorResource, BookResourceVersions
 
 api = Api(discover=True)
 api.include( 'books', BookResourceVersions )
