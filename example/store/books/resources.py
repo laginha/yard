@@ -26,14 +26,6 @@ class BookResource(resources.Resource):
     class Meta:
         maximum = (('longest_title', 'title'),)
         average = (('average_pages', 'number_of_pages'),)
-
-    class Pagination:
-        offset_parameter = 'offset'
-        results_per_page = {        
-            'parameter': 'results', 
-            'default': 25,          
-            'limit': 50,            
-        }
         
     def index(self, request, params):
         return Book.objects.filter( **params ) #returns a JsonResponse-200
