@@ -4,8 +4,7 @@ from datetime  import datetime, date
     
 class Author( models.Model ):
     name = models.CharField( max_length=100 )
-    gender = models.CharField( max_length=1, 
-        choices=(('M', 'male'),('F','female')) )
+    gender = models.CharField( max_length=1, choices=(('M', 'male'),('F','female')) )
     birthday = models.DateField( default=datetime.today )
     
     def gender_(self):
