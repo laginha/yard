@@ -26,14 +26,6 @@ class BookResource(resources.Resource):
     class Meta:
         maximum = (('longest_title', 'title'),)
         average = (('average_pages', 'number_of_pages'),)
-
-    class Pagination:
-        offset_parameter = 'offset'
-        results_per_page = {        
-            'parameter': 'results', 
-            'default': 25,          
-            'limit': 50,            
-        }
         
     def index(self, request, params):
         if params.is_valid():
@@ -43,18 +35,6 @@ class BookResource(resources.Resource):
 
     def show(self, request, book_id):
         return Book.objects.get( id=book_id )
-    
-    def create(self, request):
-        #HttpResponse(status=405)
-        return 405
-        
-    def update(self, request, book_id):
-        #defaults to HttpResponse(status=200)
-        return
-        
-    def destroy(self, request, book_id):
-        #HttpResponse('You are not authorize', status=401)
-        return 401, 'You are not authorize'
 
 
 class BookResourceV2(BookResource):
