@@ -2,6 +2,7 @@
 # encoding: utf-8
 from yard.exceptions import VersionException
 from yard.resources import Resource
+import re
 
 class ResourceVersions(object):
 
