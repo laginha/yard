@@ -80,7 +80,7 @@ class JSONbuilder:
             return x
         elif is_geo_value(x):
             return json.loads(x.geojson)
-        elif is_relatedmanager(x) or is_manyrelatedmanager(x) or is_genericrelatedobjectmanager(resource):
+        elif is_relatedmanager(x) or is_manyrelatedmanager(x) or is_genericrelatedobjectmanager(x):
             return [unicode(i) for i in x.all()]
         elif is_modelinstance(x):
             return self.api.get_uri(x) or unicode(x)
