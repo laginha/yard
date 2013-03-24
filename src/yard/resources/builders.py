@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from django.core.urlresolvers import NoReverseMatch
-from yard.utils import is_tuple, is_geo_value, is_relatedmanager, is_manyrelatedmanager, is_genericrelatedobjectmanager
-from yard.utils import is_method, is_valuesset, is_queryset, is_serializable, is_modelinstance
+from yard.utils import is_tuple, is_geo_value, is_related_manager, is_many_related_manager, is_generic_related_manager
+from yard.utils import is_method, is_valuesset, is_queryset, is_serializable, is_modelinstance, is_dict
 import json
 
 
@@ -20,7 +20,7 @@ class JSONbuilder:
         '''
         if not resource: 
             return
-        elif is_relatedmanager(resource) or is_manyrelatedmanager(resource) or is_genericrelatedobjectmanager(resource):
+        elif is_related_manager(resource) or is_many_related_manager(resource) or is_generic_related_manager(resource):
             return [self.to_json( i ) for i in resource.all()]
         return self.__fields_to_json( resource )
         
@@ -32,7 +32,7 @@ class JSONbuilder:
             json_ = {'resource_uri': self.api.get_uri( resource )}
         except NoReverseMatch:
             json_ = {}
-        for field in self.fields:
+        for field in self.fields.iteritems():
             json_.update( self.__handle_field(resource, field) )
         return json_
 
@@ -40,11 +40,11 @@ class JSONbuilder:
         '''
         Handler for each field
         '''
-        if is_tuple( field ):
-            return self.__handle_tuple_field( resource, field )
-        return self.__handle_string_field( resource, field )
+        if is_dict( field[1] ):
+            return self.__handle_dict_field( resource, field )
+        return self.__handle_string_field( resource, field[0] )
 
-    def __handle_tuple_field(self, resource, field ):
+    def __handle_dict_field(self, resource, field):
         '''
         Handle fields of type tuple - subfields
         '''
@@ -84,7 +84,7 @@ class JSONbuilder:
             return x
         elif is_geo_value(x):
             return json.loads(x.geojson)
-        elif is_relatedmanager(x) or is_manyrelatedmanager(x) or is_genericrelatedobjectmanager(x):
+        elif is_related_manager(x) or is_many_related_manager(x) or is_generic_related_manager(x):
             return [unicode(i) for i in x.all()]
         elif is_modelinstance(x):
             return self.api.get_uri(x) or unicode(x)
