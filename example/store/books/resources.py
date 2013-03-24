@@ -12,8 +12,17 @@ class AuthorResource(resources.Resource):
     
 class BookResource(resources.Resource):
     model  = Book
-    fields = ['id', 'title', 'publication_date', 'genres', 
-             ('author', ('name','age','gender_')) ]
+    fields = {
+        'id': None, 
+        'title': None, 
+        'publication_date': None, 
+        'genres': None, 
+        'author': {
+            'name': None,
+            'age': None,
+            'gender_': None,
+        }
+    }
 
     class Parameters:
         year   = forms.IntegerParam( alias='publication_date__year', min_value=1970, max_value=2012 )
