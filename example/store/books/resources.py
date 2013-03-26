@@ -20,7 +20,6 @@ class BookResource(resources.Resource):
         'title': fields.Unicode, 
         'publication_date': fields.Unicode, 
         'genres': fields.RelatedManager,
-        #'author': fields.URI,
         'author': {
             'name': fields.Unicode,
             'age': fields.Integer,

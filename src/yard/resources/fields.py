@@ -8,8 +8,8 @@ List    = Tuple = Iter = list
 Dict    = JSON = dict
 Unicode = String = unicode
 Boolean = bool
-GEOJSON        = lambda x: simplejson.loads(x.geojson)
-RelatedManager = lambda x: [unicode(i) for i in x.all()]
-QuerySet       = lambda x: [unicode(i) for i in x]
-ValuesSet      = lambda x: list( result )
-URI            = lambda x, api: api.get_uri(x)
+GEOJSON        = lambda resource: simplejson.loads(resource.geojson)
+RelatedManager = lambda resource: [unicode(i) for i in resource.all()]
+QuerySet       = lambda resource: [unicode(i) for i in resource]
+ValuesSet      = lambda resource: list( resource )
+URI            = lambda resource, api: api.get_uri(resource)
