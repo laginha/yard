@@ -15,7 +15,6 @@ except ImportError:
     sys.stdout.write("Warning: Could not find the GEOS library.\n")
     is_geodj_project = False
 
-
 float_  = re.compile(r'^\-?[0-9]+\.[0-9]+$')
 
 current_url      = lambda x: "%s/%s" %(x.get_host(), x.META.get('PATH_INFO', ''))
@@ -42,3 +41,4 @@ is_generator     = lambda x: isinstance(x, GeneratorType)
 is_many_related_manager    = lambda x: "django.db.models.fields.related.ManyRelatedManager" in str(type(x))
 is_related_manager         = lambda x: "django.db.models.fields.related.RelatedManager" in str(type(x))
 is_generic_related_manager = lambda x: "django.contrib.contenttypes.generic.GenericRelatedObjectManager" in str(type(x))
+is_related_manager         = lambda x: is_many_related_manager(x) and is_related_manager(x) and is_generic_related_manager(x)
