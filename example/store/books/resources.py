@@ -1,10 +1,13 @@
 from yard import forms, version, resources
 from yard.resources.decorators import validate
+from yard.resources import fields
 from models import Book, Author
 
 class AuthorResource(resources.Resource):
     model  = Author
-    fields = ['name']
+    fields = {
+        'name': fields.Unicode,
+    }
     
     def show(self, request, author_id):
         return Author.objects.get( pk=author_id )
@@ -13,14 +16,15 @@ class AuthorResource(resources.Resource):
 class BookResource(resources.Resource):
     model  = Book
     fields = {
-        'id': None, 
-        'title': None, 
-        'publication_date': None, 
-        'genres': None, 
+        'id': fields.Integer, 
+        'title': fields.Unicode, 
+        'publication_date': fields.Unicode, 
+        'genres': fields.RelatedManager,
+        #'author': fields.URI,
         'author': {
-            'name': None,
-            'age': None,
-            'gender_': None,
+            'name': fields.Unicode,
+            'age': fields.Integer,
+            'gender_': fields.Unicode,
         }
     }
 
@@ -46,7 +50,11 @@ class BookResource(resources.Resource):
 
 
 class BookResourceV2(BookResource):
-    fields = ['title', 'author', 'publication_date']
+    fields = {
+        'title': fields.Unicode,
+        'author': fields.URI,
+        'publication_date': fields.Unicode
+    }
 
 
 class BookResourceVersions(version.ResourceVersions):
