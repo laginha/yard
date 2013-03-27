@@ -4,7 +4,6 @@ from django.conf import settings
 from django.http import HttpResponse
 import simplejson, mimetypes
 
-
 # INDENTATION 
 INDENT = getattr(settings, 'INDENT_JSON', 2) if settings.DEBUG else None
 
@@ -13,7 +12,6 @@ if hasattr(settings, 'DEBUG_TOOLBAR_CONFIG'):
     TAG = settings.DEBUG_TOOLBAR_CONFIG.get('TAG', 'body') 
 else:
     TAG = 'body'    
-
 
 
 class HttpResponseUnauthorized(HttpResponse):
