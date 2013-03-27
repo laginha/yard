@@ -1,11 +1,19 @@
 #!/usr/bin/env python
 # encoding: utf-8
-from django.db.models.query import QuerySet, ValuesQuerySet
-from django.db import models
-from django.http import HttpResponse
-from types import GeneratorType, NoneType
-import re
-import inspect
+from django.db.models.query              import QuerySet, ValuesQuerySet
+from django.db                           import models
+from django.http                         import HttpResponse
+from types                               import GeneratorType, NoneType
+import re, inspect
+
+try:
+    from django.contrib.gis.db.models.fields import GeometryField
+    from django.contrib.gis.geos             import GEOSGeometry
+    is_geodj_project = True
+except ImportError:
+    import sys
+    sys.stdout.write("Warning: Could not find the GEOS library.\n")
+    is_geodj_project = False
 
 
 float_  = re.compile(r'^\-?[0-9]+\.[0-9]+$')

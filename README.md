@@ -22,6 +22,16 @@ You can also install from source:
 
 ## Usage
 
+*settings.py*
+<pre>
+```python    
+MIDDLEWARE_CLASSES = (
+    ...
+    'yard.middleware.YardMiddleware',
+)
+```
+</pre>
+
 *urls.py*
 
 ```python

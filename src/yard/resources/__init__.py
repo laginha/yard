@@ -1,21 +1,12 @@
 #!/usr/bin/env python
 # encoding: utf-8
-from django.conf               import settings
-from django.core.exceptions    import ObjectDoesNotExist
-from django.core.paginator     import Paginator, EmptyPage
-from django.core               import serializers
-from django.http               import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
-from yard.exceptions           import RequiredParamMissing, HttpMethodNotAllowed, InvalidStatusCode, MethodNotImplemented
-from yard.forms                import Form
+from yard.exceptions           import HttpMethodNotAllowed, InvalidStatusCode, MethodNotImplemented
 from yard.utils                import *
-from yard.utils.http           import FileResponse, HttpResponseUnauthorized, JSONResponse, ProperJsonResponse
 from yard.resources.parameters import ResourceParameters
 from yard.resources.builders   import JSONbuilder
-from yard.resources.templates  import ServerErrorTemplate
 from yard.resources.meta       import ResourceMeta
 from yard.resources.page       import ResourcePage
 from yard.forms                import Form
-import json, mimetypes
 
 class CRUDonlyResource(BaseResource, ElementMixin, CollectionMixin):
     pass
@@ -53,37 +44,18 @@ class Resource(object):
         '''
         Called in every request made to Resource
         '''
-        try:
-            method = self.__method( request )
-            if method == 'index':
-                resource_parameters = self.__resource_parameters( request, parameters )
-                builder, current_fields = self.__get_builder(self.index_fields, resource_parameters)
-            elif method == 'show':
-                resource_parameters = parameters
-                builder, current_fields = self.__get_builder(self.show_fields, resource_parameters)
-            else:
-                resource_parameters = parameters
-                builder, current_fields = self.__get_builder(self.fields, resource_parameters)
-            response = self.__view( request, method, resource_parameters )
-            return self.__response( request, response, current_fields, resource_parameters, builder )
-        except HttpMethodNotAllowed:
-            # if http_method not allowed for this resource
-            return HttpResponseNotFound()
-        except RequiredParamMissing as e:
-            # if required param missing from request
-            return HttpResponseBadRequest()
-        except MethodNotImplemented as e:
-            # if view not implemented
-            return HttpResponseNotFound()
-        except ObjectDoesNotExist:
-            # if return model instance does not exist
-            return HttpResponseNotFound()
-        except IOError:
-            # if return file not found
-            return HttpResponseNotFound()
-        except InvalidStatusCode as e:
-            # status code given is not int
-            return ServerErrorTemplate(e)
+        method = self.__method( request )
+        if method == 'index':
+            resource_parameters = self.__resource_parameters( request, parameters )
+            builder, current_fields = self.__get_builder(self.index_fields, resource_parameters)
+        elif method == 'show':
+            resource_parameters = parameters
+            builder, current_fields = self.__get_builder(self.show_fields, resource_parameters)
+        else:
+            resource_parameters = parameters
+            builder, current_fields = self.__get_builder(self.fields, resource_parameters)
+        response = self.__view( request, method, resource_parameters )
+        return self.__response( request, response, current_fields, resource_parameters, builder )
 
 class CRUDonlyMobileDrivenResource(CRUDonlyResource):
     json_builder_class = JSONbuilderForMobile
@@ -128,49 +100,18 @@ class CRUDonlyMobileDrivenResource(CRUDonlyResource):
 
     def __response(self, request, response, current_fields, resource_parameters, builder):
         '''
-        Returns a HttpResponse according to given response
+        Proccess response into a JSON serializable object
         '''
-        status = 200
-        if is_tuple(response) and len(response)>1:
-            if is_int(response[0]):
-                status = response[0]
-            else:
-                raise InvalidStatusCode(response[0])
-            response = response[1]
-        elif is_httpresponse(response):
-            return response
-
-        if is_valuesset(response):
-            content = self.__list_with_meta(request, list(response), resource_parameters, builder)
-            return self.__json_response(request)(content, status=status)
-        elif is_queryset(response):
+        if is_queryset(response):
             response = self.select_related(response, current_fields)
-            content  = self.__queryset_with_meta(request, response, resource_parameters, builder)
-            return self.__json_response(request)(content, status=status)
+            return self.__queryset_with_meta(request, response, resource_parameters, builder)
         elif is_modelinstance(response):
-            content = self.__serialize(response, builder)
-            return self.__json_response(request)(content, status=status)
+            return self.__serialize(response, builder)
         elif is_generator(response) or is_list(response):
-            content = self.__list_with_meta(request, response, resource_parameters, builder)
-            return self.__json_response(request)(content, status=status)
-        elif response == None:
-            return HttpResponse(status=status)
-        elif is_int(response):
-            return HttpResponse(status=response)
-        elif is_str(response) or is_dict(response):
-            return self.__json_response(request)(response, status=status)
-        elif is_file(response):
-            return FileResponse(response, status=status)
-        else:
-            return HttpResponse(str(response), status=status)
-
-    def __json_response(self, request):
-        '''
-        Get Json response object
-        '''
-        if JSONResponse==ProperJsonResponse:
-            return JSONResponse(request)
-        return JSONResponse
+            return self.__list_with_meta(request, response, resource_parameters, builder)
+        elif is_valuesset(response):
+            return self.__list_with_meta(request, list(response), resource_parameters)
+        return response
 
     def select_related(self, resources, current_fields):
         '''
