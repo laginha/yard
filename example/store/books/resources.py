@@ -15,17 +15,17 @@ class AuthorResource(resources.Resource):
     
 class BookResource(resources.Resource):
     model  = Book
-    fields = {
-        'id': fields.Integer, 
-        'title': fields.Unicode, 
-        'publication_date': fields.Unicode, 
-        'genres': fields.RelatedManager,
-        'author': {
-            'name': fields.Unicode,
-            'age': fields.Integer,
-            'gender_': fields.Unicode,
-        }
-    }
+    # fields = {
+    #     'id': fields.Integer, 
+    #     'title': fields.Unicode, 
+    #     'publication_date': fields.Unicode, 
+    #     'genres': fields.RelatedManager,
+    #     'author': {
+    #         'name': fields.Unicode,
+    #         'age': fields.Integer,
+    #         'gender_': fields.Unicode,
+    #     }
+    # }
 
     class Parameters:
         year   = forms.IntegerParam( alias='publication_date__year', min_value=1970, max_value=2012 )
