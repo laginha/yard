@@ -6,6 +6,7 @@ from yard.resources.parameters import ResourceParameters
 from yard.resources.builders   import JSONbuilder
 from yard.resources.meta       import ResourceMeta
 from yard.resources.page       import ResourcePage
+from yard.resources            import fields as yardFields
 from yard.forms                import Form
 
 
@@ -35,9 +36,12 @@ class Resource(object):
         if hasattr(self, "fields"):
             return self.fields
         elif not hasattr(self, "model"):
-            return ()
-        return [i.name for i in self.model._meta.fields if i.name not in ['mymodel_ptr']]
-
+            return {}
+        return dict(
+            [ (i.name, yardFields.get_field(i)) 
+                for i in self.model._meta.fields if i.name not in ['mymodel_ptr']]
+        )
+    
     def __call__(self, request, **parameters):
         '''
         Called in every request made to Resource
