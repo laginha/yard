@@ -117,7 +117,7 @@ class Resource(object):
         '''
         Optimize queryset according to current response fields
         '''
-        related_models = [i[0] for i in current_fields if isinstance(i, tuple)]
+        related_models = [k for k,v in current_fields.iteritems() if isinstance(v, dict)]
         return resources.select_related( *related_models )
 
     def queryset_with_meta(self, request, resources, resource_parameters, builder):
