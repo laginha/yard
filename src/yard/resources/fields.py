@@ -7,16 +7,17 @@ Integer = int
 Float = float
 List = Tuple = Iter = list
 Dict = JSON = dict
-Unicode = String = unicode
+String = str
+Unicode = unicode
 Boolean = bool
-CommaSeparatedValue = lambda resource: [i for i in resource.split(',')],
-File = lambda resource: resource.url,
-FilePath = lambda resource: resource.path,
-GEOJSON = lambda resource: simplejson.loads(resource.geojson)
-RelatedManager = lambda resource: [unicode(i) for i in resource.all()]
-QuerySet = lambda resource: [unicode(i) for i in resource]
-ValuesSet = lambda resource: list( resource )
-URI = lambda resource, api: api.get_uri(resource)
+CommaSeparatedValue = lambda data: [i for i in data.split(',')],
+File = lambda data: data.url,
+FilePath = lambda data: data.path,
+GEOJSON = lambda data: simplejson.loads(data.geojson)
+RelatedManager = lambda data: [unicode(i) for i in data.all()]
+QuerySet = lambda data: [unicode(i) for i in data]
+ValuesSet = lambda data: list( data )
+URI = lambda data, api: api.get_uri(data)
 
 MAPPING = {
     models.AutoField: Integer,
