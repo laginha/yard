@@ -9,8 +9,8 @@ import re
 
 
 class Api(object):
-    __collection_routes = {'get':'index', 'post':'create'}
-    __single_routes     = {'get':'show', 'put':'update', 'post':'update', 'delete':'destroy'}
+    __collection_routes = {'get':'__index', 'post':'__create'}
+    __single_routes     = {'get':'__show', 'put':'__update', 'post':'__update', 'delete':'__destroy'}
 
     def __init__(self, path=r'^', discover=False):
         self.__urlpatterns = []

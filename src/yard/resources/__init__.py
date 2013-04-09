@@ -48,21 +48,25 @@ class Resource(object):
         '''
         Called in every request made to Resource
         '''
-        method = self.__method( request )
-        if method == 'index':
-            resource_parameters = self.__resource_parameters( request, parameters )
-            builder, current_fields = self.__get_builder(self.index_fields, resource_parameters)
-        elif method == 'show':
-            resource_parameters = parameters
-            builder, current_fields = self.__get_builder(self.show_fields, resource_parameters)
-        else:
-            resource_parameters = parameters
-            builder, current_fields = self.__get_builder(self.fields, resource_parameters)
-        response = self.__view( request, method, resource_parameters )
-        return self.__response( request, response, current_fields, resource_parameters, builder )
-
-class CRUDonlyMobileDrivenResource(CRUDonlyResource):
-    json_builder_class = JSONbuilderForMobile
+        try:
+            method = self.__method( request )
+            return getattr(method)(request, parameters)
+        except HttpMethodNotAllowed:
+            # if http_method not allowed for this resource
+            return HttpResponseNotFound()
+        except RequiredParamMissing as e:
+            # if required param missing from request
+            return HttpResponseBadRequest()
+        except MethodNotImplemented as e:
+            # if view not implemented
+            return HttpResponseNotFound()
+        except ObjectDoesNotExist:
+            # if return model instance does not exist
+            return HttpResponseNotFound()
+        except IOError:
+            # if return file not found
+            return HttpResponseNotFound()
+            
 
     def __method(self, request):
         '''
@@ -88,19 +92,6 @@ class CRUDonlyMobileDrivenResource(CRUDonlyResource):
             current_fields = fields(parameters)
             return JSONbuilder( self._api, current_fields ), current_fields
         return JSONbuilder( self._api, fields ), fields
-
-    def __view(self, request, method, parameters):
-        '''
-        Runs desired view according to method
-        '''
-        if not hasattr(self, method):
-            raise MethodNotImplemented(method)
-        view = getattr( self, method )
-        if method in ['show', 'update', 'destroy']:
-            return view( request, parameters.pop('pk'), **parameters )
-        elif method == 'create':
-            return view( request, **parameters )
-        return view( request, parameters )
 
     def __response(self, request, response, current_fields, resource_parameters, builder):
         '''
@@ -173,4 +164,61 @@ class CRUDonlyMobileDrivenResource(CRUDonlyResource):
     def serialize(self, resource, fields):
         builder = JSONbuilder( self._api, fields )
         return self.__serialize( resource, builder )
+         
+    #
+    # HTTP verbs
+    #
+    
+    def __index(self, request, parameters):
+        parameters = self.__resource_parameters( request, parameters )
+        builder, current_fields = self.__get_builder(self.index_fields, parameters)
+        response = self.index(request, parameters)
+        return self.__response(request, response, current_fields, parameters, builder)
+    
+    def index(self, request, params):
+        raise MethodNotImplemented()
 
+
+    def __show(self, request, parameters):
+        builder, fields = self.__get_builder(self.show_fields, parameters)
+        response = self.show(request, parameters.pop('pk'), **parameters)
+        return self.__response(request, response, fields, parameters, builder)
+    
+    def show(self, request, obj_id):
+        raise MethodNotImplemented()
+    
+    
+    def __create(self, request, parameters):
+        builder, fields = self.__get_builder(self.fields, parameters)
+        response = self.create(request, **parameters)
+        return self.__response(request, response, fields, parameters, builder)
+    
+    def create(self, request, parameters):
+        raise MethodNotImplemented()
+      
+        
+    def __update(self):
+        builder, fields = self.__get_builder(self.fields, parameters)
+        response = self.update(request, parameters.pop('pk'), **parameters)
+        return self.__response(request, response, fields, parameters, builder)
+        
+    def update(self, request, obj_id):
+        raise MethodNotImplemented()
+    
+    
+    def __destroy(self, request, parameters):
+        builder, fields = self.__get_builder(self.fields, parameters)
+        response = self.destroy(request, parameters.pop('pk'), **parameters)
+        return self.__response(request, response, fields, parameters, builder)
+        
+    def destroy(self, request, obj_id):
+        raise MethodNotImplemented()
+    
+    
+    def __options(self, request, parameters):
+        builder, fields = self.__get_builder(self.fields, parameters)
+        response = self.options(request, **parameters)
+        return self.__response(request, response, fields, parameters, builder)
+    
+    def options(self, request):
+        raise MethodNotImplemented()
