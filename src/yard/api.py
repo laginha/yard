@@ -2,15 +2,25 @@
 # encoding: utf-8
 from django.conf.urls import patterns, include, url
 from django.views.decorators.csrf import csrf_exempt
-from django.core.urlresolvers     import reverse
-from yard.version    import ResourceVersions
+from django.core.urlresolvers import reverse
+from yard.version import ResourceVersions
 from yard.utils.http import ProperJsonResponse
 import re
 
 
 class Api(object):
-    __collection_routes = {'get':'__index', 'post':'__create'}
-    __single_routes     = {'get':'__show', 'put':'__update', 'post':'__update', 'delete':'__destroy'}
+    __collection_routes = {
+        'GET':'index', 
+        'POST':'create',
+        'OPTIONS': 'options'
+    }
+    __single_routes = {
+        'GET':'show', 
+        'PUT':'update', 
+        'POST':'update', 
+        'DELETE': 'destroy',
+        'OPTIONS': 'options', 
+    }
 
     def __init__(self, path=r'^', discover=False):
         self.__urlpatterns = []

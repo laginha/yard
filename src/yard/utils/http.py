@@ -2,7 +2,10 @@
 # encoding: utf-8
 from django.conf import settings
 from django.http import HttpResponse
+from yard.utils import is_file, is_int, is_str, is_dict, is_list, is_generator
+from yard.utils import is_httpresponse, is_queryset, is_modelinstance, is_valuesset
 import simplejson, mimetypes
+
 
 # INDENTATION 
 INDENT = getattr(settings, 'INDENT_JSON', 2) if settings.DEBUG else None
@@ -98,3 +101,34 @@ class JsonDebugResponse(HttpResponse):
 YARD_DEBUG_TOOLBAR = 'debug_toolbar' in settings.INSTALLED_APPS and settings.DEBUG==True
 YARD_DEBUG_TOOLBAR = getattr(settings, 'YARD_DEBUG_TOOLBAR', YARD_DEBUG_TOOLBAR)
 JSONResponse       = JsonDebugResponse if YARD_DEBUG_TOOLBAR else ProperJsonResponse
+
+
+DEFAULT_STATUS_CODE = getattr(settings, 'DEFAULT_STATUS_CODE', 200)
+
+
+def json_response(request):
+    if JSONResponse==ProperJsonResponse:
+        return JSONResponse(request)
+    return JSONResponse
+
+
+def to_http(request, content, status=DEFAULT_STATUS_CODE):
+    if is_httpresponse(content):
+        return content
+    elif content == None:
+        return HttpResponse(status=status)
+    elif is_int(content):
+        return HttpResponse(status=content)
+    elif is_str(content) or is_dict(content) or is_list(content):
+        return json_response(request)(content, status=status)
+    elif is_file(content):
+        return FileResponse(content, status=status)
+    elif is_queryset(content):
+        return json_response(request)(content.values(), status=status)
+    elif is_modelinstance(content):
+        content = [f.name for f in content._meta.fields if f.name not in ['mymodel_ptr']]
+        return json_response(request)(content, status=status)
+    elif is_valuesset(content) or is_generator(content):
+        return json_response(request)(list(content), status=status)      
+    else:
+        return HttpResponse(str(content), status=status)
