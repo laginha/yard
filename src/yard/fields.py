@@ -1,81 +1,25 @@
 #!/usr/bin/env python
 # encoding: utf-8
-from django.db import models
+from django.contrib.gis.db import models
+import simplejson
 
+Integer = int
+Float = float
+List = Tuple = Iter = list
+Dict = JSON = dict
+String = str
+Unicode = unicode
+Boolean = bool
+CommaSeparatedValue = lambda data: [i for i in data.split(',')],
+File = lambda data: data.url,
+FilePath = lambda data: data.path,
+GEOJSON = lambda data: simplejson.loads(data.geojson)
+RelatedManager = lambda data: [unicode(i) for i in data.all()]
+QuerySet = lambda data: [unicode(i) for i in data]
+ValuesSet = lambda data: list( data )
+URI = lambda data, api: api.get_uri(data)
 
-class JsonField(object):
-    def __init__(self, typename, converter=None):
-        self.typename = typename
-        if not converter:
-            self.converter = lambda data: str(data)
-        self.converter = converter
-    
-    def get_documentation(self):
-        json = {'type': self.typename}
-        if self.typename == 'array':
-            json['items'] = {'type': 'string'}
-        return json
-    
-    def __call__(self, data, api=None):
-        if data:
-            return self.converter(data, api) if api else self.converter(data)
-
-
-Integer = JsonField('integer', lambda data: int(data))
-Float = JsonField('number', lambda data: float(data))
-String = JsonField('string', lambda data: str(data))
-Boolean = JsonField('boolean', lambda data: bool(data))
-File = JsonField('string', lambda data: data.url)
-FilePath = JsonField('boolean', lambda data: data.path)
-QuerySet = JsonField('array', lambda data: [unicode(i) for i in data])
-ValuesSet = List = JsonField('array', lambda data: list(data))
-JSON = Dict = JsonField('string', lambda data: list(data))
-RelatedManager = JsonField('array', lambda data: [unicode(i) for i in data.all()])
-CommaSeparatedValue = JsonField('string', lambda data: [i for i in data.split(',')])
-
-
-def unicode_converter(data):
-    try:
-        return unicode(data)
-    except StopIteration:
-        return repr(data)
-
-Unicode = JsonField('string',  unicode_converter)
-ForeignKey = GenericForeignKey = Unicode
-
-
-def link_converter(data, api):
-    return data.pk, api.get_link(data) 
-
-Link = JsonField('boolean', link_converter)
-
-
-def uri_converter(data, api):
-    return api.get_uri(data)
-
-URI = JsonField('boolean', uri_converter)
-
-
-OBJECT_TO_JSONFIELD = {
-    int: Integer,
-    float: Float,
-    long: Integer,
-    bool: Boolean,
-    list: List,
-    tuple: List,
-    set: List,
-    dict: Dict,
-    models.query.QuerySet: QuerySet,
-    models.query.ValuesQuerySet: ValuesSet,
-}
-   
-def auto_converter(data):
-    return OBJECT_TO_JSONFIELD.get( type(data), Unicode )(data)
-
-Auto = JsonField('string', auto_converter)
-
-
-MODELFIELD_TO_JSONFIELD = {
+MAPPING = {
     models.AutoField: Integer,
     models.BigIntegerField: Integer,
     models.IntegerField: Integer,
@@ -91,11 +35,13 @@ MODELFIELD_TO_JSONFIELD = {
     models.ImageField: File,
     models.FilePathField: FilePath,
     models.ManyToManyField: RelatedManager,
-}    
+    models.GeometryField: GEOJSON,
+    models.PointField: GEOJSON,
+    models.LineStringField: GEOJSON,
+    models.PolygonField: GEOJSON,
+    models.MultiPointField: GEOJSON,
+    models.MultiLineStringField: GEOJSON,
+    models.MultiPolygonField: GEOJSON,
+}
 
-def get_field(obj): 
-    return MODELFIELD_TO_JSONFIELD.get( type(obj), Unicode )
-
-
-SELECT_RELATED_FIELDS = [URI, Link, ForeignKey]
-PREFETCH_RELATED_FIELDS = [GenericForeignKey, RelatedManager]
+get_field = lambda obj: MAPPING.get( type(obj), Unicode )

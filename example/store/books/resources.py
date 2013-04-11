@@ -1,6 +1,5 @@
-from yard import forms, version, resources
 from yard.resources.decorators import validate
-from yard.resources import fields
+from yard import forms, version, resources, fields
 from models import Book, Author
 
 class AuthorResource(resources.Resource):
