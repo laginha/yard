@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 # encoding: utf-8
-from yard.exceptions           import HttpMethodNotAllowed, InvalidStatusCode, MethodNotImplemented
-from yard.utils                import *
-from yard.resources.parameters import ResourceParameters
-from yard.resources.builders   import JSONbuilder
-from yard.resources.meta       import ResourceMeta
-from yard.resources.page       import ResourcePage
-from yard.resources            import fields as yardFields
-from yard.forms                import Form
+from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse
+from yard.exceptions import HttpMethodNotAllowed, InvalidStatusCode, MethodNotImplemented, RequiredParamMissing
+from yard.utils import is_tuple, is_queryset, is_modelinstance, is_generator, is_list, is_valuesset
+from yard.utils.http import to_http
+from yard.forms import Form
+from yard.resources.utils import *
+
+
+DEFAULT_STATUS_CODE = getattr(settings, 'DEFAULT_STATUS_CODE', 200)
 
 
 class Resource(object):
@@ -37,10 +40,7 @@ class Resource(object):
             return self.fields
         elif not hasattr(self, "model"):
             return {}
-        return dict(
-            [ (i.name, yardFields.get_field(i)) 
-                for i in self.model._meta.fields if i.name not in ['mymodel_ptr']]
-        )
+        return model_to_fields(self.model)
     
     def __call__(self, request, **parameters):
         '''
@@ -48,32 +48,24 @@ class Resource(object):
         '''
         try:
             method = self.__method( request )
-            return getattr(method)(request, parameters)
-        except HttpMethodNotAllowed:
-            # if http_method not allowed for this resource
-            return HttpResponseNotFound()
-        except RequiredParamMissing as e:
+            return getattr(self, 'handle_'+method)(request, parameters)
+        except (HttpMethodNotAllowed, MethodNotImplemented, ObjectDoesNotExist, IOError):
+            # HttpMethodNotAllowed: if http_method not allowed for this resource
+            # MethodNotImplemented: if view not implemented
+            # ObjectDoesNotExist: if return model instance does not exist
+            # IOError: if return file not found
+            return HttpResponse(status=404)
+        except RequiredParamMissing :
             # if required param missing from request
-            return HttpResponseBadRequest()
-        except MethodNotImplemented as e:
-            # if view not implemented
-            return HttpResponseNotFound()
-        except ObjectDoesNotExist:
-            # if return model instance does not exist
-            return HttpResponseNotFound()
-        except IOError:
-            # if return file not found
-            return HttpResponseNotFound()
-            
+            return HttpResponse(status=403)
 
     def __method(self, request):
         '''
         Checks if http_method within possible routes
         '''
-        http_method = request.method.lower()
-        if http_method not in self.__routes:
-            raise HttpMethodNotAllowed( http_method )
-        return self.__routes[http_method]
+        if request.method not in self.__routes:
+            raise HttpMethodNotAllowed(request.method)
+        return self.__routes[request.method]
 
     def __resource_parameters(self, request, parameters):
         '''
@@ -91,21 +83,24 @@ class Resource(object):
             return JSONbuilder( self._api, current_fields ), current_fields
         return JSONbuilder( self._api, fields ), fields
 
-    def __response(self, request, response, current_fields, resource_parameters, builder):
+    def __handle_response(self, request, response, current_fields, resource_parameters, builder):
         '''
         Proccess response into a JSON serializable object
         '''
+        status = DEFAULT_STATUS_CODE
+        if is_tuple(response):
+            status, response = response
         if is_queryset(response):
             response = self.select_related(response, current_fields)
-            return self.__queryset_with_meta(request, response, resource_parameters, builder)
+            response = self.__queryset_with_meta(request, response, resource_parameters, builder)
         elif is_modelinstance(response):
-            return self.__serialize(response, builder)
+            response = self.__serialize(response, builder)
         elif is_generator(response) or is_list(response):
-            return self.__list_with_meta(request, response, resource_parameters, builder)
+            response = self.__list_with_meta(request, response, resource_parameters, builder)
         elif is_valuesset(response):
-            return self.__list_with_meta(request, list(response), resource_parameters)
-        return response
-
+            response = self.__list_with_meta(request, list(response), resource_parameters)
+        return to_http(request, response, status)
+        
     def select_related(self, resources, current_fields):
         '''
         Optimize queryset according to current response fields
@@ -167,56 +162,44 @@ class Resource(object):
     # HTTP verbs
     #
     
-    def __index(self, request, parameters):
+    @method_required('index')
+    def handle_index(self, request, parameters):
         parameters = self.__resource_parameters( request, parameters )
-        builder, current_fields = self.__get_builder(self.index_fields, parameters)
         response = self.index(request, parameters)
-        return self.__response(request, response, current_fields, parameters, builder)
+        builder, current_fields = self.__get_builder(self.index_fields, parameters)
+        return self.__handle_response(request, response, current_fields, parameters, builder)
     
-    def index(self, request, params):
-        raise MethodNotImplemented()
-
-
-    def __show(self, request, parameters):
-        builder, fields = self.__get_builder(self.show_fields, parameters)
+    @method_required('show')
+    def handle_show(self, request, parameters):
         response = self.show(request, parameters.pop('pk'), **parameters)
-        return self.__response(request, response, fields, parameters, builder)
+        builder, fields = self.__get_builder(self.show_fields, parameters)
+        return self.__handle_response(request, response, fields, parameters, builder)
     
-    def show(self, request, obj_id):
-        raise MethodNotImplemented()
-    
-    
-    def __create(self, request, parameters):
-        builder, fields = self.__get_builder(self.fields, parameters)
+    @method_required('create')
+    def handle_create(self, request, parameters):
         response = self.create(request, **parameters)
-        return self.__response(request, response, fields, parameters, builder)
-    
-    def create(self, request, parameters):
-        raise MethodNotImplemented()
-      
-        
-    def __update(self):
         builder, fields = self.__get_builder(self.fields, parameters)
+        return self.__handle_response(request, response, fields, parameters, builder)
+    
+    @method_required('update')    
+    def handle_update(self):
         response = self.update(request, parameters.pop('pk'), **parameters)
-        return self.__response(request, response, fields, parameters, builder)
-        
-    def update(self, request, obj_id):
-        raise MethodNotImplemented()
-    
-    
-    def __destroy(self, request, parameters):
         builder, fields = self.__get_builder(self.fields, parameters)
+        return self.__handle_response(request, response, fields, parameters, builder)
+    
+    @method_required('destroy')
+    def handle_destroy(self, request, parameters):
         response = self.destroy(request, parameters.pop('pk'), **parameters)
-        return self.__response(request, response, fields, parameters, builder)
-        
-    def destroy(self, request, obj_id):
-        raise MethodNotImplemented()
-    
-    
-    def __options(self, request, parameters):
         builder, fields = self.__get_builder(self.fields, parameters)
-        response = self.options(request, **parameters)
-        return self.__response(request, response, fields, parameters, builder)
+        return self.__handle_response(request, response, fields, parameters, builder)
     
-    def options(self, request):
-        raise MethodNotImplemented()
+    @method_required('options')
+    def handle_options(self, request, parameters):
+        response = self.options(request, **parameters)
+        builder, fields = self.__get_builder(self.fields, parameters)
+        response = self.__handle_response(request, response, fields, parameters, builder)
+        response['Allow'] = ','.join([k for k,v in self.__routes.items() if hasattr(self, v)])
+        return response
+        
+    def options(self, request, **parameters):
+        return 200

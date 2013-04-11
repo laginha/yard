@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
-from django.db.models.query              import QuerySet, ValuesQuerySet
-from django.db                           import models
-from django.http                         import HttpResponse
-from types                               import GeneratorType, NoneType
+from django.db.models.query import QuerySet, ValuesQuerySet
+from django.db import models
+from django.http import HttpResponse
+from types import GeneratorType, NoneType
 import re, inspect
 
 try:
