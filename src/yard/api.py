@@ -4,7 +4,7 @@ from django.conf.urls import patterns, include, url
 from django.views.decorators.csrf import csrf_exempt
 from django.core.urlresolvers import reverse
 from yard.version import ResourceVersions
-from yard.utils.http import ProperJsonResponse
+from yard.utils.http import JsonResponse
 import re
 
 
@@ -60,24 +60,24 @@ class Api(object):
             resource_name = self.__mapping[ model.__class__ ]
             return reverse( "single."+resource_name, kwargs={'pk':model.pk} )
 
-    #def api_paths(self, request):
-    #    def get_paths(urllist):
-    #        pathlist = []
-    #        for entry in urllist:
-    #            regex   = r'\?|\$|\^|\(|P|\)|\+|\*|\[.+\]'
-    #            urlpath = re.sub( regex, '', entry.regex.pattern )
-    #            if hasattr(entry, 'url_patterns'):
-    #                for i in get_paths( entry.url_patterns ):
-    #                    pathlist.append( urlpath+i )
-    #            else:
-    #                pathlist.append( urlpath )
-    #        return pathlist
-    #    return ProperJsonResponse(request)(content=get_paths(self.__urlpatterns))
+    # def api_paths(self, request):
+    #     def get_paths(urllist):
+    #         pathlist = []
+    #         for entry in urllist:
+    #             regex   = r'\?|\$|\^|\(|P|\)|\+|\*|\[.+\]'
+    #             urlpath = re.sub( regex, '', entry.regex.pattern )
+    #             if hasattr(entry, 'url_patterns'):
+    #                 for i in get_paths( entry.url_patterns ):
+    #                     pathlist.append( urlpath+i )
+    #             else:
+    #                 pathlist.append( urlpath )
+    #         return pathlist
+    #     return JsonResponse(content=get_paths(self.__urlpatterns), context=request)
 
     @property
     def urlpatterns(self):
         urlpatterns = self.__urlpatterns
-        #if self.discoverable:
-        #    urlpatterns += [url( self.__path+"$", self.api_paths )]
+        # if self.discoverable:
+        #     urlpatterns += [url( self.__path+"$", self.api_paths )]
         return patterns( '', *urlpatterns )
     
