@@ -7,14 +7,12 @@ if the `model` attribute is defined in the `Resource`, `fields` defaults to all 
 
 ## Instance attributes in fields
 
-<pre>
 ```python 
 from yard import resources
 
 class BookResource(resources.Resource):
     fields = ('id', 'title', 'author')
 ```
-</pre>
 
 The API-client, whenever requesting a resource collection (`index`), will receive a *JSON* response built according to the specified `fields` attribute.
 
@@ -39,7 +37,6 @@ The API-client, whenever requesting a resource collection (`index`), will receiv
 
 It is also possible to dive into a foreign key instance, as follows:
 
-<pre>
 ```python 
 from yard import resources
 
@@ -48,7 +45,6 @@ class BookResource(resources.Resource):
                 ('author', ('id', 'name',)) 
     )
 ```
-</pre>
 
 resulting in the following *JSON* response:
 
@@ -77,7 +73,6 @@ resulting in the following *JSON* response:
 
 The instance method can be callable with arguments. You just need to indicate the arguments in front of the instance method name: `method_name arg0 arg1`.
 
-<pre>
 ```python
 from django import models
 from yard import resources
@@ -92,7 +87,6 @@ class Book(models.Model):
 class Book(resources.Resource):
     fields = ('id', 'title', 'author', 'book_genres')
 ```
-</pre>
 
 
 Beware, *Yard* deals differently according to the object type returned by instance methods:
@@ -125,7 +119,6 @@ Beware, *Yard* deals differently according to the object type returned by instan
 
 Some times it is required that the resource's representation to depend on the given input in the request. For that purpose, the `fields` attribute can be callable and should expect the validated parameters (`ResourceParameters`) as it argument.
 
-<pre>
 ```python 
 from yard import resources
 
@@ -136,14 +129,12 @@ class BookResource(resources.Resource):
             return ('id', 'title')
         return ('id', 'title', 'author')
 ```
-</pre>
 
 
 ## Show and index fields
 
 *Yard* allows you to define different *JSON* representation for the `show` and `index` methods, by means of `show\_fields` and `index\_fields` attributes. These attributes have priority over the `fields` attribute.
 
-<pre>
 ```python 
 from yard import resources
 
@@ -152,5 +143,4 @@ class BookResource(resources.Resource):
     show_fields  = ('id', 'title', ('author', ('name',)) )
     
 ```
-</pre>
 

@@ -2,7 +2,6 @@
 
 The *Yard* framework paginates `QuerySet`, `ValueSet`, *list* and *generator* based responses. This behavior is **compulsory**.
 
-<pre>
 ```python  
 from yard import resources
 
@@ -17,7 +16,6 @@ class FooResource(resources.Resource):
             'limit': 50,        
         }
 ```
-</pre>
 
 
 ## Pagination Options
