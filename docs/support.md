@@ -61,7 +61,6 @@
 
 ## Examples
 
-<pre>
 ```python
 from yard import resources
 
@@ -69,21 +68,16 @@ class BookResource(resources.Resource):
     def create(self):
         return 401, 'Not Authorize'
 ```
-</pre>
 
-<pre>
 ```python
 class BookResource(resources.Resource):
     def destroy(self, request):
         return 401
 ```
-</pre>
 
-<pre>
 ```python
 class BookResource(resources.Resource):
     def show(self, request, book_id):
         return Book.objects.get(id=book_id)
 ```
-</pre>
 
