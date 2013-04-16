@@ -117,6 +117,32 @@ class Book(resources.Resource):
 ```
 
 
+Beware, *Yard* deals differently according to the object type returned by instance methods:
+
+<table border="1">
+    <tr>
+        <th>Object types</th>
+        <th>Process</th>
+    </tr>
+    <tr>
+        <td>ValuesQuerySet</td>
+        <td>Converts to list</td>
+    </tr>
+    <tr>
+        <td>QuerySet</td>
+        <td>Converts to list</td>
+    </tr>
+    <tr>
+        <td>JSON-serializable (e.g. dict, list)</td>
+        <td> - </td>
+    </tr>
+    <tr>
+        <td>Other (e.g. model instance)</td>
+        <td>Converts to unicode</td>
+    </tr>
+</table>
+
+
 ## Dynamic fields
 
 Some times it is required that the resource's representation to depend on the given input in the request. For that purpose, the `fields` attribute can be callable and should expect the validated parameters (`ResourceParameters`) as it argument.
@@ -159,3 +185,4 @@ class BookResource(resources.Resource):
         }
     }    
 ```
+

@@ -23,7 +23,7 @@ You can also install from source:
 ## Usage
 
 *urls.py*
-<pre>
+
 ```python
 from views    import AuthorResource, BookResource
 from yard.api import Api
@@ -34,10 +34,9 @@ api.include( 'authors', AuthorResource )
 
 urlpatterns = api.urlpatterns
 ```
-</pre>
 
 *views.py*
-<pre>
+
 ```python
 from yard import resources, forms
 from models import Book
@@ -76,7 +75,7 @@ class BooksResource(resources.Resource):
         #DELETE /resource/:id/
         ...
 ```
-</pre>
+
 
 ## Main features
 

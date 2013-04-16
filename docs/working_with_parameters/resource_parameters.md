@@ -2,12 +2,10 @@
 
 The third argument of the `index` method is a `ResourceParameters` instance.
 
-<pre>
 ```python
     def index(self, request, params):
         ...
 ```
-</pre>
 
 
 ## Methods
@@ -42,7 +40,6 @@ Returns dictionary of parameters of type query.
 
 ## Example
 
-<pre>
 ```python
 from yard import resources, forms
 
@@ -55,13 +52,11 @@ class BookResource(resources.Resource):
             return Book.objects.filter( **params )
         return params.errors()
 ```
-</pre>
 
 In this example, the model is filtered only if there was no error detected, according to the `Parameters` logic, while validating the given request input. However, such verification can be ignored since **only the validated parameters are used in filter**.
 
 As an alternative to the example above, you can use the `validate` decorator instead.
 
-<pre>
 ```python
 from yard.resources.decorators import validate
 from yard import resources, forms
@@ -74,4 +69,3 @@ class BookResource(resources.Resource):
     def index(self, request, params):
         return Book.objects.filter( **params )
 ```
-</pre>
