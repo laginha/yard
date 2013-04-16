@@ -110,6 +110,7 @@ class Book(resources.Resource):
     }
 ```
 
+
 Beware, *Yard* deals differently according to the object type returned by instance methods:
 
 <table border="1">
@@ -178,3 +179,4 @@ class BookResource(resources.Resource):
         }
     }    
 ```
+
