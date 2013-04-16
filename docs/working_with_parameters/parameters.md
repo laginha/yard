@@ -7,7 +7,6 @@ The *Yard* resource relies on the `Parameters` attribute for the `index` method.
 
 Include several [parameter types](params.md) as an attribute.
 
-<pre>
 ```python
 from yard import resources, forms    
     
@@ -19,7 +18,6 @@ class BookResource(resources.Resource):
     def index(self, request, params):
         return Book.objects.filter( **params )
 ```
-</pre>
 
 The attributes names are the inputs expected for the API.
 
@@ -31,7 +29,6 @@ and the code line `Book.objects.filter( **params )` in the example above, is in 
 	
 The *param* name is often not equal to the model field name. When that is the case, use an `alias` as follows:
 
-<pre>
 ```python
 from yard import resources, forms    
     
@@ -42,7 +39,6 @@ class BookResource(resources.Resource):
     def index(self, request, params):
         return Book.objects.filter( **params )
 ```
-</pre>
 
 As before, the attributes names are the inputs expected for the API.
 
@@ -55,7 +51,6 @@ However the code line `Book.objects.filter( **params )` corresponds to `Book.obj
 
 There is a optional, yet powerful attribute named `__logic__`. It is meant to easily define the logic between parameters for a particular API method.
 
-<pre>
 ```python
 from yard import resources, forms    
 
@@ -67,7 +62,6 @@ class BookResource(resources.Resource):
 
         __logic__ = year, title, author & (year | title)
 ```
-</pre>
 
 In this example, the *year*, and *title* parameter are allowed as well as the combined presence of the parameters *author* and either *year* or *title*.
 

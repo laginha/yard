@@ -61,51 +61,22 @@
 
 ## Examples
 
-<<<<<<< HEAD
-```python
-class BookResource(Resource):
-=======
-<pre>
 ```python
 from yard import resources
->>>>>>> update and improve docs
 
 class BookResource(resources.Resource):
     def create(self):
         return 401, 'Not Authorize'
 ```
-<<<<<<< HEAD
 
-```python
-class BookResource(Resource):
-
-    def create(self, request):
-        return 401
-```
-
-```python
-class BookResource(Resource):
-
-    def show(self, request, book_id):
-        return Book.objects.get(id=book_id)
-```
-=======
-</pre>
-
-<pre>
 ```python
 class BookResource(resources.Resource):
     def destroy(self, request):
         return 401
 ```
-</pre>
 
-<pre>
 ```python
 class BookResource(resources.Resource):
     def show(self, request, book_id):
         return Book.objects.get(id=book_id)
 ```
-</pre>
->>>>>>> update and improve docs
-
