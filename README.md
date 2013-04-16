@@ -78,6 +78,7 @@ class BooksResource(resources.Resource):
         ...
 ```
 
+
 ## Main features
 
 - Resource and API oriented 
