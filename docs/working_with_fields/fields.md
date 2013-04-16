@@ -130,6 +130,7 @@ class Book(resources.Resource):
     }
 ```
 
+
 Beware, *Yard* deals differently according to the object type returned by instance methods:
 
 <table border="1">
@@ -178,6 +179,7 @@ class BookResource(resources.Resource):
         }
 ```
 
+
 ## Show and index fields
 
 *Yard* allows you to define different *JSON* representation for the `show` and `index` methods, by means of `show\_fields` and `index\_fields` attributes. These attributes have priority over the `fields` attribute.
@@ -197,3 +199,4 @@ class BookResource(resources.Resource):
         }
     }    
 ```
+
