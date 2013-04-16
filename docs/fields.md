@@ -81,6 +81,7 @@ class Book(resources.Resource):
     fields = ('id', 'title', 'author', 'book_genres')
 ```
 
+
 Beware, *Yard* deals differently according to the object type returned by instance methods:
 
 <table border="1">
@@ -135,3 +136,4 @@ class BookResource(resources.Resource):
     show_fields  = ('id', 'title', ('author', ('name',)) )
     
 ```
+
