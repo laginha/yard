@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
+from django.core.urlresolvers import NoReverseMatch
 from yard.utils import is_tuple, is_geo_value, is_relatedmanager, is_manyrelatedmanager, is_genericrelatedobjectmanager
 from yard.utils import is_method, is_valuesset, is_queryset, is_serializable, is_modelinstance
 import json
@@ -27,7 +28,10 @@ class JSONbuilder:
         '''
         Builds (sub) json response according to given fields and resource
         '''
-        json_ = {'resource_uri': self.api.get_uri( resource )}
+        try:
+            json_ = {'resource_uri': self.api.get_uri( resource )}
+        except NoReverseMatch:
+            json_ = {}
         for field in self.fields:
             json_.update( self.__handle_field(resource, field) )
         return json_
