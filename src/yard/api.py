@@ -19,20 +19,25 @@ class Api(object):
         self.discoverable  = discover #TODO
 
     def include(self, resource_path, resource_class, single_name=None, collection_name=None):
+        
         def single_pattern():
             path     = r'%s%s/(?P<pk>[0-9]+)/?$' %(self.__path, resource_path)
             resource = resource_class( self, self.__single_routes )
             name     = single_name or "single."+resource_class.__name__
             return url( path, csrf_exempt( resource ), name=name )
-
+        
         def collection_pattern():
             path     = r'%s%s/?$' %(self.__path, resource_path)
             resource = resource_class( self, self.__collection_routes )
             name     = collection_name or "collection."+resource_class.__name__
             return url( path, csrf_exempt( resource ), name=name )
 
-        self.__urlpatterns.append( single_pattern() )
-        self.__urlpatterns.append( collection_pattern() )
+        has_methods = lambda x: [i for i in x if hasattr(resource_class, i)]
+        if has_methods( self.__single_routes.values() ):
+            self.__urlpatterns.append( single_pattern() )
+        if has_methods( self.__collection_routes.values() ):
+            self.__urlpatterns.append( collection_pattern() )
+            
         if hasattr(resource_class, 'model'):
             self.__mapping[ resource_class.model ] = resource_class.__name__
         elif issubclass(resource_class, ResourceVersions):
