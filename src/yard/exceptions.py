@@ -11,6 +11,18 @@ class NoResourceMatch(Exception):
     def __str__(self):
         return "No resource found for model '%s'" %self.model
 
+class InvalidStatusCode(Exception):
+    '''
+    For when view returns an invalid status code
+    '''
+    For API has no resource for a given model
+    '''
+    def __init__(self, model):
+        self.model = model
+    
+    def __str__(self):
+        return "No resource found for model '%s'" %self.model
+
 
 class RequiredParamMissing(Exception):
     '''

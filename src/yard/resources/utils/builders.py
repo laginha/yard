@@ -3,6 +3,7 @@
 from django.core.urlresolvers import NoReverseMatch
 from yard.utils import is_related_manager, is_method, is_dict
 from yard.resources import fields
+from yard.exceptions import NoResourceMatch
 import json
 
 
@@ -29,9 +30,8 @@ class JSONbuilder:
         Builds (sub) json response according to given fields and resource
         '''
         try:
-            uri   = self.api.get_uri( resource )
-            json_ = {'resource_uri': uri} if uri else {}
-        except NoReverseMatch:
+            json_ = {'resource_uri': self.api.get_uri( resource )}
+        except NoReverseMatch, NoResourceMatch:
             json_ = {}
         for key, value in self.fields.iteritems():
             json_.update( self.__handle_field(resource, key, value) )
@@ -64,7 +64,7 @@ class JSONbuilder:
         if type_ is fields.URI:
             try:
                 return {args[0]: type_( attribute, self.api )}
-            except NoReverseMatch:
+            except NoReverseMatch, NoResourceMatch:
                 return {args[0]: None}
         return {args[0]: type_( attribute )}
 
