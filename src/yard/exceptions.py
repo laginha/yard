@@ -11,16 +11,6 @@ class NoResourceMatch(Exception):
     def __str__(self):
         return "No resource found for model '%s'" %self.model
 
-class InvalidStatusCode(Exception):
-    '''
-    For when view returns an invalid status code
-    '''
-    def __init__(self, status):
-        self.status = status
-    
-    def __str__(self):
-        return "Http status code '%s' is not valid. Only int allowed." %self.status
-
 
 class HttpMethodNotAllowed(Exception):
     '''
