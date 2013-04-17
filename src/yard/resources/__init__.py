@@ -3,7 +3,7 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
-from yard.exceptions import HttpMethodNotAllowed, InvalidStatusCode, MethodNotImplemented, RequiredParamMissing
+from yard.exceptions import HttpMethodNotAllowed, MethodNotImplemented, RequiredParamMissing
 from yard.utils import is_tuple, is_queryset, is_modelinstance, is_generator, is_list, is_valuesset
 from yard.utils.http import to_http
 from yard.forms import Form
