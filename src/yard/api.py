@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.urlresolvers import reverse
 from yard.version import ResourceVersions
 from yard.utils.http import JsonResponse
+from yard.exceptions import NoResourceMatch
 import re
 
 
@@ -59,6 +60,7 @@ class Api(object):
         if model.__class__ in self.__mapping:
             resource_name = self.__mapping[ model.__class__ ]
             return reverse( "single."+resource_name, kwargs={'pk':model.pk} )
+        raise NoResourceMatch( model )
 
     # def api_paths(self, request):
     #     def get_paths(urllist):
