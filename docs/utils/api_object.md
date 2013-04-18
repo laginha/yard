@@ -73,15 +73,20 @@ api.extend( r'someapp', 'path.to.someapp.urls' )
 Get URI path of the resource associated the a given model. For this to work properly the expected *Resource* must have the class attribute `model`.
 
 ```python
-get_uri( model )
+get_uri( modelinstance )
 ```
 
 Arguments:
 
-- **model**: model associated to a *Resource*
+- **modelinstance**: model associated to a *Resource*
+
+Exceptions:
+
+- **yard.exceptions.NoResourceMatch**: There is no *Resource* associated with the model.
+- **django.core.urlresolvers.NoReverseMatch**: Although there is a *Resource* associated with the model there is no *URL* match for the model instance.
 
 Example:
 
 ```python
-get_uri( Foo )
+get_uri( foo )
 ```
