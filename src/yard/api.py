@@ -56,11 +56,11 @@ class Api(object):
         urlpattern = url(self.__path+path, include(to_include), name=name)
         self.__urlpatterns.append( urlpattern )
 
-    def get_uri(self, model):
-        if model.__class__ in self.__mapping:
+    def get_uri(self, modelinstance):
+        if modelinstance.__class__ in self.__mapping:
             resource_name = self.__mapping[ model.__class__ ]
-            return reverse( "single."+resource_name, kwargs={'pk':model.pk} )
-        raise NoResourceMatch( model )
+            return reverse( "single."+resource_name, kwargs={'pk':modelinstance.pk} )
+        raise NoResourceMatch( modelinstance.__class__ )
 
     # def api_paths(self, request):
     #     def get_paths(urllist):
