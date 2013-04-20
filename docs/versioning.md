@@ -24,7 +24,7 @@ class BookResourceV3(BookResource):
 
 ### ResourceVersions
 
-This class is responsible for resource versioning. Each subclass of `ResourceVersions` requires at least one of two attributes: `default` and `latest`. Each one can be used whenever no version is mentioned in the HTTP request, although the former has precedence over the later.
+This class is responsible for resource versioning. Each subclass of `ResourceVersions` requires the `default` attribute. This will be used whenever no version is mentioned in the HTTP request.
 
 ```python
 from yard import versions

@@ -8,7 +8,7 @@ reqs = [str(each.req) for each in install_reqs if each.req]
 
 setup(
     name             = 'yard',
-    version          = '1.4.0',
+    version          = '1.5.0',
     author           = "Diogo Laginha",
     author_email     = "diogo.laginha.machado@gmail.com",
     url              = 'https://github.com/laginha/yard',

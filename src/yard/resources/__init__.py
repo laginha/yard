@@ -25,7 +25,7 @@ class Resource(object):
 
     class Pagination(object):
         pass
-
+    
     def __init__(self, api, routes):
         self._api         = api
         self.__routes     = routes # maps http methods with respective views
@@ -33,8 +33,9 @@ class Resource(object):
         self.__pagination = ResourcePage( self.Pagination )
         self.__parameters = Form( self.Parameters ) if hasattr(self, "Parameters") else None
         self.fields       = self.__get_fields()
-        self.index_fields = self.index_fields if hasattr(self, "index_fields") else self.fields
-        self.show_fields  = self.show_fields  if hasattr(self, "show_fields") else self.fields
+        self.index_fields = getattr(self, "index_fields", self.fields)
+        self.show_fields  = getattr(self, "show_fields", self.fields)
+        self.description = getattr(self, "description", "not provided")
         self.__meta.page_class = self.__pagination #TEMPORARY
 
     def __get_fields(self):
