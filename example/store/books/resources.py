@@ -13,6 +13,7 @@ class AuthorResource(resources.Resource):
     
     
 class BookResource(resources.Resource):
+    description = "Search books in our store."
     model  = Book
     fields = {
         'id': fields.Integer, 
