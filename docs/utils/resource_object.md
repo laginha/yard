@@ -164,3 +164,14 @@ class FooResource(resources.Resource):
     show_fields  = ('id', 'bar' )
 ```
 
+### description
+
+Description of the resource. Used in the *discover* option of the *Api*.
+
+```python 
+from yard import resources
+
+class FooResource(resources.Resource):
+    description = "This resource is responsible for foo"
+```
+
