@@ -5,12 +5,28 @@ This *Object* is responsible to generate the *urlpatterns* according to its *Res
 
 ### init
 
-The class constructor accepts one argument that defines the pre-path of its *Resources* (defaults to `r'^`)
+The class constructor accepts two arguments:
+
+- **path**: defines the pre-path of its *Resources* (defaults to `r'^`)
+- **discover**: defines if the pre-path should return a list of available resources in the *Api* (defaults to `False`)
 
 ```python
-api = Api( path=r'^apipath/' )
+api = Api( r'^apipath/', discover=True )
 ```
 
+In this case a *HTTP GET* request to `http://example.com/apipath` would return a *JSON* response like this:
+
+<pre>
+{
+    Resources: [
+        {
+            uri: "some_resource/"
+            description: "some description"
+        },
+        ...
+    ]
+}
+</pre>
 
 ## Methods and Properties
 
