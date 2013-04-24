@@ -35,6 +35,24 @@ class BookResource(resources.Resource):
 ```
 
 
+## key_required
+
+To protect a specific view through key based authentication.
+
+```python
+from yard import resources
+from yard.apps.keyauth.decorators import key_required
+
+class FooResource(resources.Resource):
+
+    @key_required
+    def show(self, request, book_id):
+        return "bar"
+```
+
+Don't forget to add `yard.apps.keyauth` to `INSTALLED_APPS` and `yard.apps.keyauth.backends.KeyAuthBackend` to `AUTHENTICATION_BACKENDS` in your settings.
+
+
 ## validateForm
 
 Check if a *Django's* form is valid. If not, returns a *Bad Request* response (status 400).

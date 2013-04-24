@@ -12,6 +12,7 @@
 		- [hypermedia](hypermedia.md)
 	- [Pagination](pagination.md)
 	- [Metadata](meta.md)
+	- [Authentication](authentication.md)
 - [Versioning](versioning.md)
 
 ### Utils

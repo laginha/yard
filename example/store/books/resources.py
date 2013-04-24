@@ -1,5 +1,6 @@
 from yard.resources.decorators import validate
 from yard import forms, version, resources, fields
+from yard.apps.keyauth.decorators import key_required
 from models import Book, Author
 
 class AuthorResource(resources.Resource):
@@ -44,6 +45,7 @@ class BookResource(resources.Resource):
     def index(self, request, params):
         return Book.objects.filter( **params ) #returns a JsonResponse-200
 
+    @key_required
     def show(self, request, book_id):
         return Book.objects.get( id=book_id )
 
