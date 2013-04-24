@@ -19,14 +19,9 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'yard.apps.keyauth.backends.KeyAuthBackend',
 )
-
-MIDDLEWARE_CLASSES = (
-    ...
-    'yard.apps.keyauth.middleware.ApiKeyAuthenticationMiddleware',
-)
 ```
 
-If you wish all your views to be protected, use the `ApiKeyRequiredMiddleware`. 
+If you wish all your views to be protected, you can use the `ApiKeyRequiredMiddleware`.
 
 ```python
 MIDDLEWARE_CLASSES = (
@@ -35,7 +30,7 @@ MIDDLEWARE_CLASSES = (
 )
 ```
 
-This middlewares must come before the `yard.middleware.SimpleResponseMiddleware`.
+This middleware must come before the `yard.middleware.SimpleResponseMiddleware`.
 
 
 ### Decorator
@@ -60,26 +55,12 @@ When requesting the resource, *yard* looks for the `key` parameter in the *HTTP*
 You can change the name of the parameter through the `KEY_PARAMETER_NAME` setting.
 
 
-In case this decorator is needed for all *HTTP* response methods (*index*, *show*, *create*, *update*, *destroy*), the `decorator_for_response_methods` can be used, as follows:
-
-```python
-from yard import resources
-from yard.resources.decorators import resource_decorator
-from yard.apps.keyauth.decorators import key_required
-
-@resource_decorator( key_required )
-class FooResource(resources.Resource):
-
-    def show(self, request, book_id):
-        return "bar"
-```
-
 ## Models
 
 
 ### yard.apps.keyauth.models.Key
 
-*API* key for resource access.
+API key for resource access.
 
 #### Fields
 

@@ -100,6 +100,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Yard middlewares:
+    # 'yard.apps.keyauth.middleware.ApiKeyRequiredMiddleware',
     # 'yard.middleware.SimpleResponseMiddleware',
 )
 
@@ -126,6 +128,13 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'books',
+    'yard.apps.keyauth',
+)
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    # Yard authentication backend
+    'yard.apps.keyauth.backends.KeyAuthBackend',
 )
 
 # A sample logging configuration. The only tangible logging
