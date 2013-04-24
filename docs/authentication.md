@@ -60,7 +60,7 @@ You can change the name of the parameter through the `KEY_PARAMETER_NAME` settin
 
 ### yard.apps.keyauth.models.Key
 
-API key for resource access.
+*API* key for resource access.
 
 #### Fields
 
