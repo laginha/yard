@@ -1,6 +1,6 @@
 from django.utils       import unittest
 from django.test.client import Client
-from book_store.models  import *
+from books.models  import *
 
 from datetime import date
 import json
@@ -13,7 +13,7 @@ genres  = Genre.objects
 
 
 
-class Book_TestCase( unittest.TestCase ):
+class BookTestCase( unittest.TestCase ):
     def setUp(self):
         self.client = Client()
         self.genre1 = genres.get_or_create( name='Dark Fantasy' )[0]
@@ -129,17 +129,17 @@ class Book_TestCase( unittest.TestCase ):
     
     def test_create(self):
         response = self.client.post( '/books/' )
-        assert response.status_code == 405, response.status_code
+        assert response.status_code == 404, response.status_code
     
     
     def test_update(self):
         response = self.client.post( '/books/%s/' %self.book1.id )
-        assert response.status_code == 200, response.status_code
+        assert response.status_code == 404, response.status_code
     
         
     def test_destroy(self):
         response = self.client.delete( '/books/%s/' %self.book1.id )
-        assert response.status_code == 401, response.status_code
+        assert response.status_code == 404, response.status_code
     
         
         
