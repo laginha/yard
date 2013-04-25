@@ -32,11 +32,8 @@ class Api(object):
             name     = collection_name or "collection."+resource_class.__name__
             return url( path, csrf_exempt( resource ), name=name )
 
-        has_methods = lambda x: [i for i in x if hasattr(resource_class, i)]
-        if has_methods( self.__single_routes.values() ):
-            self.__urlpatterns.append( single_pattern() )
-        if has_methods( self.__collection_routes.values() ):
-            self.__urlpatterns.append( collection_pattern() )
+        self.__urlpatterns.append( single_pattern() )
+        self.__urlpatterns.append( collection_pattern() )
             
         if hasattr(resource_class, 'model'):
             self.__mapping[ resource_class.model ] = resource_class.__name__
