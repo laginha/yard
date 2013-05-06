@@ -11,7 +11,7 @@ C = Parameter()
 D = Parameter()
 E = Parameter()
 
-class SomeForm(Form):
+class SomeForm:
     a, b, c, d, e = A, B, C, D, E
     
     __logic__ = a, b&c&d, e|a|b, c&(d|e)&a, b|(c&d)|e
@@ -20,7 +20,7 @@ class SomeForm(Form):
 class TestForm(unittest.TestCase):
     
     def test_logic(self):
-        form = SomeForm()
+        form = Form( SomeForm )
         assert len(form.__logic__) == 5
         assert not isinstance(form.__logic__[0], Logic)
         assert form.__logic__[0] == A
