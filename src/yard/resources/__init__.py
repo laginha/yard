@@ -26,7 +26,7 @@ class Resource(object):
     class Pagination(object):
         pass
     
-    def __init__(self, api, routes):
+    def __init__(self, api, routes):        
         self._api         = api
         self.__routes     = routes # maps http methods with respective views
         self.__meta       = ResourceMeta( self.Meta )
@@ -35,15 +35,23 @@ class Resource(object):
         self.fields       = self.__get_fields()
         self.index_fields = getattr(self, "index_fields", self.fields)
         self.show_fields  = getattr(self, "show_fields", self.fields)
-        self.description = getattr(self, "description", "not provided")
+        self.description  = getattr(self, "description", "not provided")
+        self.__allowed_methods = [k for k,v in self.__routes.items() if hasattr(self, v)]
+        self.__builders = self.__create_json_builders()
         self.__meta.page_class = self.__pagination #TEMPORARY
-
+    
     def __get_fields(self):
         if hasattr(self, "fields"):
             return self.fields
         elif not hasattr(self, "model"):
             return {}
         return model_to_fields(self.model)
+        
+    def __create_json_builders(self):
+        return {
+            id(i): JSONbuilder(self._api, i) 
+            for i in [self.index_fields, self.show_fields, self.fields] if not callable(i)
+        }
     
     def __call__(self, request, **parameters):
         '''
@@ -79,12 +87,12 @@ class Resource(object):
             for i in self.__parameters.get( request ):
                 resource_params.update( i )
         return resource_params
-
+    
     def __get_builder(self, fields, parameters):
         if callable(fields):
             current_fields = fields(parameters)
             return JSONbuilder( self._api, current_fields ), current_fields
-        return JSONbuilder( self._api, fields ), fields
+        return self.__builders[ id(fields) ], fields
 
     def __handle_response(self, request, response, current_fields, resource_parameters, builder):
         '''
@@ -148,7 +156,7 @@ class Resource(object):
         return [builder.to_json(i) for i in resources]
 
     def serialize_all(self, resources, fields):
-        builder = JSONbuilder( self._api, fields )
+        builder = self.__builders.get( id(fields) ) or JSONbuilder(self._api, fields)
         return self.__serialize_all( resources, builder )
 
     def __serialize(self, resource, builder):
@@ -158,7 +166,7 @@ class Resource(object):
         return builder.to_json(resource)
 
     def serialize(self, resource, fields):
-        builder = JSONbuilder( self._api, fields )
+        builder = self.__builders.get( id(fields) ) or JSONbuilder(self._api, fields)
         return self.__serialize( resource, builder )
          
     #
@@ -201,8 +209,8 @@ class Resource(object):
         response = self.options(request, **parameters)
         builder, fields = self.__get_builder(self.fields, parameters)
         response = self.__handle_response(request, response, fields, parameters, builder)
-        response['Allow'] = ','.join([k for k,v in self.__routes.items() if hasattr(self, v)])
+        response['Allow'] = self.__allowed_methods
         return response
-        
+    
     def options(self, request, **parameters):
-        return 200
+        return 404 if len(self.__allowed_methods) <= 1 else 200
