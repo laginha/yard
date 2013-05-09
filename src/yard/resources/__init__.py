@@ -24,6 +24,10 @@ class Resource(object):
     class Pagination(object):
         pass
     
+    @classmethod
+    def has_any_method(self, routes):
+        return any([hasattr(self, i) for i in routes if i!='options'])
+    
     def __init__(self, api, routes):        
         self._api         = api
         self.__routes     = routes # maps http methods with respective views
@@ -34,9 +38,12 @@ class Resource(object):
         self.index_fields = getattr(self, "index_fields", self.fields)
         self.show_fields  = getattr(self, "show_fields", self.fields)
         self.description  = getattr(self, "description", "not provided")
-        self.__allowed_methods = [k for k,v in self.__routes.items() if hasattr(self, v)]
+        self.__allowed_methods = self.__get_allowed_methods()
         self.__builders = self.__create_json_builders()
         self.__meta.page_class = self.__pagination #TEMPORARY
+    
+    def __get_allowed_methods(self):
+        return [k for k,v in self.__routes.items() if k!="OPTIONS" and hasattr(self, v)]
     
     def __get_fields(self):
         if hasattr(self, "fields"):
@@ -92,7 +99,7 @@ class Resource(object):
             return JSONbuilder( self._api, current_fields ), current_fields
         return self.__builders[ id(fields) ], fields
 
-    def __handle_response(self, request, response, current_fields, resource_parameters, builder):
+    def __handle_response(self, request, response, current_fields, parameters, builder):
         '''
         Proccess response into a JSON serializable object
         '''
@@ -101,13 +108,13 @@ class Resource(object):
             status, response = response
         if is_queryset(response):
             response = self.select_related(response, current_fields)
-            response = self.__queryset_with_meta(request, response, resource_parameters, builder)
+            response = self.__queryset_with_meta(request, response, parameters, builder)
         elif is_modelinstance(response):
             response = self.__serialize(response, builder)
         elif is_generator(response) or is_list(response):
-            response = self.__list_with_meta(request, response, resource_parameters, builder)
+            response = self.__list_with_meta(request, response, parameters, builder)
         elif is_valuesset(response):
-            response = self.__list_with_meta(request, list(response), resource_parameters)
+            response = self.__list_with_meta(request, list(response), parameters)
         return to_http(request, response, status)
         
     def select_related(self, resources, current_fields):
@@ -117,7 +124,7 @@ class Resource(object):
         related_models = [k for k,v in current_fields.iteritems() if isinstance(v, dict)]
         return resources.select_related( *related_models )
 
-    def __queryset_with_meta(self, request, resources, resource_parameters, builder):
+    def __queryset_with_meta(self, request, resources, parameters, builder):
         '''
         Appends Meta data into the json response
         '''
@@ -128,7 +135,7 @@ class Resource(object):
             return objects if not meta else {'Objects': objects,'Meta': meta}
         return self.__serialize_all( resources, builder )
 
-    def __list_with_meta(self, request, resources, resource_parameters, builder):
+    def __list_with_meta(self, request, resources, parameters, builder):
         '''
         Appends Meta data into list based response
         '''
@@ -139,12 +146,12 @@ class Resource(object):
             return objects if not meta else {'Objects': objects,'Meta': meta}
         return [self.__serialize(i, builder) if is_modelinstance(i) else i for i in resources]
 
-    def __paginate(self, request, resources, resource_parameters):
+    def __paginate(self, request, resources, parameters):
         '''
         Return page of resources according to default or parameter values
         '''
         page_resources, page_parameters = self.__pagination.select( request, resources )
-        resource_parameters.validated.update( page_parameters )
+        parameters.validated.update( page_parameters )
         return page_resources
 
     def __serialize_all(self, resources, builder):
@@ -211,4 +218,4 @@ class Resource(object):
         return response
     
     def options(self, request, **parameters):
-        return 404 if len(self.__allowed_methods) <= 1 else 200
+        return 404 if self.__allowed_methods else 200

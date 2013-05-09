@@ -31,26 +31,21 @@ class Api(object):
         self.__discoverable_paths = None
 
     def include(self, resource_path, resource_class, single_name=None, collection_name=None):
-        def has_any(resource, routes):
-            return any([hasattr(resource, i) for i in routes.values() if i!='options'])
-        
-        def build_pattern(path, routes, name):
-            resource = resource_class( self, routes )
-            return url( path, csrf_exempt( resource ), name=name )
-            
         def build_single_pattern():
             name = single_name or "single."+resource_class.__name__
             path = r'%s%s/(?P<pk>[0-9]+)/?$' %(self.__path, resource_path)
-            return build_pattern(path, self.__single_routes, name)
+            resource = resource_class( self, self.__single_routes )
+            return url( path, csrf_exempt( resource ), name=name )
         
         def build_collection_pattern():
             name = collection_name or "collection."+resource_class.__name__
             path = r'%s%s/?$' %(self.__path, resource_path)
-            return build_pattern(path, self.__collection_routes, name)
+            resource = resource_class( self, self.__collection_routes )
+            return url( path, csrf_exempt( resource ), name=name )
 
-        if has_any( resource_class, self.__single_routes ):
+        if resource_class.has_any_method(self.__single_routes.values()):
             self.__urlpatterns.append( build_single_pattern() )
-        if has_any( resource_class, self.__collection_routes ):
+        if resource_class.has_any_method(self.__collection_routes.values()):
             self.__urlpatterns.append( build_collection_pattern() )
         if hasattr(resource_class, 'model'):
             self.__mapping[ resource_class.model ] = resource_class
