@@ -48,13 +48,10 @@ class Api(object):
             path = r'%s%s/?$' %(self.__path, resource_path)
             return build_pattern(path, self.__collection_routes, name)
 
-        self.__urlpatterns.append( single_pattern() )
-        self.__urlpatterns.append( collection_pattern() )
-            
-        #if has_any( resource_class, self.__single_routes ):
-        #    self.__urlpatterns.append( build_single_pattern() )
-        #if has_any( resource_class, self.__collection_routes ):
-        #    self.__urlpatterns.append( build_collection_pattern() )
+        if has_any( resource_class, self.__single_routes ):
+            self.__urlpatterns.append( build_single_pattern() )
+        if has_any( resource_class, self.__collection_routes ):
+            self.__urlpatterns.append( build_collection_pattern() )
         if hasattr(resource_class, 'model'):
             self.__mapping[ resource_class.model ] = resource_class
 
