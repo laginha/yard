@@ -136,7 +136,10 @@ class Resource(object):
         elif is_httpresponse(response):
             return response
 
-        if is_queryset(response):
+        if is_valuesset(response):
+            content = self.__list_with_meta(request, list(response), resource_parameters, builder)
+            return self.__json_response(request)(content, status=status)
+        elif is_queryset(response):
             response = self.select_related(response, current_fields)
             content  = self.__queryset_with_meta(request, response, resource_parameters, builder)
             return self.__json_response(request)(content, status=status)
@@ -154,9 +157,6 @@ class Resource(object):
             return self.__json_response(request)(response, status=status)
         elif is_file(response):
             return FileResponse(response, status=status)
-        elif is_valuesset(response):
-            content = self.__list_with_meta(request, list(response), resource_parameters)
-            return self.__json_response(request)(content, status=status)
         else:
             return HttpResponse(str(response), status=status)
 
@@ -179,19 +179,23 @@ class Resource(object):
         '''
         Appends Meta data into the json response
         '''
-        page    = self.__paginate( request, resources, resource_parameters )
-        objects = self.__serialize_all( page, builder )
-        meta    = self.__meta.fetch(request, resources, page, resource_parameters)
-        return objects if not meta else {'Objects': objects,'Meta': meta}
+        if hasattr(resource_parameters, 'validated'):
+            page = self.__paginate( request, resources, resource_parameters )
+            objects = self.__serialize_all( page, builder )
+            meta = self.__meta.fetch(request, resources, page, resource_parameters)
+            return objects if not meta else {'Objects': objects,'Meta': meta}
+        return self.__serialize_all( resources, builder )
 
     def __list_with_meta(self, request, resources, resource_parameters, builder):
         '''
         Appends Meta data into list based response
         '''
-        page    = self.__paginate( request, resources, resource_parameters )
-        objects = [self.__serialize(i, builder) if is_modelinstance(i) else i for i in page]
-        meta    = self.__meta.fetch(request, resources, page, resource_parameters)
-        return objects if not meta else {'Objects': objects,'Meta': meta}
+        if hasattr(resource_parameters, 'validated'):
+            page = self.__paginate( request, resources, resource_parameters )
+            objects = [self.__serialize(i, builder) if is_modelinstance(i) else i for i in page]
+            meta = self.__meta.fetch(request, resources, page, resource_parameters)
+            return objects if not meta else {'Objects': objects,'Meta': meta}
+        return [self.__serialize(i, builder) if is_modelinstance(i) else i for i in resources]
 
     def __paginate(self, request, resources, resource_parameters):
         '''
