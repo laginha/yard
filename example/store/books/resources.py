@@ -10,7 +10,7 @@ class AuthorResource(resources.Resource):
     }
     
     def show(self, request, author_id):
-        return Author.objects.get( pk=author_id )
+        return Author.objects.filter( pk=author_id )#.values('id', 'name')
     
     
 class BookResource(resources.Resource):

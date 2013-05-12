@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from yard.exceptions import HttpMethodNotAllowed, MethodNotImplemented, RequiredParamMissing
-from yard.utils import is_tuple, is_queryset, is_modelinstance, is_generator, is_list, is_valuesset
+from yard.utils import is_tuple, is_queryset, is_modelinstance, is_generator, is_list, is_valuesset, is_dict
 from yard.utils.http import to_http
 from yard.forms import Form
 from yard.resources.utils import *
@@ -106,15 +106,15 @@ class Resource(object):
         status = DEFAULT_STATUS_CODE
         if is_tuple(response):
             status, response = response
-        if is_queryset(response):
+        if is_valuesset(response):
+            response = self.__list_with_meta(request, list(response), parameters, builder)
+        elif is_queryset(response):
             response = self.select_related(response, current_fields)
             response = self.__queryset_with_meta(request, response, parameters, builder)
         elif is_modelinstance(response):
             response = self.__serialize(response, builder)
         elif is_generator(response) or is_list(response):
             response = self.__list_with_meta(request, response, parameters, builder)
-        elif is_valuesset(response):
-            response = self.__list_with_meta(request, list(response), parameters)
         return to_http(request, response, status)
         
     def select_related(self, resources, current_fields):
@@ -128,10 +128,10 @@ class Resource(object):
         '''
         Appends Meta data into the json response
         '''
-        if hasattr(resource_parameters, 'validated'):
-            page = self.__paginate( request, resources, resource_parameters )
+        if hasattr(parameters, 'validated'):
+            page = self.__paginate( request, resources, parameters )
             objects = self.__serialize_all( page, builder )
-            meta = self.__meta.fetch(request, resources, page, resource_parameters)
+            meta = self.__meta.fetch(request, resources, page, parameters)
             return objects if not meta else {'Objects': objects,'Meta': meta}
         return self.__serialize_all( resources, builder )
 
@@ -139,10 +139,10 @@ class Resource(object):
         '''
         Appends Meta data into list based response
         '''
-        if hasattr(resource_parameters, 'validated'):
-            page = self.__paginate( request, resources, resource_parameters )
+        if hasattr(parameters, 'validated'):
+            page    = self.__paginate( request, resources, parameters )
             objects = [self.__serialize(i, builder) if is_modelinstance(i) else i for i in page]
-            meta = self.__meta.fetch(request, resources, page, resource_parameters)
+            meta = self.__meta.fetch(request, resources, page, parameters)
             return objects if not meta else {'Objects': objects,'Meta': meta}
         return [self.__serialize(i, builder) if is_modelinstance(i) else i for i in resources]
 
