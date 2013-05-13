@@ -1,6 +1,6 @@
 # Pagination
 
-The *Yard* framework paginates `QuerySet`, `ValueSet`, *list* and *generator* based responses. This behavior is **compulsory**.
+The *Yard* framework paginates only **index**'s `QuerySet`, `ValueSet`, *list* and *generator* based responses. This behavior is **compulsory**.
 
 ```python  
 from yard import resources
