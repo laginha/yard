@@ -1,6 +1,6 @@
 # Metadata
 
-For `QuerySet`, list of model instances and `ValuesSet` based responses, *Yard* appends useful metadata by default.
+For **index**'s `QuerySet`, list of model instances and `ValuesSet` based responses, *Yard* appends useful metadata by default.
 
 
 ## Meta Options
