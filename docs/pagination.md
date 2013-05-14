@@ -1,6 +1,6 @@
 # Pagination
 
-The *Yard* framework paginates only **index**'s `QuerySet`, `ValueSet`, *list* and *generator* based responses. This behavior is **compulsory**.
+The *Yard* framework paginates **index**'s `QuerySet`, `ValueSet`, *list* and *generator* based responses. 
 
 ```python  
 from yard import resources
@@ -17,9 +17,27 @@ class FooResource(resources.Resource):
         }
 ```
 
+In order to deactivate the pagination you need to do as follows:
+
+```python  
+from yard import resources
+
+class FooResource(resources.Resource):
+    
+    # default configuration
+    class Pagination:  
+        no_pagination = True
+```
+
 
 ## Pagination Options
 
+### no_pagination
+
+    no_pagination = True
+
+- disable pagination in the resource.
+- defaults to `False`
 
 ### offset_parameter
 
@@ -38,4 +56,4 @@ class FooResource(resources.Resource):
 
 - **default**: default number of results per each page. Defaults to *25*.
 - **parameter**: name of the parameter for the number of results. Defaults to *results*.
-- **limit**: maximum number of results per each page allowed. Defaults to *100*.
+- **limit**: maximum number of results per each page allowed. Defaults to *50*.
