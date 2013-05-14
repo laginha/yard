@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 # encoding: utf-8
-
 from django.core.paginator import Paginator
 from yard.utils            import is_generator
 
 
 class ResourcePage(object):
+    '''
+    Class responsible for resource pagination
+    '''
+    
     defaults = [
+        ('no_pagination', False),
         ('offset_parameter', 'offset'),
         ('results_per_page', {
             'parameter': 'results',
@@ -21,12 +25,18 @@ class ResourcePage(object):
         self.__pre_select()
             
     def select(self, request, resources):
+        '''
+        Paginate the resources according to Resource.Pagination attributes
+        '''
         offset, param1 = self.__offset( request.REQUEST )
         number, param2 = self.__number( request.REQUEST )
         return self.__paginate(resources, offset, number), dict(param1+param2)
         
     def __pre_select(self):
-        if not self.results_per_page or not self.offset_parameter:
+        '''
+        Optimize pagination process according to pagination attributes
+        '''
+        if self.no_pagination:
             self.select = lambda request,resources: (resources, {})
         else:
             if 'default' in self.results_per_page:
@@ -39,10 +49,16 @@ class ResourcePage(object):
                 self.__limit = lambda number: number
     
     def __limit(self, number):
+        '''
+        Define the number of resources to return considering the default limit
+        '''
         number = min(number, self.results_per_page['limit'])
         return number if number > 0 else self.__default
     
     def __number(self, request):
+        '''
+        Define the real number of resources to return in the pagination
+        '''
         parameter = self.results_per_page['parameter']
         number    = request.get(parameter, '')  
         if number.isdigit():
@@ -51,6 +67,9 @@ class ResourcePage(object):
         return self.__default, [(parameter, self.__default)]
     
     def __offset(self, request):
+        '''
+        Define the starting point for pagination
+        '''
         offset = request.get(self.offset_parameter, '')
         if offset.isdigit():
             offset = max(0, int(offset))
@@ -58,11 +77,17 @@ class ResourcePage(object):
         return 0, [(self.offset_parameter, 0)]
     
     def __paginate(self, resources, offset, number):
+        '''
+        Paginate the resources
+        '''
         if is_generator( resources ):
             return self.__paginate_generator(resources, offset, number)
         return resources[offset:offset+number]
     
     def __paginate_generator(self, resources, offset, number):
+        '''
+        Paginate a generator based resources
+        '''
         objects = []
         try:
             for i in range(offset): 

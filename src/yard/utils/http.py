@@ -57,7 +57,7 @@ class JsonResponse(HttpResponse):
 
 
 
-def to_http(request, content, status=DEFAULT_STATUS_CODE):
+def to_http(request, content=None, status=DEFAULT_STATUS_CODE):
     if is_httpresponse(content):
         return content
     elif content == None:
