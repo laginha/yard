@@ -17,56 +17,60 @@ class Resource(object):
     '''
     API Resource object
     '''
-
-    class Meta(object):
-        pass
-
-    class Pagination(object):
-        pass
     
-    @classmethod
-    def has_any_method(self, routes):
-        return any([hasattr(self, i) for i in routes if i!='options'])
-    
-    def __init__(self, api, routes):        
+    def __init__(self, api, routes):
+
+        def get_class_attribute(name):
+            return getattr(self, name, type(name, (), {}))
+            
+        def get_allowed_methods():
+            return [k for k,v in self.__routes.items() if k!="OPTIONS" and hasattr(self, v)]
+
+        def get_fields():
+            return self.fields if hasattr(self, "fields") else (
+                model_to_fields(self.model) if hasattr(self, "model") else {} )
+
+        def get_json_builders():
+            fields = [self.index_fields, self.show_fields, self.fields]
+            return { id(i): JSONbuilder(self._api, i) for i in fields if not callable(i) }
+            
+        def get_parameters():
+            parameters = Form( self.Parameters ) if hasattr(self, "Parameters") else None
+            if not parameters:
+                self.__get_resource_parameters = lambda r,p: ResourceParameters( p )
+            return parameters
+            
+        # 'Public' attributes
         self._api         = api
-        self.__routes     = routes # maps http methods with respective views
-        self.__meta       = ResourceMeta( self.Meta )
-        self.__pagination = ResourcePage( self.Pagination )
-        self.__parameters = Form( self.Parameters ) if hasattr(self, "Parameters") else None
-        self.fields       = self.__get_fields()
+        self._pagination  = ResourcePage( get_class_attribute('Pagination') )
+        self._meta        = ResourceMeta( get_class_attribute('Meta'), self._pagination )
+        self.fields       = get_fields()
         self.index_fields = getattr(self, "index_fields", self.fields)
         self.show_fields  = getattr(self, "show_fields", self.fields)
         self.description  = getattr(self, "description", "not provided")
-        self.__allowed_methods = self.__get_allowed_methods()
-        self.__builders = self.__create_json_builders()
-        self.__meta.page_class = self.__pagination #TEMPORARY
+        # 'Private' attributes
+        self.__routes          = routes
+        self.__parameters      = get_parameters()
+        self.__builders        = get_json_builders()
+        self.__allowed_methods = get_allowed_methods()
     
-    def __get_allowed_methods(self):
-        return [k for k,v in self.__routes.items() if k!="OPTIONS" and hasattr(self, v)]
-    
-    def __get_fields(self):
-        if hasattr(self, "fields"):
-            return self.fields
-        elif not hasattr(self, "model"):
-            return {}
-        return model_to_fields(self.model)
-        
-    def __create_json_builders(self):
-        return {
-            id(i): JSONbuilder(self._api, i) 
-            for i in [self.index_fields, self.show_fields, self.fields] if not callable(i)
-        }
+    @classmethod
+    def has_any_method(self, routes):
+        '''
+        Check if Resource has any http method implemented
+        '''
+        return any([hasattr(self, i) for i in routes if i!='options'])
     
     def __call__(self, request, **parameters):
         '''
         Called in every request made to Resource
         '''
         try:
-            method = self.__method( request )
+            if request.method not in self.__routes:
+                return to_http(request, status=404)
+            method = self.__routes[request.method]
             return getattr(self, 'handle_'+method)(request, parameters)
-        except (HttpMethodNotAllowed, MethodNotImplemented, ObjectDoesNotExist, IOError):
-            # HttpMethodNotAllowed: if http_method not allowed for this resource
+        except (MethodNotImplemented, ObjectDoesNotExist, IOError):
             # MethodNotImplemented: if view not implemented
             # ObjectDoesNotExist: if return model instance does not exist
             # IOError: if return file not found
@@ -75,48 +79,62 @@ class Resource(object):
             # if required param missing from request
             return HttpResponse(status=403)
 
-    def __method(self, request):
-        '''
-        Checks if http_method within possible routes
-        '''
-        if request.method not in self.__routes:
-            raise HttpMethodNotAllowed(request.method)
-        return self.__routes[request.method]
-
-    def __resource_parameters(self, request, parameters):
+    def __get_resource_parameters(self, request, parameters):
         '''
         Gets parameters from resource request
         '''
         resource_params = ResourceParameters( parameters )
-        if self.__parameters:
-            for i in self.__parameters.get( request ):
-                resource_params.update( i )
+        for i in self.__parameters.get( request ):
+            resource_params.update( i )
         return resource_params
-    
-    def __get_builder(self, fields, parameters):
-        if callable(fields):
-            current_fields = fields(parameters)
-            return JSONbuilder( self._api, current_fields ), current_fields
-        return self.__builders[ id(fields) ], fields
 
-    def __handle_response(self, request, response, current_fields, parameters, builder):
+    def __get_builder(self, fields):
+        '''
+        Get JSONbuilder for the given fields
+        '''
+        return self.__builders[ id(fields) ] or JSONbuilder( self._api, fields )
+
+    def __handle_response(self, request, response, fields, parameters):
         '''
         Proccess response into a JSON serializable object
         '''
+        current_fields = fields(parameters) if callable(fields) else fields
         status = DEFAULT_STATUS_CODE
         if is_tuple(response):
             status, response = response
         if is_valuesset(response):
-            response = self.__list_with_meta(request, list(response), parameters, builder)
+            response = self.__handle_list(request, list(response), parameters, current_fields)
         elif is_queryset(response):
             response = self.select_related(response, current_fields)
-            response = self.__queryset_with_meta(request, response, parameters, builder)
+            response = self.__handle_queryset(request, response, parameters, current_fields)
         elif is_modelinstance(response):
-            response = self.__serialize(response, builder)
+            response = self.serialize(response, current_fields)
         elif is_generator(response) or is_list(response):
-            response = self.__list_with_meta(request, response, parameters, builder)
+            response = self.__handle_list(request, response, parameters, current_fields)
         return to_http(request, response, status)
-        
+
+    @with_pagination_and_meta
+    def __handle_queryset(self, request, resources, parameters, fields):
+        '''
+        Serialize queryset based response
+        '''
+        return self.serialize_all( resources, fields )
+
+    @with_pagination_and_meta
+    def __handle_list(self, request, resources, parameters, fields):
+        '''
+        Serialize list based response
+        '''
+        return [self.serialize(i, fields) if is_modelinstance(i) else i for i in resources]
+
+    def _paginate(self, request, resources, parameters):
+        '''
+        Return page of resources according to default or parameter values
+        '''
+        page_resources, page_parameters = self._pagination.select( request, resources )
+        parameters.validated.update( page_parameters )
+        return page_resources
+
     def select_related(self, resources, current_fields):
         '''
         Optimize queryset according to current response fields
@@ -124,98 +142,50 @@ class Resource(object):
         related_models = [k for k,v in current_fields.iteritems() if isinstance(v, dict)]
         return resources.select_related( *related_models )
 
-    def __queryset_with_meta(self, request, resources, parameters, builder):
-        '''
-        Appends Meta data into the json response
-        '''
-        if hasattr(parameters, 'validated'):
-            page = self.__paginate( request, resources, parameters )
-            objects = self.__serialize_all( page, builder )
-            meta = self.__meta.fetch(request, resources, page, parameters)
-            return objects if not meta else {'Objects': objects,'Meta': meta}
-        return self.__serialize_all( resources, builder )
-
-    def __list_with_meta(self, request, resources, parameters, builder):
-        '''
-        Appends Meta data into list based response
-        '''
-        if hasattr(parameters, 'validated'):
-            page    = self.__paginate( request, resources, parameters )
-            objects = [self.__serialize(i, builder) if is_modelinstance(i) else i for i in page]
-            meta = self.__meta.fetch(request, resources, page, parameters)
-            return objects if not meta else {'Objects': objects,'Meta': meta}
-        return [self.__serialize(i, builder) if is_modelinstance(i) else i for i in resources]
-
-    def __paginate(self, request, resources, parameters):
-        '''
-        Return page of resources according to default or parameter values
-        '''
-        page_resources, page_parameters = self.__pagination.select( request, resources )
-        parameters.validated.update( page_parameters )
-        return page_resources
-
-    def __serialize_all(self, resources, builder):
+    def serialize_all(self, resources, fields):
         '''
         Serializes each resource (within page) into json
         '''
-        return [builder.to_json(i) for i in resources]
+        return [self.__get_builder(fields).to_json(i) for i in resources]
 
-    def serialize_all(self, resources, fields):
-        builder = self.__builders.get( id(fields) ) or JSONbuilder(self._api, fields)
-        return self.__serialize_all( resources, builder )
-
-    def __serialize(self, resource, builder):
+    def serialize(self, resource, fields):
         '''
         Creates json for given resource
         '''
-        return builder.to_json(resource)
-
-    def serialize(self, resource, fields):
-        builder = self.__builders.get( id(fields) ) or JSONbuilder(self._api, fields)
-        return self.__serialize( resource, builder )
-         
-    #
-    # HTTP verbs
-    #
+        return self.__get_builder(fields).to_json(resource)
     
     @method_required('index')
     def handle_index(self, request, parameters):
-        parameters = self.__resource_parameters( request, parameters )
+        parameters = self.__get_resource_parameters( request, parameters )
         response = self.index(request, parameters)
-        builder, current_fields = self.__get_builder(self.index_fields, parameters)
-        return self.__handle_response(request, response, current_fields, parameters, builder)
+        return self.__handle_response(request, response, self.index_fields, parameters)
     
     @method_required('show')
     def handle_show(self, request, parameters):
         response = self.show(request, parameters.pop('pk'), **parameters)
-        builder, fields = self.__get_builder(self.show_fields, parameters)
-        return self.__handle_response(request, response, fields, parameters, builder)
+        return self.__handle_response(request, response, self.show_fields, parameters)
     
     @method_required('create')
     def handle_create(self, request, parameters):
         response = self.create(request, **parameters)
-        builder, fields = self.__get_builder(self.fields, parameters)
-        return self.__handle_response(request, response, fields, parameters, builder)
+        return self.__handle_response(request, response, self.fields, parameters)
     
     @method_required('update')    
     def handle_update(self):
         response = self.update(request, parameters.pop('pk'), **parameters)
-        builder, fields = self.__get_builder(self.fields, parameters)
-        return self.__handle_response(request, response, fields, parameters, builder)
+        return self.__handle_response(request, response, self.fields, parameters)
     
     @method_required('destroy')
     def handle_destroy(self, request, parameters):
         response = self.destroy(request, parameters.pop('pk'), **parameters)
-        builder, fields = self.__get_builder(self.fields, parameters)
-        return self.__handle_response(request, response, fields, parameters, builder)
+        return self.__handle_response(request, response, self.fields, parameters)
     
     @method_required('options')
     def handle_options(self, request, parameters):
         response = self.options(request, **parameters)
-        builder, fields = self.__get_builder(self.fields, parameters)
-        response = self.__handle_response(request, response, fields, parameters, builder)
-        response['Allow'] = self.__allowed_methods
+        response = self.__handle_response(request, response, self.fields, parameters)
+        response['Allow'] = self.allowed_methods
         return response
     
     def options(self, request, **parameters):
-        return 404 if self.__allowed_methods else 200
+        return 200
