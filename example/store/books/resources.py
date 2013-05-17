@@ -1,4 +1,5 @@
 from yard import forms, version, resources
+from yard.resources.decorators import validate
 from models import Book, Author
 
 class AuthorResource(resources.Resource):
@@ -26,12 +27,10 @@ class BookResource(resources.Resource):
     class Meta:
         maximum = (('longest_title', 'title'),)
         average = (('average_pages', 'number_of_pages'),)
-        
+    
+    @validate    
     def index(self, request, params):
-        if params.is_valid():
-            return Book.objects.filter( **params ) #returns a JsonResponse-200
-        else:
-            return 400, params.errors()
+        return Book.objects.filter( **params ) #returns a JsonResponse-200
 
     def show(self, request, book_id):
         return Book.objects.get( id=book_id )

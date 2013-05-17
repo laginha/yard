@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from django.test.client import Client, RequestFactory
-from yard.resources.base.page import ResourcePage
-from yard.resources.base.meta import ResourceMeta
-from yard.resources.base.parameters import ResourceParameters
+from yard.resources.page import ResourcePage
+from yard.resources.meta import ResourceMeta
+from yard.resources.parameters import ResourceParameters
 from books.tests.base import BaseTestCase
 from books.models  import *
 
@@ -20,12 +20,14 @@ class MetaTestCase( BaseTestCase ):
         self.factory = RequestFactory()
         
     def get_resource_meta(self, meta=None):
-        return ResourceMeta(self.pagination) if not meta else ResourceMeta(self.pagination, meta)
+        meta = ResourceMeta() if not meta else ResourceMeta(meta)
+        meta.page_class = self.pagination
+        return meta
     
     def get_metadata(self, request, meta, objects):
         paged, page_params = self.pagination.select(request, objects)
         self.params.validated.update( page_params )
-        return meta.generate( request, objects, paged, self.params )
+        return meta.fetch( request, objects, paged, self.params )
         
     def assert_defaults_in_meta(self, metadata, value=True):
         assert ('total_objects' in metadata) == value
@@ -56,7 +58,7 @@ class MetaTestCase( BaseTestCase ):
         meta = self.get_resource_meta()
         paged, page_params = self.pagination.select(request, objects)
         self.params.validated.update( page_params )
-        metadata = meta.generate( request, objects, paged, self.params )
+        metadata = meta.fetch( request, objects, paged, self.params )
         self.assert_defaults_in_meta( metadata )
         self.assert_aggregates_not_in_meta( metadata )
         assert 'no_meta' not in metadata
@@ -80,6 +82,7 @@ class MetaTestCase( BaseTestCase ):
         }))
         metadata = self.get_metadata(request, meta, objects)
         assert 'number_of_objects_is_even' in metadata
+
 
     def test_custom(self):        
         request = self.factory.get('/books/')

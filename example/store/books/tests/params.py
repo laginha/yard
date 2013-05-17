@@ -1,13 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from django.test import TestCase
-try:
-    from yard.gis.params import *
-    HAS_GIS_SUPPORT = True
-except ImportError:
-    from yard.forms.params import *
-    HAS_GIS_SUPPORT = False
-
+from yard.forms.params import *
 from yard.exceptions import InvalidParameterValue, ConversionError
 from .randomizer import Randomizer
 from datetime import datetime
@@ -240,14 +234,12 @@ class MultipleChoiceParamTestCase(TestCase):
         assert fail_validation(p, [RANDOM.string(), RANDOM.string()])
 
 
-if HAS_GIS_SUPPORT:
-    
-    class PointParamTestCase(TestCase):
-        def test_convert(self):
-            p = PointParam()
-            assert p.convert('1,1.1')
-            assert fail_conversion(p, '1.1')
-            assert fail_conversion(p, '190,190')
+class PointParamTestCase(TestCase):
+
+    def test_convert(self):
+        p = PointParam()
+        assert p.convert('1,1.1')
+        assert fail_conversion(p, '1.1')
 
 
 class IpAddressParamTestCase(TestCase):
@@ -280,19 +272,3 @@ class TimestampParamTestCase(TestCase):
         assert fail_conversion(p, 'a')
         assert fail_conversion(p, '11111111111111111')
 
-
-class CommaSeparatedValueParamTestCase(TestCase):
-
-    def test_convert(self):
-        p = CommaSeparatedValueParam()
-        assert p.convert('1')
-        assert p.convert('1,a') == ['1','a']
-
-
-class CommaSeparatedIntegerParamTestCase(TestCase):
-
-    def test_convert(self):
-        p = CommaSeparatedIntegerParam()
-        assert p.convert('1') == [1]
-        assert p.convert('1,1') == [1, 1]
-        assert fail_conversion(p, '1,a')
