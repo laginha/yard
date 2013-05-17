@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
-
-from settings             import *
-from yard.forms           import Form, Parameter
+from django.test import TestCase
+from yard.forms import Form, Parameter
 from yard.forms.parameter import Logic, AND, OR
 
 A = Parameter()
@@ -13,11 +12,10 @@ E = Parameter()
 
 class SomeForm:
     a, b, c, d, e = A, B, C, D, E
-    
     __logic__ = a, b&c&d, e|a|b, c&(d|e)&a, b|(c&d)|e
 
 
-class TestForm(unittest.TestCase):
+class FormTestCase(TestCase):
     
     def test_logic(self):
         form = Form( SomeForm )
@@ -75,9 +73,3 @@ class TestForm(unittest.TestCase):
         assert form.__logic__[4].y.x.y == D
         assert str(form.__logic__[4]) == "( e or ( ( c and d ) or b ) )"
         assert len(form.__logic__[4]) == 4
-
-
-
-if __name__ == '__main__':
-    unittest.main()
-
