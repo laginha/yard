@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # encoding: utf-8
-
-from settings          import *
+from django.test import TestCase
 from yard.forms.params import *
-from yard.exceptions   import InvalidParameterValue, ConversionError
-from datetime          import datetime
+from yard.exceptions import InvalidParameterValue, ConversionError
+from .randomizer import Randomizer
+from datetime import datetime
+
+RANDOM = Randomizer()
 
 
 def fail_validation(p, x):
@@ -22,7 +24,7 @@ def fail_conversion(p, x):
         return True
 
 
-class TestIntegerParam(unittest.TestCase):
+class IntegerParamTestCase(TestCase):
         
     def test_convert(self, param=IntegerParam):
         p = param()
@@ -62,13 +64,13 @@ class TestIntegerParam(unittest.TestCase):
         assert p._validate(min_*-1)
     
 
-class TestPositiveIntegerParam(TestIntegerParam):
+class PositiveIntegerParamTestCase(IntegerParamTestCase):
     
     def test_conversion(self, param=PositiveIntegerParam):
-        TestIntegerParam.test_convert(self, param)
+        IntegerParamTestCase.test_convert(self, param)
         
     def test_default(self, param=PositiveIntegerParam):
-        TestIntegerParam.test_default(self, param)
+        IntegerParamTestCase.test_default(self, param)
         
     def test_validate(self, param=PositiveIntegerParam):
         p = param()
@@ -81,35 +83,35 @@ class TestPositiveIntegerParam(TestIntegerParam):
         assert fail_validation(p, max_+RANDOM.number())
 
 
-class TestFloatParam(TestIntegerParam):
+class FloatParamTestCase(IntegerParamTestCase):
     
     def test_convert(self, param=FloatParam):
-        TestIntegerParam.test_convert(self, param)
+        IntegerParamTestCase.test_convert(self, param)
         value = RANDOM.float()
         assert value == param().convert(str(value))
         
     def test_default(self):
-        TestIntegerParam.test_default(self, FloatParam)
+        IntegerParamTestCase.test_default(self, FloatParam)
 
     def test_validate(self):
-        TestIntegerParam.test_validate(self, FloatParam)
+        IntegerParamTestCase.test_validate(self, FloatParam)
     
 
-class TestPositiveFloatParam(TestPositiveIntegerParam):
+class TestPositiveFloatParam(PositiveIntegerParamTestCase):
 
     def test_convert(self, param=PositiveFloatParam):
-        TestPositiveIntegerParam.test_convert(self, param)
+        PositiveIntegerParamTestCase.test_convert(self, param)
         value = RANDOM.float()
         assert value == param().convert(str(value))
 
     def test_default(self):
-        TestPositiveIntegerParam.test_default(self, PositiveFloatParam)
+        PositiveIntegerParamTestCase.test_default(self, PositiveFloatParam)
 
     def test_validate(self):
-        TestPositiveIntegerParam.test_validate(self, PositiveFloatParam)
+        PositiveIntegerParamTestCase.test_validate(self, PositiveFloatParam)
 
 
-class TestCharParam(unittest.TestCase):
+class CharParamTestCase(TestCase):
 
     def test_convert(self, param=CharParam):
         value = RANDOM.string()
@@ -130,7 +132,7 @@ class TestCharParam(unittest.TestCase):
         assert p._validate(RANDOM.string(max_))
 
 
-class TestRegexParam(unittest.TestCase):
+class RegexParamTestCase(TestCase):
     
     def test_convert(self):
         value = RANDOM.string()
@@ -150,7 +152,7 @@ class TestRegexParam(unittest.TestCase):
         assert fail_validation(p, RANDOM.string())
 
 
-class TestDateTimeParam(unittest.TestCase):
+class DateTimeParamTestCase(TestCase):
 
     def test_convert(self, param=DateTimeParam):
         p = param()
@@ -168,7 +170,7 @@ class TestDateTimeParam(unittest.TestCase):
         assert p._default(string)[0] == string
 
 
-class TestDateParam(TestDateTimeParam):
+class DateParamTestCase(DateTimeParamTestCase):
     
     def test_convert(self):
         p = DateParam()
@@ -176,10 +178,10 @@ class TestDateParam(TestDateTimeParam):
         assert fail_conversion(p, '2012-1-1 0:0:0')
 
     def test_default(self):
-        TestDateTimeParam.test_default(self, DateParam)
+        DateTimeParamTestCase.test_default(self, DateParam)
 
 
-class TestTimeParam(TestDateTimeParam):
+class TimeParamTestCase(DateTimeParamTestCase):
 
     def test_convert(self):
         p = TimeParam()
@@ -188,10 +190,10 @@ class TestTimeParam(TestDateTimeParam):
         assert fail_conversion(p, '2012-1-1 0:0:0')
             
     def test_default(self):
-        TestDateTimeParam.test_default(self, TimeParam)
+        DateTimeParamTestCase.test_default(self, TimeParam)
 
 
-class TestBooleanParam(unittest.TestCase):
+class BooleanParamTestCase(TestCase):
 
     def test_convert(self):
         p = BooleanParam()
@@ -207,7 +209,7 @@ class TestBooleanParam(unittest.TestCase):
         assert p._default(boolean)[0] == boolean
         
 
-class TestChoiceParam(unittest.TestCase):
+class ChoiceParamTestCase(TestCase):
 
     def test_validate(self):
         options = RANDOM.list_of_numbers()
@@ -216,7 +218,7 @@ class TestChoiceParam(unittest.TestCase):
         assert fail_validation(p, RANDOM.string())
 
 
-class TestMultipleChoiceParam(unittest.TestCase):
+class MultipleChoiceParamTestCase(TestCase):
     
     def test_convert(self):
         options = RANDOM.list_of_numbers()
@@ -232,7 +234,7 @@ class TestMultipleChoiceParam(unittest.TestCase):
         assert fail_validation(p, [RANDOM.string(), RANDOM.string()])
 
 
-class TestPointParam(unittest.TestCase):
+class PointParamTestCase(TestCase):
 
     def test_convert(self):
         p = PointParam()
@@ -240,7 +242,7 @@ class TestPointParam(unittest.TestCase):
         assert fail_conversion(p, '1.1')
 
 
-class TestIpAddressParam(unittest.TestCase):
+class IpAddressParamTestCase(TestCase):
 
     def test_validate(self):
         p = IpAddressParam()
@@ -250,7 +252,7 @@ class TestIpAddressParam(unittest.TestCase):
         assert fail_validation(p, '1.1.1.1.1.1.1.1.1.1')
 
 
-class TestEmailParam(unittest.TestCase):
+class EmailParamTestCase(TestCase):
 
     def test_validate(self):
         p = EmailParam()
@@ -261,7 +263,7 @@ class TestEmailParam(unittest.TestCase):
         assert fail_validation(p, 'sth@wtv.x')
 
 
-class TestTimestampParam(unittest.TestCase):
+class TimestampParamTestCase(TestCase):
 
     def test_convert(self):
         p = TimestampParam()
@@ -270,6 +272,3 @@ class TestTimestampParam(unittest.TestCase):
         assert fail_conversion(p, 'a')
         assert fail_conversion(p, '11111111111111111')
 
-
-if __name__ == '__main__':
-    unittest.main()

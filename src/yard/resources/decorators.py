@@ -7,7 +7,7 @@ def validate(f):
     '''
     def wrapper(klass, request, params):
         if not params.is_valid():
-            return params.errors()
+            return 400, params.errors()
         return f(klass, request, params)
     return wrapper
 

@@ -125,7 +125,7 @@ class ResourceMeta(object):
         ('count',                 None)
     ]
 
-    def __init__(self, meta):
+    def __init__(self, meta=type('Meta', (), {})):
         self.__new_meta = [
             (k,v) for k,v in meta.__dict__.iteritems() if callable(v)
         ]
