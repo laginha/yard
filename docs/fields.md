@@ -1,6 +1,6 @@
 # Fields
 
-The `fields` attribute is responsible for defining which returned model instance's attributes are to be included in the *JSON* response (only used for `index` and `show` methods only). 
+The `fields` attribute is responsible for defining which returned model instance's attributes are to be included in the *JSON* response. 
 
 if the `model` attribute is defined in the `Resource`, `fields` defaults to all model's attributes.
 
