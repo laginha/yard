@@ -43,8 +43,10 @@ class ResourceHttpMethodsTestCase( BaseTestCase ):
     def setUp(self):
         super(ResourceHttpMethodsTestCase, self).setUp()
         self.factory = RequestFactory()
-        self.collection_resource = Resource(Api(), {'get':'index', 'post':'create'})
-        self.single_resource = Resource(Api(), {'get':'show', 'put':'update', 'post':'update', 'delete':'destroy'})
+        SomeResource = Resource
+        #SomeResource.model = Book
+        self.collection_resource = SomeResource(Api(), {'GET':'index', 'POST':'create'})
+        self.single_resource = SomeResource(Api(), {'GET':'show', 'PUT':'update', 'POST':'update', 'DELETE':'destroy'})
     
     def get_response(self, request, resource, params={}, content_type="application/json", status=200):
         response = resource(request, **params)
@@ -59,9 +61,9 @@ class ResourceHttpMethodsTestCase( BaseTestCase ):
         self.single_method_test( request, 'show' )
     
     def test_update_method(self):
-        request = self.factory.post('/books/')
+        request = self.factory.post('/books/1')
         self.single_method_test( request, 'update' )
-        request = self.factory.put('/books/')
+        request = self.factory.put('/books/1')
         self.single_method_test( request, 'update' )
         
     def test_destroy_method(self):

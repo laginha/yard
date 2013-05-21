@@ -3,7 +3,7 @@
 from django.db.models    import Avg, Max, Min, Count
 from yard.exceptions     import NoMeta
 from yard.utils          import is_list, is_generator
-from yard.resources.page import ResourcePage
+from yard.resources.utils.page import ResourcePage
 
 
 class MetaDict(dict):
@@ -174,8 +174,7 @@ class ResourceMeta(object):
         ('count',                 None)
     ]
 
-    #def __init__(self, meta=type('Meta', (), {})):
-    def __init__(self, meta, pagination):
+    def __init__(self, pagination, meta=type('Meta', (), {})):
         self.__pagination = pagination
         self.__new_meta = [
             (k,v) for k,v in meta.__dict__.iteritems() if callable(v)

@@ -3,10 +3,6 @@
 from django.test.client import Client
 from books.tests.base import BaseTestCase
 from books.models  import *
-#from django.contrib.auth.models import User
-#from yard.apps.keyauth.models import Key
-#self.user = User.objects.get_or_create( username='username' )[0]
-#self.key = Key.objects.get_or_create( user=self.user )[0]
 from datetime import date
 import json
 
