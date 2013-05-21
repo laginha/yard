@@ -2,6 +2,8 @@
 # encoding: utf-8
 from django.test import TestCase
 from django.test.client import Client
+from django.contrib.auth.models import User
+from yard.apps.keyauth.models import Key
 from books.models  import *
 from datetime import date
 import json
@@ -15,6 +17,8 @@ genres  = Genre.objects
 class BaseTestCase( TestCase ):
     def setUp(self):
         self.client = Client()
+        self.user = User.objects.get_or_create( username='username' )[0]
+        self.key = Key.objects.get_or_create( user=self.user )[0]
         self.genre1 = genres.get_or_create( name='Dark Fantasy' )[0]
         self.genre2 = genres.get_or_create( name='Medieval Fantasy' )[0]
         self.genre3 = genres.get_or_create( name='High Fantasy' )[0]

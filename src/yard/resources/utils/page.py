@@ -10,13 +10,13 @@ class ResourcePage(object):
     '''
     
     defaults = [
-        ('no_pagination', False),
         ('offset_parameter', 'offset'),
         ('results_per_page', {
             'parameter': 'results',
             'default': 25,
             'limit': 50,
         }),
+        ('no_pagination', False),
     ]
 
     def __init__(self, page=type('Pagination', (), {})):

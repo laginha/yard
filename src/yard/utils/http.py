@@ -26,7 +26,7 @@ class JSONResponse(HttpResponse):
     Http Response with Json content type
     '''
     def __init__(self, content='', mimetype=None, status=None):
-        content = simplejson.dumps( content or [], ensure_ascii=False )
+        content = simplejson.dumps( content, ensure_ascii=False )
         HttpResponse.__init__(self, content      = content, 
                                     mimetype     = mimetype, 
                                     status       = status, 
@@ -38,7 +38,8 @@ class JSONPResponse(HttpResponse):
     Http Response with Jsonp content type
     '''
     def __init__(self, content='', mimetype=None, status=None, callback='callback'):
-        content = simplejson.dumps( content or [], ensure_ascii=False )
+        #content = simplejson.dumps( content or [], ensure_ascii=False )
+        content = simplejson.dumps( content, ensure_ascii=False )
         HttpResponse.__init__(self, content      = "%s(%s)" %(callback, content), 
                                     mimetype     = mimetype,
                                     status       = status, 

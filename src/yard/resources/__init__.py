@@ -43,7 +43,7 @@ class Resource(object):
         # 'Public' attributes
         self._api         = api
         self._pagination  = ResourcePage( get_class_attribute('Pagination') )
-        self._meta        = ResourceMeta( get_class_attribute('Meta'), self._pagination )
+        self._meta        = ResourceMeta( self._pagination, get_class_attribute('Meta') )
         self.fields       = get_fields()
         self.index_fields = getattr(self, "index_fields", self.fields)
         self.show_fields  = getattr(self, "show_fields", self.fields)
@@ -92,7 +92,7 @@ class Resource(object):
         '''
         Get JSONbuilder for the given fields
         '''
-        return self.__builders[ id(fields) ] or JSONbuilder( self._api, fields )
+        return self.__builders.get( id(fields) ) or JSONbuilder( self._api, fields )
 
     def __handle_response(self, request, response, fields, parameters):
         '''
@@ -171,7 +171,7 @@ class Resource(object):
         return self.__handle_response(request, response, self.fields, parameters)
     
     @method_required('update')    
-    def handle_update(self):
+    def handle_update(self, request, parameters):
         response = self.update(request, parameters.pop('pk'), **parameters)
         return self.__handle_response(request, response, self.fields, parameters)
     
