@@ -3,21 +3,75 @@
 from django.contrib.gis.db import models
 import simplejson
 
-Integer = int
-Float = float
-List = Tuple = Iter = list
-Dict = JSON = dict
-String = str
-Unicode = unicode
-Boolean = bool
-CommaSeparatedValue = lambda data: [i for i in data.split(',')],
-File = lambda data: data.url,
-FilePath = lambda data: data.path,
-GEOJSON = lambda data: simplejson.loads(data.geojson)
-RelatedManager = lambda data: [unicode(i) for i in data.all()]
-QuerySet = lambda data: [unicode(i) for i in data]
-ValuesSet = lambda data: list( data )
-URI = lambda data, api: api.get_uri(data)
+def verify(f):
+    def wrapper(data, *args):
+        return f(data, *args) if data != None else None
+    return wrapper
+
+@verify
+def Integer(data):
+    return int(data)
+    
+@verify
+def Float(data):
+    return float(data)
+
+@verify
+def List(data):
+    return list(data)
+    
+Tuple = Iter = List
+
+@verify
+def Dict(data):
+    return dict(data)
+    
+JSON = Dict
+
+@verify
+def String(data):
+    return str(data)
+    
+@verify
+def Unicode(data):
+    return unicode(data)
+        
+@verify
+def Boolean(data):
+    return bool(data)
+            
+@verify
+def CommaSeparatedValue(data):
+    return lambda data: [i for i in data.split(',')]
+
+@verify
+def File(data): 
+    return data.url
+    
+@verify    
+def FilePath(data): 
+    return data.path
+
+@verify     
+def GEOJSON(data):
+    return simplejson.loads(data.geojson)
+    
+@verify  
+def RelatedManager(data): 
+    return [unicode(i) for i in data.all()]
+    
+@verify   
+def QuerySet(data): 
+    return [unicode(i) for i in data]
+
+@verify   
+def ValuesSet(data): 
+    return list(data)
+
+@verify   
+def URI(data, api): 
+    return api.get_uri(data)
+
 
 MAPPING = {
     models.AutoField: Integer,
