@@ -4,7 +4,7 @@
 
 In practice, every returned resource or nested resource contains in its *JSON* representation an *resource_uri* field.
 
-<pre>
+```javascript
 {
     "Objects": [
         {
@@ -23,7 +23,7 @@ In practice, every returned resource or nested resource contains in its *JSON* r
         ...
     }
 }
-</pre>
+```
 
 For this to work properly both resources, books and authors, must exist in the `Api`.
 

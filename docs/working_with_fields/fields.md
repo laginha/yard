@@ -72,20 +72,6 @@ resulting in the following *JSON* response:
 resulting in the following *JSON* response:
 
 ```javascript
-[ 
-    { "id": "8",
-      "title": "A Game of Thrones",
-      "author": {
-          "id": 1,
-          "name": "George R.R. Martin",
-      }
-    } 
-]
-```
-
-resulting in the following *JSON* response:
-
-<pre>
 {
     "Objects": [
         {
@@ -102,7 +88,7 @@ resulting in the following *JSON* response:
         ...
     }
 }
-</pre>
+```
 
 ## Instance methods in fields
 
