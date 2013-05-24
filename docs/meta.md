@@ -102,7 +102,7 @@ class BookResource(resources.Resource):
         maximum = (('longest_title', 'title'),)
 ```
 
-<pre>
+```javascript
 {
     "Objects": [
         {
@@ -123,7 +123,7 @@ class BookResource(resources.Resource):
         "longest_title": "A Feast for Crows",
     }
 }
-</pre>
+```
 
 ### without meta
 
@@ -135,7 +135,7 @@ class BookResource(resources.Resource):
         no_meta = True
 ```
 
-<pre>
+```javascript
 [
     {
         "publication_date": "2005-10-17", 
@@ -146,4 +146,4 @@ class BookResource(resources.Resource):
     },
     ...
 ]
-</pre>
+```

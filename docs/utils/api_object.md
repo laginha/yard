@@ -16,7 +16,7 @@ api = Api( r'^apipath/', discover=True )
 
 In this case a *HTTP GET* request to `http://example.com/apipath` would return a *JSON* response like this:
 
-<pre>
+```javascript
 {
     Resources: [
         {
@@ -26,7 +26,7 @@ In this case a *HTTP GET* request to `http://example.com/apipath` would return a
         ...
     ]
 }
-</pre>
+```
 
 ## Methods and Properties
 

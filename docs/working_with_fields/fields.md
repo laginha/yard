@@ -20,7 +20,7 @@ class BookResource(resources.Resource):
 
 The API-client, whenever requesting a resource collection (`index`), will receive a *JSON* response built according to the specified `fields` attribute.
 
-<pre>
+```javascript
 {
     "Objects": [
         {
@@ -34,7 +34,7 @@ The API-client, whenever requesting a resource collection (`index`), will receiv
         ...
     }
 }
-</pre>
+```
 
 
 ## Foreign keys in fields
@@ -71,7 +71,7 @@ resulting in the following *JSON* response:
 
 resulting in the following *JSON* response:
 
-<pre>
+```javascript
 {
     "Objects": [
         {
@@ -88,7 +88,7 @@ resulting in the following *JSON* response:
         ...
     }
 }
-</pre>
+```
 
 ## Instance methods in fields
 
