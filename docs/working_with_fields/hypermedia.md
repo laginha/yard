@@ -1,20 +1,21 @@
 # Hypermedia API
 
-*Yard* supports Hypermedia APIs (not in its full extension yet). With this feature APIs are browsable and friendlier to API-clients.
+*Yard* supports Hypermedia APIs (not in its full extension yet). With this feature APIs are browsable and friendlier to web-crawlers and API-clients.
 
-In practice, if using `Resource`, every returned resource or nested resource contains in its *JSON* representation an *resource_uri* field.
+In practice, every returned resource or nested resource contains in its *JSON* representation an *resource_uri* field.
 
-```javascript
+<pre>
 {
     "Objects": [
         {
+            "id": 18, 
             "author": {
                 "id": 10
                 "name": "George R.R. Martin", 
-                "resource_uri": "/authors/10"
+                "resource_uri": /authors/10
             }, 
             "title": "A Feast for Crows"
-            "resource_uri": "/books/18"
+            "resource_uri": /books/18
         }, 
         ...
     ], 
@@ -22,33 +23,7 @@ In practice, if using `Resource`, every returned resource or nested resource con
         ...
     }
 }
-```
-
-However, if using `MobileDrivenResource`, the *JSON* response is different but lighter and faster
-
-```javascript
-{
-    "Objects": [
-        {
-            "author": {
-                "id": 10
-                "name": "George R.R. Martin", 
-                "pk": 10
-            }, 
-            "title": "A Feast for Crows"
-            "pk": 18
-        }, 
-        ...
-    ], 
-    "Links": {
-        "Book": "/books/%s",
-        "Author": "/authors/%s"
-    },
-    "Meta": {
-        ...
-    }
-}
-```
+</pre>
 
 For this to work properly both resources, books and authors, must exist in the `Api`.
 

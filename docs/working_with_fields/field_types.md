@@ -1,6 +1,6 @@
 # List of types
 
-Choosing the *field type* is not only a matter of semantics. It influences the *JSON* response structure, as well as, the number of queries to the database.
+
 
 ### Integer
 
@@ -62,26 +62,6 @@ fields = {
     'name': fields.Unicode
 }
 ```
-
-### ForeignKey
-   
-Same as `Unicode` although it enables *Yard* to automatically optimize the database query using `QuerySet.select_related`.
-
-```python
-fields = {
-    'author': fields.ForeignKey
-}
-```
-
-### GenericForeignKey
-   
-Same as `Unicode` although it enables *Yard* to automatically optimize the database query using `QuerySet.prefetch_related`.
-
-```python
-fields = {
-    'genres': fields.GenericForeignKey
-}
-```
    
 ### Boolean
 
@@ -139,7 +119,7 @@ Return JSON field as a list of unicode values for RelatedManager input.
 
 ```python
 fields = {
-    'genres': fields.RelatedManager
+    'authors': fields.RelatedManager
 }
 ```
 
@@ -169,11 +149,11 @@ Return JSON field as an URI.
 
 ```python
 fields = {
-    'author': fields.URI
+    'id': fields.URI
 }
 ```    
     
-This type expects a *model instance* as input which `Model` class is referenced by a `Resource`.
+This type expects a *model instance* as input which `Model` is referenced by a `Resource`.
 
 ```python
 from yard import resources, fields
@@ -191,46 +171,18 @@ class AuthorsResource(resources.Resource):
         return Author.objects.get(pk=object_id)
 ```
 
-## Link
 
-Return the `pk` as JSON field value and adds *incomplete-URI* to *JSON* response field *Links*. 
-
-Just like `fields.URI`, this type expects a *model instance* as input which `Model` class is referenced by a `Resource`.
-
-```python
-fields = {
-    'author': fields.Link
-}
-```
-
-```javascript
-{
-    "Objects": [
-        {
-            "author": 1
-        }, 
-        ...
-    ], 
-    "Links": {
-        "author": "path/to/author/%s",
-    }
-}
-```
-
-This is an lighter alternative to the `field.URI`! See the also the documentation about [MobileDrivenResource](resource_types.md).
-
-
-### Auto
+### get\_field
 
 Return JSON field with the type most appropriated for the input.
 
 ```python
 fields = {
-    'id': fields.Auto
+    'id': fields.get_field
 }
 ```
 
-If you are too lazy to specify the field type, this is a good solution for you. However this won't work properly for certain class objects like `ManyRelatedManager`.
+If you are too lazy to specify the field type, this is a good solution for you. However This may not work properly for instance method based field.
 
 
 ## Create your own field type
@@ -239,7 +191,7 @@ If by any chance any of the above types don't work for your particular needs, yo
 
 ```python
 fields = {
-    'description': lambda text: text if len(text) <= 140 else text[:140]+"..."
+    'description': lambda data: text if len(text) <= 140 else text[:140]+"..."
 }
 ```
 
