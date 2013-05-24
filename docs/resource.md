@@ -58,9 +58,18 @@ class FooResource(resources.Resource):
         <td>Delete</td>
         <td>/myresource/:pk/</td>
     </tr>
+    <tr>
+        <td>option</td>
+        <td>Option</td>
+        <td>/myresource/ and /myresource/:pk/</td>
+    </tr>
 </table>
 
-If any of these methods is not implemented, *Yard* returns *Not Found* whenever requested.
+The `option` method is implemented by default. Although it returns no content in the *HTTP* response, it list the available options for the resource in the *Allow* response header:
+
+    ALLOW: GET, POST, DELETE
+
+Any other method is not implemented by default, thus *Yard* returns *Not Found* whenever requested.
 
 
 ### Create the API

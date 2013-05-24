@@ -58,4 +58,8 @@ The specific *version* of a resource can be mentioned as a request query input
 
     http://example.com/books/?version=v1
 
-or it can be stated in the *Accept* header of the request.
+or it can be stated in the *Accept* header of the request
+
+    ACCEPT: version=v1
+
+    ACCEPT: application/json; version=v1

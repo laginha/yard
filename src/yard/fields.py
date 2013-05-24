@@ -20,8 +20,6 @@ def Float(data):
 def List(data):
     return list(data)
     
-Tuple = Iter = List
-
 @verify
 def Dict(data):
     return dict(data)
@@ -53,7 +51,7 @@ def FilePath(data):
     return data.path
 
 @verify     
-def GEOJSON(data):
+def GeoJSON(data):
     return simplejson.loads(data.geojson)
     
 @verify  
@@ -89,13 +87,13 @@ MAPPING = {
     models.ImageField: File,
     models.FilePathField: FilePath,
     models.ManyToManyField: RelatedManager,
-    models.GeometryField: GEOJSON,
-    models.PointField: GEOJSON,
-    models.LineStringField: GEOJSON,
-    models.PolygonField: GEOJSON,
-    models.MultiPointField: GEOJSON,
-    models.MultiLineStringField: GEOJSON,
-    models.MultiPolygonField: GEOJSON,
+    models.GeometryField: GeoJSON,
+    models.PointField: GeoJSON,
+    models.LineStringField: GeoJSON,
+    models.PolygonField: GeoJSON,
+    models.MultiPointField: GeoJSON,
+    models.MultiLineStringField: GeoJSON,
+    models.MultiPolygonField: GeoJSON,
 }
 
 get_field = lambda obj: MAPPING.get( type(obj), Unicode )
