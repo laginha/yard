@@ -38,14 +38,22 @@ urlpatterns = api.urlpatterns
 *views.py*
 
 ```python
-from yard import resources, forms
+from yard import resources, forms, fields
 from models import Book
 
 class BooksResource(resources.Resource):
     # model associated with the resource
     model = Book
     # used in the index and show methods
-    fields = ( 'id', 'title', 'publication_date', 'genres', ('author', ('name', 'age',)) )
+    fields = {
+        'id': fields.Integer, 
+        'title': fields.Unicode, 
+        'publication_date': fields.Unicode, 
+        'author': {
+            'age': fields.Integer,
+            'name': fields.Unicode
+        }        
+    }
     
     class Parameters:
         year   = forms.IntegerParam( alias='publication_date__year', min=1970, max=2012 )

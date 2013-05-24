@@ -58,6 +58,11 @@ class FooResource(resources.Resource):
         <td>Delete</td>
         <td>/myresource/:pk/</td>
     </tr>
+    <tr>
+        <td>option</td>
+        <td>Option</td>
+        <td>/myresource/ and /myresource/:pk/</td>
+    </tr>
 </table>
 
 The `option` method is implemented by default. Although it returns no content in the *HTTP* response, it list the available options for the resource in the *Allow* response header:
@@ -65,49 +70,6 @@ The `option` method is implemented by default. Although it returns no content in
     ALLOW: GET, POST, DELETE
 
 Any other method is not implemented by default, thus *Yard* returns *Not Found* whenever requested.
-
-
-### Create the API
-
-Add the `Resource` objects to an `Api` which will be responsible for generating the *urlpatterns*.
-
-```python
-from yard.api import Api
-
-api = Api()
-api.include( r'foo', FooResource )
-```
-
-If you want to add the `urlpatterns` of some other *urls.py*, you need to use the `extend` method. 
-
-```python
-api.extend( r'someapp', 'path.to.someapp.urls' )
-```
-
-
-### Add to Urlpatterns
-
-After including all the `Resource` objects, declare the `urlpatterns` variable in *urls.py* with the `Api` instance.
-
-```python
-urlpatterns = api.urlpatterns
-```
-
-```python    
-from django.conf.urls.defaults import patterns
-
-urlpatterns = patterns('',
-    ...
-    *api.urlpatterns
-)
-```
-
-
-### Request resource
-
-Once added `api.urlpatterns` to the `urlpatterns`, the `FooResource` is accessible to your HTTP client:
-
-	http://example.com/foo/
 
 
 ### Create the API
