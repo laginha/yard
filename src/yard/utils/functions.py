@@ -2,6 +2,15 @@
 # encoding: utf-8
 import re
 
+def get_path_by_name(urlpatterns, name):
+    for entry in urlpatterns:
+        if hasattr(entry, 'url_patterns'):
+            path = get_path_by_name(entry.url_patterns, name)
+            if path:
+                return entry._regex + path
+        if hasattr(entry, 'name') and entry.name == name:
+            return entry._regex
+
 def get_entry_paths(urllist, lambda_):
     pathlist = []
     for entry in urllist:

@@ -14,6 +14,7 @@
 	- [Pagination](pagination.md)
 	- [Metadata](meta.md)
 	- [Authentication](authentication.md)
+	- [Resource types](resource_types.md)
 - [Versioning](versioning.md)
 
 ### Utils

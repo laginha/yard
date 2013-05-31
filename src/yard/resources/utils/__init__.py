@@ -3,7 +3,7 @@
 from django.conf import settings
 from yard.exceptions import MethodNotImplemented
 from yard.resources.utils.parameters import ResourceParameters
-from yard.resources.utils.builders import JSONbuilder
+from yard.resources.utils.builders import JSONbuilder, JSONbuilderForMobile
 from yard.resources.utils.meta import ResourceMeta
 from yard.resources.utils.page import ResourcePage
 from yard import fields
@@ -15,10 +15,16 @@ def with_pagination_and_meta(f):
     def wrapper(self, request, resources, parameters, fields):
         if hasattr(parameters, 'validated'):
             page = self._paginate( request, resources, parameters )
-            objects = f(self, request, page, parameters, fields)
+            objects, links = f(self, request, page, parameters, fields)
             meta = self._meta.generate(request, resources, page, parameters)
-            return objects if not meta else {'Objects': objects,'Meta': meta}
-        return f(self, request, resources, parameters, fields)
+            if meta and not links:
+                return {'Objects': objects, 'Meta': meta}
+            if meta and links:
+                return {'Objects': objects, 'Meta': meta, 'Links':links}
+            if not meta and links:
+                return {'Objects': objects, 'Links': links}
+            return objects
+        return f(self, request, resources, parameters, fields)[0]
     return wrapper
 
 class method_required(object):
