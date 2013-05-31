@@ -149,11 +149,11 @@ Return JSON field as an URI.
 
 ```python
 fields = {
-    'id': fields.URI
+    'author': fields.URI
 }
 ```    
     
-This type expects a *model instance* as input which `Model` is referenced by a `Resource`.
+This type expects a *model instance* as input which `Model` class is referenced by a `Resource`.
 
 ```python
 from yard import resources, fields
@@ -170,6 +170,34 @@ class AuthorsResource(resources.Resource):
     def show(self, request, object_id):
         return Author.objects.get(pk=object_id)
 ```
+
+## Link
+
+Return the `pk` as JSON field value and adds *incomplete-URI* to *JSON* response field *Links*. 
+
+Just like `fields.URI`, this type expects a *model instance* as input which `Model` class is referenced by a `Resource`.
+
+```python
+fields = {
+    'author': fields.Link
+}
+```
+
+```javascript
+{
+    "Objects": [
+        {
+            "author": 1
+        }, 
+        ...
+    ], 
+    "Links": {
+        "author": "path/to/author/%s",
+    }
+}
+```
+
+This is an lighter alternative to the `field.URI`! See the also the documentation about [MobileDrivenResource](resource_types.md).
 
 
 ### get\_field
@@ -191,7 +219,7 @@ If by any chance any of the above types don't work for your particular needs, yo
 
 ```python
 fields = {
-    'description': lambda data: text if len(text) <= 140 else text[:140]+"..."
+    'description': lambda text: text if len(text) <= 140 else text[:140]+"..."
 }
 ```
 

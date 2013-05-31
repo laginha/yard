@@ -6,7 +6,8 @@ from django.core.urlresolvers import reverse
 from yard.version import ResourceVersions
 from yard.utils.http import JsonResponse
 from yard.exceptions import NoResourceMatch
-from yard.utils.functions import get_entry_paths
+from yard.utils.functions import get_entry_paths, get_path_by_name
+import re
 
 
 class Api(object):
@@ -32,6 +33,8 @@ class Api(object):
         self.__mapping = {}
         self.__path = path
         self.discoverable = discover
+        if self.discoverable:
+            self.__urlpatterns.append( url(self.__path+"$", self.__discover_callback) )
         self.__discoverable_response = None
 
     def include(self, resource_path, resource_class, single_name=None, collection_name=None):
@@ -49,13 +52,13 @@ class Api(object):
             path = r'%s%s/?$' %(self.__path, resource_path)
             resource = resource_class( self, self.__collection_routes )
             return url( path, csrf_exempt( resource ), name=name )
-
+        
         if resource_class.has_any_method(self.__single_routes.values()):
             self.__urlpatterns.append( build_single_pattern() )
+            if hasattr(resource_class, 'model'):
+                self.__mapping[ resource_class.model ] = self.__urlpatterns[-1].name
         if resource_class.has_any_method(self.__collection_routes.values()):
             self.__urlpatterns.append( build_collection_pattern() )
-        if hasattr(resource_class, 'model'):
-            self.__mapping[ resource_class.model ] = resource_class
 
     def extend(self, path, to_include, name=None):
         '''
@@ -69,8 +72,19 @@ class Api(object):
         Get the URI of a Resource according to a given model
         '''
         if modelinstance.__class__ in self.__mapping:
-            resource = self.__mapping[ modelinstance.__class__ ]
-            return reverse( "single."+resource.__name__, kwargs={'pk':modelinstance.pk} )
+            name = self.__mapping[ modelinstance.__class__ ]
+            return reverse( name, kwargs={'pk':modelinstance.pk} )
+        raise NoResourceMatch( modelinstance.__class__ )
+        
+    def get_link(self, modelinstance):
+        '''
+        GET the to-fill-in-URL link
+        '''
+        if modelinstance.__class__ in self.__mapping:
+            name = self.__mapping[ modelinstance.__class__ ]
+            path = get_path_by_name(self.__urlpatterns, name)
+            path = re.sub(r'\(\?P<(.+)>.+\)', "%s", path)
+            return re.sub(r'\?|\$|\^', '', path)
         raise NoResourceMatch( modelinstance.__class__ )
 
     def __discover_callback(self, request):
@@ -86,10 +100,7 @@ class Api(object):
         '''
         Get the urlpatterns for this Api object
         '''
-        urlpatterns = self.__urlpatterns
-        if self.discoverable:
-            urlpatterns.append( url(self.__path+"$", self.__discover_callback) )
-        return patterns( '', *urlpatterns )
+        return patterns( '', *self.__urlpatterns )
 
     @property
     def __discoverable_paths_response(self):

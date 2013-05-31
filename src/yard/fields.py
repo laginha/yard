@@ -70,6 +70,9 @@ def ValuesSet(data):
 def URI(data, api): 
     return api.get_uri(data)
 
+@verify   
+def Link(data, api): 
+    return data.pk, api.get_link(data)
 
 MAPPING = {
     models.AutoField: Integer,
