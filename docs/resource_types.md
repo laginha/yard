@@ -5,6 +5,11 @@
 
 This is the main class. Every other *resource type* is a subclass of `Resource`.
 
+
+## MobileDrivenResource
+
+In comparison to `Resource`, the `MobileDrivenResource` differs in its *hypermedia* implementation. In fact the normal `Resource` *JSON* response, although more readable, is not optimized in its size or length.
+
 ```javascript
 {
     "Objects": [
@@ -23,13 +28,6 @@ This is the main class. Every other *resource type* is a subclass of `Resource`.
     }
 }
 ```
-
-Every other *resource type* is a subclass of `Resource`.
-
-## MobileDrivenResource
-
-In comparison to `Resource`, the `MobileDrivenResource` differs in its *hypermedia* implementation. In fact the normal `Resource` *JSON* response, although more readable (see above), is not optimized in its size or length.
-
 
 However, the response in a `MobileDrivenResource` is lighter, thus more appropriate for clients with low internet connections, like mobile phones.
 

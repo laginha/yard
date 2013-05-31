@@ -49,19 +49,9 @@ Optimize database access according to given fields.
 
     self.select_related( QuerySet, fields )
 
-This method uses *django's* `QuerySet.select_related` method by guessing the necessary foreign-key relationships.
-
 By default, *Yard* uses this method in every `QuerySet` based responses with the proper fields (`show_field` or `index_field`). 
 
-```python
-from yard import resources
-
-class BookResource(resources.Resource):
-
-    def index(self, request, params):
-        books = Book.objects.filter(**params)
-        return self.select_related( books, some_other_fields )
-```
+This method uses *django's* `QuerySet.select_related` method by guessing the necessary foreign-key relationships from the given *fields*. However if some method invoked in *fields* uses some `ForeignKey`, *Yard* won't be able to guess it at all. 
 
 
 ## Class attributes

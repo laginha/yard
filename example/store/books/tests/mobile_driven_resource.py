@@ -9,17 +9,16 @@ from books.models  import *
 from books.resources import AuthorResource
 import simplejson
 
-
 class TestResource(MobileDrivenResource):
     model = Book
     fields = {
         'author': fields.Link
     }
 
-    def list(self, request, params):
+    def index(self, request, params):
         return Book.objects.filter( **params )
 
-    def detail(self, request, book_id):
+    def show(self, request, book_id):
         return Book.objects.get( id=book_id )
 
 
@@ -28,30 +27,29 @@ class MobileDrivenResourceTestCase( BaseTestCase ):
     def setUp(self):
         super(MobileDrivenResourceTestCase, self).setUp()
         self.factory = RequestFactory()
+        SomeResource = TestResource
         self.api = Api()
         self.api.include('test', TestResource)
-        self.collection_resource = [
-            i._callback for i in self.api.urlpatterns if '.list' in i.name][0]
-        self.single_resource = [
-            i._callback for i in self.api.urlpatterns if '.detail' in i.name][0]
+        self.collection_resource = self.api.urlpatterns[1]._callback
+        self.single_resource = self.api.urlpatterns[0]._callback
         
-    def test_list_method(self):
+    def test_index_method(self):
         def get_content():
             request = self.factory.get('/test/')
             response = self.collection_resource(request, **{})
-            assert response.status_code == 200, response.status_code
+            assert response.status_code == 200
             assert "application/json" in response['Content-Type']
             content = simplejson.loads( response.content )
             assert "Objects" in content
             assert "Meta" in content
             assert "Links" in content
             return content
-        
+            
         assert len(get_content()['Links']) == 1
         self.api.include('author', AuthorResource)
         assert len(get_content()['Links']) == 2
         
-    def test_detail_method(self):
+    def test_show_method(self):
         def get_content():
             request = self.factory.get('/test/1')
             response = self.single_resource(request, **{'pk':1})

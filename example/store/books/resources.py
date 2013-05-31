@@ -17,7 +17,7 @@ class BookResource(resources.Resource):
     description = "Search books in our store."
     model  = Book
     fields = {
-        'id': fields.Integer, 
+        'id': fields.Integer,
         'title': fields.Unicode, 
         'publication_date': fields.Unicode, 
         'genres': fields.RelatedManager,
@@ -43,7 +43,7 @@ class BookResource(resources.Resource):
     
     @validate    
     def index(self, request, params):
-        return Book.objects.filter( **params ) #returns a JsonResponse-200
+        return Book.objects.select_related('publishing_house').filter( **params ) #returns a JsonResponse-200
 
     @key_required
     def show(self, request, book_id):
