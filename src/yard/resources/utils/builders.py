@@ -49,7 +49,7 @@ class JSONbuilder:
         '''
         if is_dict( value ):
             return self.__handle_dict_field( resource, key, value )
-        return self.__handle_string_field( resource, key, value )
+        return self.__handle_field_type( resource, key, value )
 
     def __handle_dict_field(self, resource, field, subfields):
         '''
@@ -61,7 +61,7 @@ class JSONbuilder:
         self.links.update( builder.links )
         return json_
 
-    def __handle_string_field(self, resource, field, type_):
+    def __handle_field_type(self, resource, field, type_):
         '''
         Handle fields of type string
         '''
