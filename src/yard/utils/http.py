@@ -7,6 +7,10 @@ from yard.utils import is_httpresponse, is_queryset, is_modelinstance, is_values
 import simplejson, mimetypes
 
 DEFAULT_STATUS_CODE = getattr(settings, 'DEFAULT_STATUS_CODE', 200)
+IN_DEBUG_MODE = getattr(settings, 'DEBUG', False) and\
+                getattr(settings, 'YARD_DEBUG_MODE', False) and\
+                'debug_toolbar' in settings.INSTALLED_APPS and\
+                hasattr(settings, 'DEBUG_TOOLBAR_CONFIG')
 
 
 class FileResponse(HttpResponse):
@@ -38,7 +42,6 @@ class JSONPResponse(HttpResponse):
     Http Response with Jsonp content type
     '''
     def __init__(self, content='', mimetype=None, status=None, callback='callback'):
-        #content = simplejson.dumps( content or [], ensure_ascii=False )
         content = simplejson.dumps( content, ensure_ascii=False )
         HttpResponse.__init__(self, content      = "%s(%s)" %(callback, content), 
                                     mimetype     = mimetype,
@@ -46,7 +49,23 @@ class JSONPResponse(HttpResponse):
                                     content_type = 'application/javascript; charset=utf-8', )
 
 
-class _SingletonJsonResponse(type):
+class _DebugResponse(HttpResponse):
+    '''
+    HTTP Response for debug purposes (django-debug-toolbar)
+    '''
+    def __call__(self, content='', mimetype=None, status=None, context=None):
+        content = simplejson.dumps( content, ensure_ascii=False )
+        return HttpResponse(content  = self.__to_html(content),
+                            mimetype = mimetype,
+                            status   = status, )
+
+    def __to_html(self, content):
+        TAG = settings.DEBUG_TOOLBAR_CONFIG.get('TAG', 'body') 
+        return "<%s>%s</%s>" %(TAG, content, TAG)
+
+
+class _JsonResponse(type):
+    
     def __call__(self, content='', mimetype=None, status=None, context=None):
         callback = context.GET.get('callback', None) if context else None
         if callback:
@@ -54,8 +73,7 @@ class _SingletonJsonResponse(type):
         return JSONResponse(content, mimetype, status)
 
 class JsonResponse(HttpResponse):        
-    __metaclass__ = _SingletonJsonResponse
-
+    __metaclass__ = _DebugResponse if IN_DEBUG_MODE else _JsonResponse
 
 
 def to_http(request, content=None, status=DEFAULT_STATUS_CODE):
