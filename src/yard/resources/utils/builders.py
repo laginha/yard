@@ -53,7 +53,7 @@ class JSONbuilder:
 
     def __handle_dict_field(self, resource, field, subfields):
         '''
-        Handle fields of type tuple - subfields
+        Handle fields of type dict - subfields
         '''
         sub_resource = getattr( resource, field, None )
         builder = self.__class__( self.api, subfields )

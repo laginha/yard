@@ -7,8 +7,11 @@ class AuthorResource(resources.Resource):
     model  = Author
     fields = {
         'name': fields.Unicode,
+        'book_set': fields.RelatedManager,
     }
-
+    def index(self, request, params):
+        return Author.objects.filter( **params )
+        
     def show(self, request, author_id):
         return Author.objects.get( pk=author_id )
     
@@ -43,7 +46,8 @@ class BookResource(resources.Resource):
     
     @validate    
     def index(self, request, params):
-        return Book.objects.select_related('publishing_house').filter( **params ) #returns a JsonResponse-200
+        #'deferred_loading': (set(['publication_date', 'author__name', 'id', 'title']), False)
+        return Book.objects.filter( **params )#.select_related('author').only('id','title','publication_date', 'author')
 
     @key_required
     def show(self, request, book_id):

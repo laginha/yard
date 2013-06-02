@@ -105,13 +105,13 @@ class Book(models.Model):
     genres = models.ManyToManyField( Genre )
     
     def book_genres(self):
-        return self.genres.all()
+        return self.genres
 
 class Book(resources.Resource):
     fields = {
         'id': fields.Integer, 
         'title': fields.Unicode, 
-        'book_genres': fields.List, 
+        'book_genres': fields.RelatedManager, 
         'author': fields.Unicode
     }
 ```

@@ -4,10 +4,11 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from yard.exceptions import HttpMethodNotAllowed, MethodNotImplemented, RequiredParamMissing
-from yard.utils import is_tuple, is_queryset, is_modelinstance, is_generator, is_list, is_valuesset, is_dict
+from yard.utils import is_tuple, is_queryset, is_modelinstance, is_generator, is_list, is_valuesset, is_dict, is_many_related_manager
 from yard.utils.http import to_http
 from yard.forms import Form
 from yard.resources.utils import *
+from yard import fields as YardFields
 
 
 DEFAULT_STATUS_CODE = getattr(settings, 'DEFAULT_STATUS_CODE', 200)
@@ -157,9 +158,21 @@ class Resource(object):
         '''
         Optimize queryset according to current response fields
         '''
-        for k,v in current_fields.iteritems():
-            if isinstance(v, dict):
-                resources.query.select_related[k] = {}
+        def find_related(items, prefix=''):
+            for k,v in items:
+                related = prefix+k
+                if v in [YardFields.URI, YardFields.Link, YardFields.ForeignKey]:
+                    resources.query.select_related[ related ] = {}
+                elif v in [YardFields.GenericForeignKey, YardFields.RelatedManager]:
+                    resources._prefetch_related_lookups.append( related )
+                elif isinstance(v, dict):
+                    resources.query.select_related[ related ] = {}
+                    resources._prefetch_related_lookups.append( related )
+                    find_related( v.iteritems(), related+'__' )
+                   
+        if resources.query.select_related == False:
+            resources.query.select_related = {}
+        find_related( current_fields.iteritems() )
         return resources
 
     def serialize_all(self, resources, fields, builder=None):

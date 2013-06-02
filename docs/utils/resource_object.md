@@ -45,13 +45,39 @@ class BookResource(resources.Resource):
 
 ### select_related
 
-Optimize database access according to given fields.
+Optimize database access according to given fields, by using *django's* `QuerySet.select_related` and `QuerySet.prefetch_related`. By default, *Yard* uses this method in every `QuerySet` based responses.
 
     self.select_related( QuerySet, fields )
 
-By default, *Yard* uses this method in every `QuerySet` based responses with the proper fields (`show_field` or `index_field`). 
+*Yard* infers the relationships by analyzing the given *fields* and its *field types*. Therefore the latter plays a major role in this process. For instance
 
-This method uses *django's* `QuerySet.select_related` method by guessing the necessary foreign-key relationships from the given *fields*. However if some method invoked in *fields* uses some `ForeignKey`, *Yard* won't be able to guess it at all. 
+```python
+fields = {
+    'author': fields.Unicode
+}
+```
+
+and
+
+```python
+fields = {
+    'author': fields.ForeignKey
+}
+```
+
+results in the same *JSON* response
+
+```javascript
+{
+    "Objects": [
+        {
+            'author': "George R. Martin",
+        }...
+    ]...
+}
+```
+
+However, with the latter *Yard* is able to recognize the relation and adds `author` to `select_related`. In other words, it performs fewer database queries, hence is faster.
 
 
 ## Class attributes
