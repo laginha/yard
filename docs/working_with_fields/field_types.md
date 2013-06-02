@@ -1,6 +1,6 @@
 # List of types
 
-
+Choosing the *field type* is not only a matter of semantics. It influences the *JSON* response structure, as well as 
 
 ### Integer
 
@@ -62,6 +62,26 @@ fields = {
     'name': fields.Unicode
 }
 ```
+
+### ForeignKey
+   
+Same as `Unicode` although it enables *Yard* to automatically optimize the database query using `QuerySet.select_related`.
+
+```python
+fields = {
+    'author': fields.ForeignKey
+}
+```
+
+### GenericForeignKey
+   
+Same as `Unicode` although it enables *Yard* to automatically optimize the database query using `QuerySet.prefetch_related`.
+
+```python
+fields = {
+    'genres': fields.GenericForeignKey
+}
+```
    
 ### Boolean
 
@@ -119,7 +139,7 @@ Return JSON field as a list of unicode values for RelatedManager input.
 
 ```python
 fields = {
-    'authors': fields.RelatedManager
+    'genres': fields.RelatedManager
 }
 ```
 

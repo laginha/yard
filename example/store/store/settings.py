@@ -103,7 +103,30 @@ MIDDLEWARE_CLASSES = (
     # Yard middlewares:
     # 'yard.apps.keyauth.middleware.ApiKeyRequiredMiddleware',
     # 'yard.middleware.SimpleResponseMiddleware',
+    # Django Debug Toolbar
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
+
+YARD_DEBUG_MODE = False
+
+#
+# Django Debug Toolbar
+#
+INTERNAL_IPS = (
+    '127.0.0.1',
+)
+DEBUG_TOOLBAR_PANELS = (
+    'debug_toolbar.panels.timer.TimerDebugPanel',
+    'debug_toolbar.panels.sql.SQLDebugPanel',
+)
+DEBUG_TOOLBAR_CONFIG = {
+    'INTERCEPT_REDIRECTS': False,
+    'SHOW_TOOLBAR_CALLBACK': lambda request: True,
+    'HIDE_DJANGO_SQL': False,
+    'TAG': 'div',
+    'ENABLE_STACKTRACES' : True,
+}
+
 
 ROOT_URLCONF = 'store.urls'
 
@@ -129,6 +152,8 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'books',
     'yard.apps.keyauth',
+    
+    'debug_toolbar',
 )
 
 AUTHENTICATION_BACKENDS = (

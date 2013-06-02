@@ -53,7 +53,15 @@ def FilePath(data):
 @verify     
 def GeoJSON(data):
     return simplejson.loads(data.geojson)
-    
+
+@verify
+def ForeignKey(data):
+    return unicode(data)
+
+@verify
+def GenericForeignKey(data):
+    return unicode(data)
+
 @verify  
 def RelatedManager(data): 
     return [unicode(i) for i in data.all()]
