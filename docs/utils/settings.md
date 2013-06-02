@@ -2,11 +2,17 @@
 
 ## General
 
-### DEFAULT_STATUS_CODE
+### DEFAULT\_STATUS_CODE
 
 Defines the default status code of the *HTTP* response. Defaults to `200`.
 
     DEFAULT_STATUS_CODE = 201
+
+### YARD\_DEBUG_MODE
+
+Set this to `True` to enable *Django-Debug-Toolbar* from the JSON responses, if installed and `DEBUG` is `True`. Defaults to `False`. 
+
+    YARD_DEBUG_MODE = True
 
 
 ## Key based authentication
