@@ -1,6 +1,6 @@
 # List of types
 
-Choosing the *field type* is not only a matter of semantics. It influences the *JSON* response structure, as well as 
+Choosing the *field type* is not only a matter of semantics. It influences the *JSON* response structure, as well as, the number of queries to the database.
 
 ### Integer
 

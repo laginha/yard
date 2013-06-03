@@ -46,8 +46,7 @@ class BookResource(resources.Resource):
     
     @validate    
     def index(self, request, params):
-        #'deferred_loading': (set(['publication_date', 'author__name', 'id', 'title']), False)
-        return Book.objects.filter( **params )#.select_related('author').only('id','title','publication_date', 'author')
+        return Book.objects.filter( **params )
 
     @key_required
     def show(self, request, book_id):
