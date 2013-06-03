@@ -65,7 +65,7 @@ fields = {
 }
 ```
 
-results in the same *JSON* response
+result in the same *JSON* response
 
 ```javascript
 {
