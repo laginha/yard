@@ -53,7 +53,7 @@ class Resource(object):
         self.__routes          = routes
         self.__parameters      = get_parameters()
         self.__builders        = get_json_builders()
-        self.__allowed_methods = get_allowed_methods()
+        self.__allowed_methods = ','.join( get_allowed_methods() )
     
     @property
     def json_builder_class(self):
@@ -221,7 +221,7 @@ class Resource(object):
     def handle_options(self, request, parameters):
         response = self.options(request, **parameters)
         response = self.__handle_response(request, response, self.fields, parameters)
-        response['Allow'] = self.allowed_methods
+        response['Allow'] = self.__allowed_methods
         return response
     
     def options(self, request, **parameters):
