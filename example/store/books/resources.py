@@ -51,6 +51,9 @@ class BookResource(resources.Resource):
     @key_required
     def show(self, request, book_id):
         return Book.objects.get( id=book_id )
+        
+    def create(self, *args, **kwargs):
+        return 401
 
 
 class BookResourceV2(BookResource):
