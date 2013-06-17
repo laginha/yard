@@ -94,6 +94,7 @@ class BooksResource(resources.Resource):
 - Complex API logic
 - Hypermedia API
 - JSON serialization
+- API discovery
 - Pagination
 - Metadata
 - Resource versioning
