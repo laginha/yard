@@ -17,12 +17,12 @@ class FileResponse(HttpResponse):
     '''
     Http Response with file content
     '''
-    def __init__(self, content='', status=None, content_type=None):
+    def __init__(self, content='', status=None, content_type=None, filename=None):
         HttpResponse.__init__(self, content      = content, 
                                     mimetype     = mimetypes.guess_type(content.name)[0], 
                                     status       = status, 
                                     content_type = content_type, )
-        self['Content-Disposition'] = 'attachment; filename=' + content.name
+        self['Content-Disposition'] = 'attachment; filename=' + filename or content.name
 
 
 class JSONResponse(HttpResponse):
