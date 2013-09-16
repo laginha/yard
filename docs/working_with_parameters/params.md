@@ -173,4 +173,4 @@ Extra arguments:
 
 - **validate:** Single-argument callable function used for parameter value validation.
 - **model:** Model from which the desired instance belongs to. (REQUIRED)
-- **model_attribute:** model's attribute used for filtering the instance. (REQUIRED)
+- **model_attribute:** model's attribute used for filtering the instance. Defaults to `pk`
