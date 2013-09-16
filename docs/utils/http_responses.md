@@ -61,5 +61,6 @@ Http Response with file content. The mimetype of the response is filled automati
 Expected arguments:
 
 - **content** 
+- **filename** (optional)
 - **status** (optional)
 - **content_type** (optional)
