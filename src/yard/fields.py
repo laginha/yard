@@ -24,8 +24,6 @@ def List(data):
 def Dict(data):
     return dict(data)
     
-JSON = Dict
-
 @verify
 def String(data):
     return str(data)
@@ -49,18 +47,22 @@ def File(data):
 @verify    
 def FilePath(data): 
     return data.path
+    
+@verify   
+def URI(data, api): 
+    return api.get_uri(data)
+
+@verify   
+def Link(data, api): 
+    return data.pk, api.get_link(data)
 
 @verify     
 def GeoJSON(data):
     return simplejson.loads(data.geojson)
 
-@verify
-def ForeignKey(data):
-    return unicode(data)
-
-@verify
-def GenericForeignKey(data):
-    return unicode(data)
+JSON = Dict
+ForeignKey = GenericForeignKey = Unicode
+ValuesSet = List
 
 @verify  
 def RelatedManager(data): 
@@ -70,19 +72,35 @@ def RelatedManager(data):
 def QuerySet(data): 
     return [unicode(i) for i in data]
 
-@verify   
-def ValuesSet(data): 
-    return list(data)
+
+
+OBJECT_TO_JSONFIELD = {
+    int: Integer,
+    float: Float,
+    long: Integer,
+    bool: Boolean,
+    list: List,
+    tuple: List,
+    set: List,
+    dict: Dict,
+    models.query.QuerySet: QuerySet,
+    models.query.ValuesQuerySet: ValuesSet,
+    models.fields.LineStringField: GeoJSON,
+    models.fields.MultiLineStringField: GeoJSON,
+    models.fields.PointField: GeoJSON,
+    models.fields.MultiPointField: GeoJSON,
+    models.fields.PolygonField: GeoJSON,
+    models.fields.MultiPolygonField: GeoJSON,
+    models.fields.GeometryField: GeoJSON,
+    models.fields.GeometryCollectionField: GeoJSON,
+}
 
 @verify   
-def URI(data, api): 
-    return api.get_uri(data)
+def Auto(data):
+    return OBJECT_TO_JSONFIELD.get( type(data), Unicode )(data)
 
-@verify   
-def Link(data, api): 
-    return data.pk, api.get_link(data)
 
-MAPPING = {
+MODELFIELD_TO_JSONFIELD = {
     models.AutoField: Integer,
     models.BigIntegerField: Integer,
     models.IntegerField: Integer,
@@ -105,6 +123,6 @@ MAPPING = {
     models.MultiPointField: GeoJSON,
     models.MultiLineStringField: GeoJSON,
     models.MultiPolygonField: GeoJSON,
-}
+}    
 
-get_field = lambda obj: MAPPING.get( type(obj), Unicode )
+get_field = lambda obj: MODELFIELD_TO_JSONFIELD.get( type(obj), Unicode )

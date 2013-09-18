@@ -220,17 +220,17 @@ fields = {
 This is an lighter alternative to the `field.URI`! See the also the documentation about [MobileDrivenResource](resource_types.md).
 
 
-### get\_field
+### Auto
 
 Return JSON field with the type most appropriated for the input.
 
 ```python
 fields = {
-    'id': fields.get_field
+    'id': fields.Auto
 }
 ```
 
-If you are too lazy to specify the field type, this is a good solution for you. However This may not work properly for instance method based field.
+If you are too lazy to specify the field type, this is a good solution for you. However this won't work properly for certain class objects like `ManyRelatedManager`.
 
 
 ## Create your own field type
