@@ -20,14 +20,14 @@ class BookResource(resources.Resource):
     description = "Search books in our store."
     model  = Book
     fields = {
-        'id': fields.Integer,
-        'title': fields.Unicode, 
-        'publication_date': fields.Unicode, 
-        'genres': fields.RelatedManager,
+        'id': fields.Auto,
+        'title': fields.Auto, 
+        'publication_date': fields.Auto, 
+        'genres': fields.Auto,
         'author': {
-            'name': fields.Unicode,
-            'age': fields.Integer,
-            'gender_': fields.Unicode,
+            'name': fields.Auto,
+            'age': fields.Auto,
+            'gender_': fields.Auto,
         }
     }
 
