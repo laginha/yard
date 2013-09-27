@@ -37,25 +37,31 @@ def validate(f):
     return wrapper
 
 
-def login_required(*args, **kwargs):    
+def login_required(*args, **kwargs): 
+    '''
+    Check if user is authenticated
+    '''   
     dec = django_login_required
     return django_to_yard_decorator( dec )(*args, **kwargs)
 
 
 def perm_required(*args, **kwargs):
+    '''
+    Check if user has permissions
+    '''
     dec = permission_required
     return django_to_yard_decorator( dec )(*args, **kwargs)
 
 
-class validateForm(object):
-    def __init__(self, form):
-        self.form   = form
-        
-    def __call__(self, f):    
+def validateForm(form_class):
+    '''
+    Validate request according to given form
+    '''
+    def decorator(f):
         def wrapper(klass, request, *args, **kwargs):
             
             def validate(*form_args):
-                form = self.form(*form_args)
+                form = form_class(*form_args)
                 if form.is_valid():
                     request.form = form
                     return f(klass, request, *args, **kwargs)
@@ -64,19 +70,20 @@ class validateForm(object):
             if not hasattr(request, "FILES"): 
                 return validate( request.REQUEST )
             return validate( request.REQUEST, request.FILES )
+
         return wrapper
-        
-        
-class exceptionHandling(object):
-    def __init__(self, exception, return_value=400):
-        self.exception    = exception
-        self.return_value = return_value
-        
-    def __call__(self, f):
+    return decorator
+
+
+def exceptionHandling(exception, return_value):
+    '''
+    Handle a specific exception
+    '''
+    def decorator(f):
         def wrapper(*args, **kwargs):
             try:
                 return f(*args, **kwargs)
-            except self.exception:
-                return self.return_value
+            except exception:
+                return return_value
         return wrapper
-        
+    return decorator
