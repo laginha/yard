@@ -94,7 +94,7 @@ class BookStoreTestCase( BaseTestCase ):
            
     def test_create(self):
         response = self.client.post( '/books/' )
-        assert response.status_code == 404, response.status_code
+        assert response.status_code == 401, response.status_code
     
     def test_update(self):
         response = self.client.post( '/books/%s/' %self.book1.id )
