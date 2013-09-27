@@ -1,5 +1,30 @@
 #!/usr/bin/env python
 # encoding: utf-8
+from django.contrib.auth.decorators import permission_required, login_required as django_login_required
+from django.http import HttpResponseRedirect
+
+
+def django_to_yard_decorator(django_decorator):
+    '''
+    Adapt django's decorators in yard resources
+    '''
+    def django_to_yard_wrapper(*args, **kwargs):
+        redirect = kwargs.pop('redirect', False)
+        
+        def actual_decorator(f):    
+            def decorator_wrapper(klass, request, *rargs, **rkwargs):
+                def aux(request, *a, **k):
+                    return f(klass, request, *rargs, **rkwargs)
+                user_test_decorator = django_decorator(*args, **kwargs)
+                result =  user_test_decorator( aux )(request, *rargs, **rkwargs)
+                if not redirect and isinstance(HttpResponseRedirect, result):
+                    return 401
+                return result
+            return decorator_wrapper
+            
+        return actual_decorator
+    return django_to_yard_wrapper
+
 
 def validate(f):
     '''
@@ -12,12 +37,14 @@ def validate(f):
     return wrapper
 
 
-def login_required(f):
-    def wrapper(klass, request, *args, **kwargs):
-        if request.user.is_authenticated():
-            return f(klass, request, *args, **kwargs)
-        return 401
-    return wrapper
+def login_required(*args, **kwargs):    
+    dec = django_login_required
+    return django_to_yard_decorator( dec )(*args, **kwargs)
+
+
+def perm_required(*args, **kwargs):
+    dec = permission_required
+    return django_to_yard_decorator( dec )(*args, **kwargs)
 
 
 class validateForm(object):
