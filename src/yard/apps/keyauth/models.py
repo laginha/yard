@@ -21,7 +21,7 @@ class Key(models.Model):
     """
     API key for resource access and authentication
     """
-    user            = models.ForeignKey(User)
+    user            = models.ForeignKey(User, related_name='keys')
     apikey          = models.CharField(default=generate_apikey, max_length=100, unique=True)
     activation_date = models.DateField(default=datetime.date.today)
     expiration_date = models.DateField(default=years_from_now)
