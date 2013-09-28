@@ -2,6 +2,7 @@
 # encoding: utf-8
 from django.contrib.auth.decorators import permission_required, login_required as django_login_required
 from django.http import HttpResponseRedirect
+import inspect
 
 
 def django_to_yard_decorator(django_decorator):
@@ -87,3 +88,17 @@ def exceptionHandling(exception, return_value):
                 return return_value
         return wrapper
     return decorator
+
+
+def decorator_for_response_methods(decorator):
+    '''
+    Apply one decorator to all HTTP response methods
+    Based on: stackoverflow.com/questions/2237624/applying-python-decorators-to-methods-in-a-class
+    '''
+    def wrapper(cls):
+        for name, method in inspect.getmembers(cls, inspect.ismethod):
+            if name in ['index', 'show', 'create', 'update', 'destroy']:
+                setattr(cls, name, decorator(method))
+        return cls
+    return wrapper
+
