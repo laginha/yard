@@ -48,7 +48,7 @@ Uses the *django's* `permission_required` decorator thus it accepts the same arg
 - `redirect`: determines whether it should redirect to the login url or return a *Not Authorized* response (status 401), if the user is not authenticated. (defaults to `False`)
 
 ```python
-from yard.resources.decorators import login_required
+from yard.resources.decorators import perm_required
 from yard import resources
 
 class BookResource(resources.Resource):
@@ -106,4 +106,20 @@ class BookResource(resources.Resource):
     @exceptionHandling(SomeException, 400)
     def index(self, request, params):
         return Book.objects.filter( **params )
+```
+
+
+## decorator\_for\_response_methods
+
+In case the same decorator is needed for all *HTTP* response methods (*index*, *show*, *create*, *update*, *destroy*).
+
+```python
+from yard import resources
+from yard.resources.decorators import login_required, decorator_for_response_methods
+
+@decorator_for_response_methods( login_required )
+class FooResource(resources.Resource):
+
+    def show(self, request, book_id):
+        return "bar"
 ```
