@@ -1,8 +1,10 @@
-from yard.resources.decorators import validate
+from yard.resources.decorators import validate, decorator_for_response_methods
 from yard import forms, version, resources, fields
 from yard.apps.keyauth.decorators import key_required
 from models import Book, Author
 
+
+@decorator_for_response_methods( key_required )
 class AuthorResource(resources.Resource):
     model  = Author
     fields = {
@@ -14,8 +16,8 @@ class AuthorResource(resources.Resource):
         
     def show(self, request, author_id):
         return Author.objects.get( pk=author_id )
-    
-    
+
+
 class BookResource(resources.Resource):
     description = "Search books in our store."
     model  = Book
