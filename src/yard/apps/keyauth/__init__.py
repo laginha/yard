@@ -21,23 +21,22 @@ def key_required_wrapper(f):
     Auxiliar decorator for keyauth decorator and middleware
     '''
     def wrapper(klass, request, *args, **kwargs):
-        key = authenticate(token=request.REQUEST.get(KEY_PARAMETER_NAME))
-        if key and is_valid_consumer(request, key):
-            key.save()
-            return f(klass, request, *args, **kwargs)
+        if request.user.is_authenticated():
+            if hasattr(request, 'key') and is_valid_consumer(request):
+                return f(klass, request, *args, **kwargs)
         return HttpResponse401( request )
     return wrapper
 
 
-def is_valid_consumer(request, key):
+def is_valid_consumer(request):
     '''
     Validate the client for API access with the given key
     '''
     try:
         ip = request.META.get('REMOTE_ADDR', None)
-        return Consumer.objects.get(key=key, ip=ip).allowed
+        return Consumer.objects.get(key=request.key, ip=ip).allowed
     except Consumer.DoesNotExist:
-        consumers = Consumer.objects.filter(key=key, allowed=True)
+        consumers = Consumer.objects.filter(key=request.key, allowed=True)
         return not consumers.exists()
 
 
