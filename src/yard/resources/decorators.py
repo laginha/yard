@@ -18,7 +18,7 @@ def django_to_yard_decorator(django_decorator):
                     return f(klass, request, *rargs, **rkwargs)
                 user_test_decorator = django_decorator(*args, **kwargs)
                 result =  user_test_decorator( aux )(request, *rargs, **rkwargs)
-                if not redirect and isinstance(HttpResponseRedirect, result):
+                if not redirect and isinstance(result, HttpResponseRedirect):
                     return 401
                 return result
             return decorator_wrapper
