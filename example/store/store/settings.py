@@ -103,6 +103,7 @@ MIDDLEWARE_CLASSES = (
     # Yard middlewares:
     # 'yard.apps.keyauth.middleware.ApiKeyRequiredMiddleware',
     # 'yard.middleware.SimpleResponseMiddleware',
+    'yard.apps.keyauth.middleware.ApiKeyAuthenticationMiddleware',
     # Django Debug Toolbar
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 )

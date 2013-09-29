@@ -23,6 +23,7 @@ def key_required_wrapper(f):
     def wrapper(klass, request, *args, **kwargs):
         if request.user.is_authenticated():
             if hasattr(request, 'key') and is_valid_consumer(request):
+                request.key.save()
                 return f(klass, request, *args, **kwargs)
         return HttpResponse401( request )
     return wrapper
