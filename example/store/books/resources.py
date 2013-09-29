@@ -1,4 +1,4 @@
-from yard.resources.decorators import validate, decorator_for_response_methods
+from yard.resources.decorators import validate, decorator_for_response_methods, login_required
 from yard import forms, version, resources, fields
 from yard.apps.keyauth.decorators import key_required
 from models import Book, Author
@@ -46,8 +46,10 @@ class BookResource(resources.Resource):
         maximum = (('longest_title', 'title'),)
         average = (('average_pages', 'number_of_pages'),)
     
-    @validate    
+    @validate
+    #@key_required
     def index(self, request, params):
+        print request.user
         return Book.objects.filter( **params )
 
     @key_required

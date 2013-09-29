@@ -15,12 +15,10 @@ class ApiKeyRequiredMiddleware(object):
 
 class ApiKeyAuthenticationMiddleware(object):
     """
-    Middleware to check for Api Key in request and validate the Consumer
+    Middleware to authenticate user through given api key
     """
     def process_request(self, request):
         key = authenticate(token=request.REQUEST.get(KEY_PARAMETER_NAME))
         if key:
-            key.save()
-            request.key = key
+            request.key  = key
             request.user = key.user
-
