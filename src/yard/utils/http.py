@@ -53,7 +53,7 @@ class JsonpResponse(HttpResponse):
     Http Response with Jsonp content type
     '''
     def __init__(self, content='', mimetype=None, status=None, param='callback'):
-        self.orginal_content = content
+        self.original_content = content
         content = simplejson.dumps( content or [], indent=INDENT, ensure_ascii=False )
         HttpResponse.__init__(self, content      = "%s(%s)" %(param, content), 
                                     mimetype     = mimetype,
