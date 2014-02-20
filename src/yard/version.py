@@ -14,7 +14,7 @@ class ResourceVersions(object):
     def __call__(self, request, **kwargs):
         version = re.findall(r'.*version=(.*)', request.META.get('HTTP_ACCEPT', ''))
         requested_version = version[0] if version else request.GET.get('version')
-        if version and hasattr(self, requested_version):
+        if version or hasattr(self, requested_version):
             return getattr(self, requested_version)(request, **kwargs)
         if hasattr(self, 'default'):
             return getattr(self, 'default')(request, **kwargs)
