@@ -141,7 +141,7 @@ class Resource(object):
             return self.__json_response(request)(content, status=status)
         elif is_queryset(response):
             response = self.select_related(response, current_fields)
-            content  = self.__queryset_with_meta(request, response, resource_parameters, builder)
+            content  = self.queryset_with_meta(request, response, resource_parameters, builder)
             return self.__json_response(request)(content, status=status)
         elif is_modelinstance(response):
             content = self.__serialize(response, builder)
@@ -175,7 +175,7 @@ class Resource(object):
         related_models = [i[0] for i in current_fields if isinstance(i, tuple)]
         return resources.select_related( *related_models )
 
-    def __queryset_with_meta(self, request, resources, resource_parameters, builder):
+    def queryset_with_meta(self, request, resources, resource_parameters, builder):
         '''
         Appends Meta data into the json response
         '''
