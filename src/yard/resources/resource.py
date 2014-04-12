@@ -8,6 +8,7 @@ from yard.utils import is_tuple, is_queryset, is_modelinstance, is_generator, is
 from yard.utils.http import to_http
 from yard.forms import Form
 from yard.resources.utils import *
+from yard.resources.utils.uglify import uglify_json
 from yard import fields as YardFields
 
 
@@ -49,6 +50,7 @@ class Resource(object):
         self.index_fields = getattr(self, "index_fields", self.fields)
         self.show_fields  = getattr(self, "show_fields", self.fields)
         self.description  = getattr(self, "description", "not provided")
+        self.uglify       = getattr(self, "uglify", False)
         # 'Private' attributes
         self.__routes          = routes
         self.__parameters      = get_parameters()
@@ -116,6 +118,10 @@ class Resource(object):
             response = self.__handle_instance(response, current_fields)
         elif is_generator(response) or is_list(response):
             response = self.__handle_list(request, response, parameters, current_fields)
+        
+        if self.uglify:
+            response.update( uglify_json(response.pop('Objects')) )
+        
         return to_http(request, response, status)
 
     @with_pagination_and_meta
