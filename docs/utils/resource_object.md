@@ -82,17 +82,39 @@ However, with the latter *Yard* is able to recognize the relation and adds `auth
 
 ## Class attributes
 
-### model
+### fields
 
-The model to which the resource is associated to. 
+Responsible for defining which returned model-instance's attributes are to be included in the *JSON* response. 
 
-Although this attribute is optional it is very important for the hypermedia API to take full effect. Without it the *resource_uri*'s displayed in the *JSON* representation may not be correctly generated.
-
-```python  
+```python 
 from yard import resources
 
-class FooResource(resources.Resource):    
-    model = Foo
+class FooResource(resources.Resource):
+    fields  = ('id', 'bar')
+```
+
+
+### index_fields
+
+Same as `fields` but for the `index` method only. It has priority over `fields`. 
+
+```python 
+from yard import resources
+
+class FooResource(resources.Resource):
+    index_fields  = ('id',)
+```
+
+
+### show_fields
+
+Same as `fields` but for the `show` method only. It has priority over `fields`. 
+
+```python 
+from yard import resources
+
+class FooResource(resources.Resource):
+    show_fields  = ('id', 'bar' )
 ```
 
 
@@ -129,7 +151,42 @@ class FooResource(resources.Resource):
 ```
 
 
-## Instance attributes
+### model
+
+The model to which the resource is associated to. 
+
+Although this attribute is optional it is very important for the hypermedia API to take full effect. Without it the *resource_uri*'s displayed in the *JSON* representation may not be correctly generated.
+
+```python  
+from yard import resources
+
+class FooResource(resources.Resource):    
+    model = Foo
+```
+
+
+### uglify
+
+Determines if *JSON* response should be uglified. 
+
+```python 
+from yard import resources
+
+class FooResource(resources.Resource):
+    uglify  = True
+```
+
+### description
+
+Description of the resource. Used in the *discover* option of the *Api*.
+
+```python 
+from yard import resources
+
+class FooResource(resources.Resource):
+    description = "This resource is responsible for foo"
+```
+
 
 ### _api
 
@@ -142,52 +199,5 @@ class FooResource(resources.Resource):
     def index(self, request, params):
     	foos = Foo.objects.all()
     	return {'resource_uri': self._api.get_uri(i) for i in foos}
-```
-
-
-### fields
-
-Responsible for defining which returned model-instance's attributes are to be included in the *JSON* response. 
-
-```python 
-from yard import resources
-
-class FooResource(resources.Resource):
-    fields  = ('id', 'bar')
-```
-
-
-### index_fields
-
-Same as `fields` but for the `index` method only. It has priority over `fields`. 
-
-```python 
-from yard import resources
-
-class FooResource(resources.Resource):
-    index_fields  = ('id',)
-```
-
-
-### show_fields
-
-Same as `fields` but for the `show` method only. It has priority over `fields`. 
-
-```python 
-from yard import resources
-
-class FooResource(resources.Resource):
-    show_fields  = ('id', 'bar' )
-```
-
-### description
-
-Description of the resource. Used in the *discover* option of the *Api*.
-
-```python 
-from yard import resources
-
-class FooResource(resources.Resource):
-    description = "This resource is responsible for foo"
 ```
 

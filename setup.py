@@ -15,7 +15,7 @@ setup(
     description      = "Yet Another Resftul Django framework",
     packages         = find_packages(where='src'),
     package_dir      = {'': 'src'},
-    install_requires = reqs,
+    install_requires = ['simplejson', 'rstr', 'django'],
     extras_require   = {},
     zip_safe         = False,
     license          = 'MIT',

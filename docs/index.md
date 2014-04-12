@@ -15,6 +15,7 @@
 	- [Metadata](meta.md)
 	- [Authentication](authentication.md)
 	- [Resource types](resource_types.md)
+    - [Uglification](uglification.md)
 - [Versioning](versioning.md)
 
 ### Utils
