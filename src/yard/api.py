@@ -55,7 +55,7 @@ class Api(object):
         
         if resource_class.has_any_method(self.__single_routes.values()):
             self.__urlpatterns.append( build_single_pattern() )
-            if hasattr(resource_class, 'model'):
+            if getattr(resource_class, 'model', None):
                 self.__mapping[ resource_class.model ] = self.__urlpatterns[-1].name
         if resource_class.has_any_method(self.__collection_routes.values()):
             self.__urlpatterns.append( build_collection_pattern() )
