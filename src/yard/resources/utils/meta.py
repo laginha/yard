@@ -26,7 +26,7 @@ class MetaDict(dict):
     @property
     def page_count(self):
         '''
-        Get the number of objectes paginated in the response
+        Get the number of objects paginated in the response
         '''
         if self._page_count == None:
             if isinstance(self.page, (list, tuple)) or is_generator(self.resources):
@@ -78,9 +78,14 @@ class MetaDict(dict):
             self['next_page'] = None
         elif self.page_count < params[ self.__results_name ]:
             self['next_page'] = None
+        elif self.page_count <= self.resource_count:
+            self['next_page'] = None
         else:
             next_offset = params[ self.__offset_name ] + self.page_count
-            self['next_page'] = self.__page_uri(next_offset)
+            if next_offset > self.resource_count:
+                self['next_page'] = None
+            else:
+                self['next_page'] = self.__page_uri(next_offset)
 
     def previous_page(self):
         '''
