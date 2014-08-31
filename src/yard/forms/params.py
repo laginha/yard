@@ -236,10 +236,17 @@ class PointParam(Parameter):
         Converts to Point
         '''
         try:
+            in_range = lambda lon,lat: lat in range(-90, 90) and lon in range(-180,180)
             x, y = [float(i) for i in value.split(',')]
             if math.isnan( x ) or math.isnan( y ):
                 raise ConversionError(self, value)
-            return Point(y, x) if self.latitude_first else Point(x, y)
+            if self.latitude_first:
+                if in_range(y, x):
+                    return Point(y, x)
+            else:
+                if in_range(x, y):
+                    return Point(x, y)
+            raise ConversionError(self, value)
         except ValueError:
             raise ConversionError(self, value)
 
