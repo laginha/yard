@@ -3,6 +3,7 @@
 All available parameter types have three core arguments:
 
 - **alias:** Parameter's name within server's logic. If not given the parameter's name is used instead.
+- **aliases:** List of names the Parameter may assume within server's logic.
 - **required:** Defines whether parameter is required or not.
 - **default:** Defines the default value for the `Parameter`. It can be callable with no arguments (e.g. `default = date.today`) or with only one argument which is the value given in the request (e.g. `default = lambda x: datetime.combine(date.today(),x)`).
 

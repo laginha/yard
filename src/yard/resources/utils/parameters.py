@@ -22,8 +22,12 @@ class ResourceParameters(dict):
             if isinstance(value, Exception):
                 self.__errors[key] = unicode(value)
             elif isinstance(key, Parameter):
-                self[key.alias] = value
                 self.validated[key.name] = value if is_serializable(value) else unicode(value)
+                if key.aliases != None:
+                    for each in key.aliases:
+                        self[each] = value
+                else:
+                    self[key.alias] = value
             else:
                 self[key] = value
                 if not hide:
