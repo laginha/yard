@@ -12,15 +12,10 @@ class Parameter(object):
     '''
     Parent class to all Form's parameter types
     '''    
-    typename = 'string'
-    
-    def __init__(self, description='', help_text='', alias=None, aliases=None,
-                 validate=None, default=None, required=False, 
-                 ignore_invalids=False):
+    def __init__(self, alias=None, aliases=None, validate=None, default=None, required=False, ignore_invalids=False):
         self.alias           = alias
         self.aliases         = aliases
-        if not hasattr(self, 'validate'):
-            self.validate    = validate
+        self.validate        = validate
         self.default         = default
         self.required        = required
         self.ignore_invalids = ignore_invalids
