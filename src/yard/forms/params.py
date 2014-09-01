@@ -214,7 +214,7 @@ class MultipleChoiceParam(Parameter):
     def __init__(self, choices, alias=None, aliases=None, required=False, default=None, sep=','):
         self.sep = sep
         validate = lambda x: all([i in choices for i in x])
-        super(MultipleChoiceParam, self).__init__( alias=alias, aliases=aliases, required=required, default=default, validate=validate)
+        super(MultipleChoiceParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, validate=validate)
         
     def convert(self, value):
         '''
@@ -229,7 +229,7 @@ class PointParam(Parameter):
     '''
     def __init__(self, alias=None, aliases=None, required=False, default=None, validate=None, latitude_first=False):
         self.latitude_first = latitude_first
-        super(PointParam, self).__init__( alias=alias, aliases=aliases, required=required, default=default, validate=validate)        
+        super(PointParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, validate=validate)        
 
     def convert(self, value):
         '''
@@ -261,7 +261,7 @@ class IpAddressParam(Parameter):
                 return socket.inet_aton( x )
             except socket.error:
                 return False 
-        super(IpAddressParam, self).__init__( alias=alias, aliases=aliases, required=required, default=default, validate=validate)
+        super(IpAddressParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, validate=validate)
 
     def convert(self, value):
         return value
@@ -277,7 +277,7 @@ class EmailParam(Parameter):
                 return EmailField().clean(x)
             except:
                 return False
-        super(EmailParam, self).__init__( alias=alias, aliases=aliases, required=required, default=default, validate=validate)    
+        super(EmailParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, validate=validate)    
 
     def convert(self, value):
         return value
@@ -290,7 +290,7 @@ class InstanceParam(Parameter):
     def __init__(self, model, model_attribute='pk', alias=None, aliases=None, required=False, default=None):
         self.model = model.objects
         self.model_attribute = model_attribute
-        super(InstanceParam, self).__init__( alias=alias, aliases=aliases, required=required, default=default)#, validate=validate)
+        super(InstanceParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default)#, validate=validate)
         
     def convert(self, value):
         try:
@@ -307,7 +307,7 @@ class TimestampParam(Parameter):
     Parameter for timestamp values
     '''      
     def __init__(self, alias=None, aliases=None, required=False, default=None, validate=None):     
-        super(TimestampParam, self).__init__( alias=alias, aliases=aliases, required=required, default=default, validate=validate)
+        super(TimestampParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, validate=validate)
     
     def convert(self, value):
         try:
@@ -317,4 +317,32 @@ class TimestampParam(Parameter):
             return datetime.fromtimestamp( converted )
         except ValueError:
             raise ConversionError(self, value)
-        
+
+
+class CommaSeparatedValueParam(RegexParam):
+    '''
+    Parameter for comma seperated values
+    '''
+    regex = r'^.+$|^.+,.+$'
+    
+    def __init__(self, alias=None, aliases=None, required=False, default=None):
+        super(CommaSeparatedValueParam, self).__init__(
+            regex=self.regex, alias=alias, aliases=aliases, required=required, default=default
+        )
+ 
+    def convert(self, value):
+        return [each for each in value.split(',')]
+ 
+
+class CommaSeparatedIntegerParam(CommaSeparatedValueParam):
+    '''
+    Parameter for comma seperated integers
+    '''
+    regex = r'^[0-9]+$|^[0-9]+,[0-9]+$'
+    
+    def convert(self, value):
+        try:
+            return [int(each) for each in value.split(',')]
+        except ValueError:
+            raise ConversionError(self, value)
+    
