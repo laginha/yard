@@ -49,7 +49,7 @@ class PositiveIntegerParam(IntegerParam):
             validate = lambda x: x<=max_value and x>=max(min_value, 0)
         else:
             validate = lambda x: x>=max(min_value, 0)
-        super(PositiveIntegerParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, validate=validate)
+        Parameter.__init__(self, alias=alias, aliases=aliases, required=required, default=default, validate=validate)
 
 
 class CharParam(Parameter):
@@ -101,7 +101,7 @@ class PositiveFloatParam(FloatParam):
     Parameter for positive float values
     '''
     def __init__(self, alias=None, aliases=None, required=False, default=None, max_value=None):
-        super(FloatParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, min_value=0, max_value=max_value)
+        super(PositiveFloatParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, min_value=0, max_value=max_value)
         
 
 class DateTimeParam(Parameter):
@@ -173,13 +173,13 @@ class TimeParam(DateTimeParam):
     Parameter for time values
     '''
     def __init__(self, alias=None, aliases=None, required=False, default=None, validate=None, formats=['%H:%M:%S', '%H:%M']):
-        super(DateParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, validate=validate, formats=formats)
+        super(TimeParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, validate=validate, formats=formats)
 
     def convert(self, value):
         '''
         Converts to Time
         '''
-        return super(DateParam, self).convert(value, to_time=True)
+        return super(TimeParam, self).convert(value, to_time=True)
         
 
 class BooleanParam(Parameter):
@@ -236,7 +236,7 @@ class PointParam(Parameter):
         Converts to Point
         '''
         try:
-            in_range = lambda lon,lat: lat in range(-90, 90) and lon in range(-180,180)
+            in_range = lambda lon,lat: (-90 < lat < 90) and (-180 < lon < 180)
             x, y = [float(i) for i in value.split(',')]
             if math.isnan( x ) or math.isnan( y ):
                 raise ConversionError(self, value)
