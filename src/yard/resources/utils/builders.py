@@ -4,9 +4,9 @@ from django.core.urlresolvers import NoReverseMatch
 from yard.utils import is_related_manager, is_method, is_dict
 from yard import fields
 from yard.exceptions import NoResourceMatch
-import json
+# import json
 
-class JSONbuilder:
+class JSONbuilder(object):
     '''
     Responsible for creating the JSON response
     '''

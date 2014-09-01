@@ -35,7 +35,7 @@ class BookResource(resources.Resource):
 
     class Parameters:
         year   = forms.IntegerParam( alias='publication_date__year', min_value=1970, max_value=2012 )
-        title  = forms.CharParam()
+        title  = forms.CharParam( alias='title__icontains' )
         genre  = forms.CharParam( alias='genres' )
         author = forms.CharParam( alias='author__id' )
         house  = forms.CharParam( alias='publishing_house__id' ) 
@@ -49,7 +49,6 @@ class BookResource(resources.Resource):
     @validate
     #@key_required
     def index(self, request, params):
-        print request.user
         return Book.objects.filter( **params )
 
     @key_required

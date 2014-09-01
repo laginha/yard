@@ -10,8 +10,9 @@ class Parameter(object):
     '''
     Parent class to all Form's parameter types
     '''    
-    def __init__(self, alias=None, validate=None, default=None, required=False, ignore_invalids=False):
+    def __init__(self, alias=None, aliases=None, validate=None, default=None, required=False, ignore_invalids=False):
         self.alias           = alias
+        self.aliases         = aliases
         self.validate        = validate
         self.default         = default
         self.required        = required
@@ -85,7 +86,7 @@ class Parameter(object):
         for k,v in params.items():
             if v==self:
                 self.name  = k
-                self.alias = self.alias if self.alias else k
+                self.alias = self.alias or k
 
     def get_value_and_info(self, request):
         '''

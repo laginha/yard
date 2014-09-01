@@ -19,7 +19,7 @@ class IntegerParam(Parameter):
     '''
     Parameter for integer values
     '''
-    def __init__(self, alias=None, required=False, default=None, min_value=None, max_value=None):
+    def __init__(self, alias=None, aliases=None, required=False, default=None, min_value=None, max_value=None):
         if max_value!=None and min_value!=None:
             validate = lambda x: x>=min_value and x<= max_value
         elif max_value!=None:
@@ -28,7 +28,7 @@ class IntegerParam(Parameter):
             validate = lambda x: x>=min_value
         else:
             validate = None
-        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
+        super(IntegerParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, validate=validate)
         
     def convert(self, value):
         '''
@@ -44,21 +44,21 @@ class PositiveIntegerParam(IntegerParam):
     '''
     Parameter for positive integer values
     '''
-    def __init__(self, alias=None, required=False, default=None, min_value=0, max_value=None):
+    def __init__(self, alias=None, aliases=None, required=False, default=None, min_value=0, max_value=None):
         if max_value!=None:
             validate = lambda x: x<=max_value and x>=max(min_value, 0)
         else:
             validate = lambda x: x>=max(min_value, 0)
-        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
+        super(PositiveIntegerParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, validate=validate)
 
 
 class CharParam(Parameter):
     '''
     Parameter for string/char values
     '''
-    def __init__(self, alias=None, required=False, default=None, max_length=None):
+    def __init__(self, alias=None, aliases=None, required=False, default=None, max_length=None):
         validate = None if not max_length else (lambda x: len(x) <= max_length)
-        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
+        super(CharParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, validate=validate)
     
     def convert(self, value):
         return value
@@ -68,9 +68,9 @@ class RegexParam(Parameter):
     '''
     Parameter with regex validation
     '''
-    def __init__(self, regex, alias=None, required=False, default=None):
+    def __init__(self, regex, alias=None, aliases=None, required=False, default=None):
         validate = lambda x: re.findall(r'^%s$'%regex, x)
-        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
+        super(RegexParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, validate=validate)
     
     def convert(self, value):
         return value
@@ -80,8 +80,8 @@ class FloatParam(IntegerParam):
     '''
     Parameter for float values
     '''
-    def __init__(self, alias=None, required=False, default=None, min_value=None, max_value=None):
-        IntegerParam.__init__(self, alias=alias, required=required, default=default, min_value=min_value, max_value=max_value)
+    def __init__(self, alias=None, aliases=None, required=False, default=None, min_value=None, max_value=None):
+        super(FloatParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, min_value=min_value, max_value=max_value)
         
     def convert(self, value):
         '''
@@ -100,15 +100,15 @@ class PositiveFloatParam(FloatParam):
     '''
     Parameter for positive float values
     '''
-    def __init__(self, alias=None, required=False, default=None, max_value=None):
-        FloatParam.__init__(self, alias=alias, required=required, default=default, min_value=0, max_value=max_value)
+    def __init__(self, alias=None, aliases=None, required=False, default=None, max_value=None):
+        super(FloatParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, min_value=0, max_value=max_value)
         
 
 class DateTimeParam(Parameter):
     '''
     Parameter for datetime values
     '''
-    def __init__(self, alias=None, required=False, default=None, default_date=None, validate=None,
+    def __init__(self, alias=None, aliases=None, required=False, default=None, default_date=None, validate=None,
                  formats=['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d'], time_formats=['%H:%M:%S', '%H:%M'] ):        
         iter_        = lambda x: x if is_iter(x) else [x,]
         self.formats = {'datetime': iter_( formats )}
@@ -119,7 +119,7 @@ class DateTimeParam(Parameter):
                 default = self.__default_date_only
             else:       
                 default = self.__default_with_default_date( default )
-        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
+        super(DateTimeParam, self).__init__( alias=alias, aliases=aliases, required=required, default=default, validate=validate)
     
     def __default_date_only(self, value):
         if isinstance(value, Time):
@@ -158,36 +158,36 @@ class DateParam(DateTimeParam):
     '''
     Parameter for date values
     '''
-    def __init__(self, alias=None, required=False, default=None, validate=None, formats=['%Y-%m-%d']):
-        DateTimeParam.__init__(self, alias=alias, required=required, default=default, validate=validate, formats=formats)
+    def __init__(self, alias=None, aliases=None, required=False, default=None, validate=None, formats=['%Y-%m-%d']):
+        super(DateParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, validate=validate, formats=formats)
 
     def convert(self, value):
         '''
         Converts to Date
         '''
-        return DateTimeParam.convert(self, value, to_date=True)
+        return super(DateParam, self).convert(value, to_date=True)
 
 
 class TimeParam(DateTimeParam):
     '''
     Parameter for time values
     '''
-    def __init__(self, alias=None, required=False, default=None, validate=None, formats=['%H:%M:%S', '%H:%M']):
-        DateTimeParam.__init__(self, alias=alias, required=required, default=default, validate=validate, formats=formats)
+    def __init__(self, alias=None, aliases=None, required=False, default=None, validate=None, formats=['%H:%M:%S', '%H:%M']):
+        super(DateParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, validate=validate, formats=formats)
 
     def convert(self, value):
         '''
         Converts to Time
         '''
-        return DateTimeParam.convert(self, value, to_time=True)
+        return super(DateParam, self).convert(value, to_time=True)
         
 
 class BooleanParam(Parameter):
     '''
     Parameter for boolean values
     '''
-    def __init__(self, alias=None, required=False, default=False):
-        Parameter.__init__(self, alias=alias, required=required, default=default, validate=None)
+    def __init__(self, alias=None, aliases=None, required=False, default=False):
+        super(BooleanParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, validate=None)
         
     def convert(self, value):
         '''
@@ -202,19 +202,19 @@ class ChoiceParam(Parameter):
     '''
     Parameter for single value with pre-defined choices
     '''
-    def __init__(self, choices, alias=None, required=False, default=None):
+    def __init__(self, choices, alias=None, aliases=None, required=False, default=None):
         validate = lambda x: x in choices
-        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
+        super(ChoiceParam, self).__init__(alias=alias, aliases=aliases, required=required, default=default, validate=validate)
 
 
 class MultipleChoiceParam(Parameter):
     '''
     Parameter for multiple values with pre-defined choices
     '''
-    def __init__(self, choices, alias=None, required=False, default=None, sep=','):
+    def __init__(self, choices, alias=None, aliases=None, required=False, default=None, sep=','):
         self.sep = sep
         validate = lambda x: all([i in choices for i in x])
-        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
+        super(MultipleChoiceParam, self).__init__( alias=alias, aliases=aliases, required=required, default=default, validate=validate)
         
     def convert(self, value):
         '''
@@ -227,9 +227,9 @@ class PointParam(Parameter):
     '''
     Parameter for point values
     '''
-    def __init__(self, alias=None, required=False, default=None, validate=None, latitude_first=False):
+    def __init__(self, alias=None, aliases=None, required=False, default=None, validate=None, latitude_first=False):
         self.latitude_first = latitude_first
-        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)        
+        super(PointParam, self).__init__( alias=alias, aliases=aliases, required=required, default=default, validate=validate)        
 
     def convert(self, value):
         '''
@@ -255,13 +255,13 @@ class IpAddressParam(Parameter):
     '''
     Parameter for IP values
     '''
-    def __init__(self, alias=None, required=False, default=None):
+    def __init__(self, alias=None, aliases=None, required=False, default=None):
         def validate(x):
             try: 
                 return socket.inet_aton( x )
             except socket.error:
                 return False 
-        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
+        super(IpAddressParam, self).__init__( alias=alias, aliases=aliases, required=required, default=default, validate=validate)
 
     def convert(self, value):
         return value
@@ -271,13 +271,13 @@ class EmailParam(Parameter):
     '''
     Parameter for E-mail values
     '''
-    def __init__(self, alias=None, required=False, default=None):
+    def __init__(self, alias=None, aliases=None, required=False, default=None):
         def validate(x):
             try:
                 return EmailField().clean(x)
             except:
                 return False
-        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)    
+        super(EmailParam, self).__init__( alias=alias, aliases=aliases, required=required, default=default, validate=validate)    
 
     def convert(self, value):
         return value
@@ -287,10 +287,10 @@ class InstanceParam(Parameter):
     '''
     Parameter for model instances
     '''
-    def __init__(self, model, model_attribute='pk', alias=None, required=False, default=None):
+    def __init__(self, model, model_attribute='pk', alias=None, aliases=None, required=False, default=None):
         self.model = model.objects
         self.model_attribute = model_attribute
-        Parameter.__init__(self, alias=alias, required=required, default=default)#, validate=validate)
+        super(InstanceParam, self).__init__( alias=alias, aliases=aliases, required=required, default=default)#, validate=validate)
         
     def convert(self, value):
         try:
@@ -306,8 +306,8 @@ class TimestampParam(Parameter):
     '''
     Parameter for timestamp values
     '''      
-    def __init__(self, alias=None, required=False, default=None, validate=None):     
-        Parameter.__init__(self, alias=alias, required=required, default=default, validate=validate)
+    def __init__(self, alias=None, aliases=None, required=False, default=None, validate=None):     
+        super(TimestampParam, self).__init__( alias=alias, aliases=aliases, required=required, default=default, validate=validate)
     
     def convert(self, value):
         try:

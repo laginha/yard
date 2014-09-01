@@ -108,6 +108,8 @@ MIDDLEWARE_CLASSES = (
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
+GDAL_LIBRARY_PATH = "/usr/local/lib/libgdal.dylib"
+
 YARD_DEBUG_MODE = False
 
 #
