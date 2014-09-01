@@ -81,7 +81,6 @@ class MetaTestCase( BaseTestCase ):
         metadata = self.get_metadata(request, meta, objects)
         assert 'number_of_objects_is_even' in metadata
 
-
     def test_custom(self):        
         request = self.factory.get('/books/')
         objects = Book.objects.all()

@@ -78,8 +78,6 @@ class MetaDict(dict):
             self['next_page'] = None
         elif self.page_count < params[ self.__results_name ]:
             self['next_page'] = None
-        elif self.page_count <= self.resource_count:
-            self['next_page'] = None
         else:
             next_offset = params[ self.__offset_name ] + self.page_count
             if next_offset > self.resource_count:
