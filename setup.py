@@ -11,7 +11,7 @@ setup(
     description      = "Yet Another Resftul Django-app",
     packages         = find_packages(where='src'),
     package_dir      = {'': 'src'},
-    install_requires = ['simplejson', 'rstr', 'django'],
+    install_requires = ['simplejson', 'rstr', 'django', 'gpolyencode'],
     extras_require   = {},
     zip_safe         = False,
 )
