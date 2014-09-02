@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from django.contrib.gis.db import models
-import simplejson#, gpolyencode
+import simplejson, gpolyencode
 
 
 def verify(f):
