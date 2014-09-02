@@ -10,7 +10,7 @@ class Parameter(object):
     '''
     Parent class to all Form's parameter types
     '''    
-    def __init__(self, alias=None, aliases=None, validate=None, default=None, required=False, ignore_invalids=False):
+    def __init__(self, description='', alias=None, aliases=None, validate=None, default=None, required=False, ignore_invalids=False):
         self.alias           = alias
         self.aliases         = aliases
         self.validate        = validate
@@ -18,9 +18,11 @@ class Parameter(object):
         self.required        = required
         self.ignore_invalids = ignore_invalids
         self.name            = None
+        self.description     = description
+        self.type            = self.__class__.__name__.split('Param')[0]
     
     def __str__(self):
-        return self.name if self.name else type(self)
+        return self.name if self.name else self.type
     
     def __or__(self, other):
         '''
@@ -33,6 +35,14 @@ class Parameter(object):
         Called when parameter is joined with another parameter through boolean 'and'
         '''
         return AND(self, other)
+
+    @property
+    def documentation(self):
+        return {
+            'name': self.name,
+            'type': self.type,
+            'description': self.description,
+        }
 
     def convert(self, value):
         '''

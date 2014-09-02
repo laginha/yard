@@ -82,9 +82,6 @@ class Resource(object):
             # ObjectDoesNotExist: if return model instance does not exist
             # IOError: if return file not found
             return HttpResponse(status=404)
-        except RequiredParamMissing :
-            # if required param missing from request
-            return HttpResponse(status=403)
 
     def __get_resource_parameters(self, request, parameters):
         '''
@@ -231,5 +228,18 @@ class Resource(object):
         return response
     
     def options(self, request, **parameters):
-        return 200
+        return 200, {
+            "Index parameters": {
+                'parameters':[
+                    each.documentation for each in self.__parameters.params
+                ],
+                'logic': unicode(self.__parameters),
+            },
+            # "Index response fields": {
+            #     k: unicode(v) for k,v in self.index_fields.iteritems()
+            # },
+            # "Show response fields": {
+            #     k: unicode(v) for k,v in self.show_fields.iteritems()
+            # }
+        }
 

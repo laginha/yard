@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from django.contrib.gis.db import models
-import simplejson
+import simplejson#, gpolyencode
+
 
 def verify(f):
     def wrapper(data, *args):
         return f(data, *args) if data != None else None
     return wrapper
+
 
 @verify
 def Integer(data):
@@ -72,6 +74,10 @@ def RelatedManager(data):
 def QuerySet(data): 
     return [unicode(i) for i in data]
 
+@verify
+def EncodedPolyline(data):
+    encoder = gpolyencode.GPolyEncoder()
+    return encoder.encode(data.coords)
 
 
 OBJECT_TO_JSONFIELD = {
