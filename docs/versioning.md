@@ -30,9 +30,13 @@ This class is responsible for resource versioning. Each subclass of `ResourceVer
 from yard import versions
 
 class BookResourceVersions(version.ResourceVersions):
-    v1 = BookResource
-    v2 = default = BookResourceV2
-    v3 = latest  = BookResourceV3
+    versions = {
+        '1.0': BookResource,
+        '2.0': BookResourceV2,
+        '3.0': BookResourceV3,
+    }
+    default = '2.0'
+    latest  = '3.0'
 ```    
 
 *urls.py*
@@ -47,19 +51,19 @@ urlpatterns = api.urlpatterns
 
 In this way the `BookResourceVersions` replies to:
 
-- version *v1*, that corresponds to the `BookResource` representation.
-- version *v2* and *default*, that corresponds to the `BookResourceV2` representation.
-- version *v3* and *latest*, that corresponds to the `BookResourceV3` representation.
+- version *1.0*, that corresponds to the `BookResource` representation.
+- version *2.0* and *default*, that corresponds to the `BookResourceV2` representation.
+- version *3.0* and *latest*, that corresponds to the `BookResourceV3` representation.
 
 
 ### Requesting data
 
 The specific *version* of a resource can be mentioned as a request query input
 
-    http://example.com/books/?version=v1
+    http://example.com/books/?version=1.0
 
 or it can be stated in the *Accept* header of the request
 
-    ACCEPT: version=v1
+    ACCEPT: version=1.0
 
-    ACCEPT: application/json; version=v1
+    ACCEPT: application/json; version=1.0
