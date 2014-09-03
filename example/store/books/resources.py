@@ -68,5 +68,9 @@ class BookResourceV2(BookResource):
 
 
 class BookResourceVersions(version.ResourceVersions):
-    v1 = default = BookResource
-    v2 = latest = BookResourceV2    
+    versions = {
+        '1.0': BookResource, 
+        '2.0': BookResourceV2,
+    } 
+    default = '1.0'
+    latest  = '2.0'   
