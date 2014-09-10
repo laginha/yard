@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 # encoding: utf-8
-
 from setuptools import setup, find_packages
 
 setup(
     name             = 'yard',
-    version          = '2.0.0',
+    version          = '2.1.0',
     author           = "Diogo Laginha",
     url              = 'https://github.com/laginha/yard',
     description      = "Yet Another Resftul Django-app",
