@@ -17,11 +17,10 @@ class FileResponse(HttpResponse):
     '''
     Http Response with file content
     '''
-    def __init__(self, content='', status=None, content_type=None, filename=None):
+    def __init__(self, content='', status=None, filename=None):
         HttpResponse.__init__(self, content      = content, 
-                                    mimetype     = mimetypes.guess_type(content.name)[0], 
-                                    status       = status, 
-                                    content_type = content_type, )
+                                    content_type = mimetypes.guess_type(content.name)[0], 
+                                    status       = status, )
         self['Content-Disposition'] = 'attachment; filename=' + filename or content.name
 
 
@@ -29,10 +28,9 @@ class JSONResponse(HttpResponse):
     '''
     Http Response with Json content type
     '''
-    def __init__(self, content='', mimetype=None, status=None):
+    def __init__(self, content='', status=None):
         content = simplejson.dumps( content, ensure_ascii=False )
         HttpResponse.__init__(self, content      = content, 
-                                    mimetype     = mimetype, 
                                     status       = status, 
                                     content_type = 'application/json; charset=utf-8', )
 
@@ -41,10 +39,9 @@ class JSONPResponse(HttpResponse):
     '''
     Http Response with Jsonp content type
     '''
-    def __init__(self, content='', mimetype=None, status=None, callback='callback'):
+    def __init__(self, content='', status=None, callback='callback'):
         content = simplejson.dumps( content, ensure_ascii=False )
         HttpResponse.__init__(self, content      = "%s(%s)" %(callback, content), 
-                                    mimetype     = mimetype,
                                     status       = status, 
                                     content_type = 'application/javascript; charset=utf-8', )
 
@@ -53,10 +50,9 @@ class _DebugResponse(HttpResponse):
     '''
     HTTP Response for debug purposes (django-debug-toolbar)
     '''
-    def __call__(self, content='', mimetype=None, status=None, context=None):
+    def __call__(self, content='', status=None, context=None):
         content = simplejson.dumps( content, ensure_ascii=False )
         return HttpResponse(content  = self.__to_html(content),
-                            mimetype = mimetype,
                             status   = status, )
 
     def __to_html(self, content):
@@ -66,11 +62,11 @@ class _DebugResponse(HttpResponse):
 
 class _JsonResponse(type):
     
-    def __call__(self, content='', mimetype=None, status=None, context=None):
+    def __call__(self, content='', status=None, context=None):
         callback = context.GET.get('callback', None) if context else None
         if callback:
-            return JSONPResponse(content, mimetype, status, callback)
-        return JSONResponse(content, mimetype, status)
+            return JSONPResponse(content, status, callback)
+        return JSONResponse(content, status)
 
 class JsonResponse(HttpResponse):        
     __metaclass__ = _DebugResponse if IN_DEBUG_MODE else _JsonResponse
