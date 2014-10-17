@@ -18,7 +18,7 @@ class PaginationTestCase( BaseTestCase ):
         assert 'results' not in parameters
         assert 'offset' in parameters
         assert parameters['offset'] == offset
-        assert len(resources) <= pagination.defaults[1][1]['default']
+        assert len(resources) <= pagination.DEFAULTS['results_per_page']['default']
 
     def assert_page_params(self, request, objects, pagination, results_name='results', offset_name='offset', offset=0):
         resources, parameters = pagination.select( request, objects )
@@ -99,7 +99,7 @@ class PaginationTestCase( BaseTestCase ):
         pagination = ResourcePage(pagination)
         request = self.factory.get('/books/')
         resources, parameters = self.assert_page_params(request, objects, pagination, results_name='objects')
-        assert parameters['objects'] == pagination.defaults[1][1]['default']
+        assert parameters['objects'] == pagination.DEFAULTS['results_per_page']['default']
         assert 'results' not in parameters
         
         pagination = type("Pagination", (), {'results_per_page': {
@@ -150,7 +150,7 @@ class PaginationTestCase( BaseTestCase ):
         request = self.factory.get('/books/')
         resources, parameters = self.assert_page_params( request, objects, pagination, results_name='objects')
         assert 'results' not in parameters
-        assert parameters['objects'] == pagination.defaults[1][1]['default']
+        assert parameters['objects'] == pagination.DEFAULTS['results_per_page']['default']
         request = self.factory.get('/books/', {'objects':10})
         resources, parameters = self.assert_page_params( request, objects, pagination, results_name='objects')
         assert 'results' not in parameters

@@ -4,7 +4,7 @@ from django.core.urlresolvers import NoReverseMatch
 from yard.utils import is_related_manager, is_method, is_dict
 from yard import fields
 from yard.exceptions import NoResourceMatch
-# import json
+
 
 class JSONbuilder(object):
     '''
@@ -23,69 +23,63 @@ class JSONbuilder(object):
             return
         elif is_related_manager(resource):
             return [self.to_json( i ) for i in resource.all()]
-        return self.__fields_to_json( resource, is_part_of_collection )
-                
-    def __fields_to_json(self, resource, is_part_of_collection):
-        '''
-        Builds (sub) json response according to given fields and resource
-        '''
         try:
-            json_ = self._init_json( resource ) if is_part_of_collection else {}
+            json = self.init_json( resource ) if is_part_of_collection else {}
         except (NoReverseMatch, NoResourceMatch):
-            json_ = {}
+            json = {}
         for key, value in self.fields.iteritems():
-            json_.update( self.__handle_field(resource, key, value) )
-        return json_
+            json.update( self.handle_field(resource, key, value) )
+        return json
     
-    def _init_json(self, resource):
+    def init_json(self, resource):
         '''
         init JSON for the resource
         '''
         return {'resource_uri': self.api.get_uri(resource)}
 
-    def __handle_field(self, resource, key, value):
+    def handle_field(self, resource, key, value):
         '''
         Handler for each field
         '''
         if is_dict( value ):
-            return self.__handle_dict_field( resource, key, value )
-        return self.__handle_field_type( resource, key, value )
+            return self.handle_dict_field( resource, key, value )
+        return self.handle_field_type( resource, key, value )
 
-    def __handle_dict_field(self, resource, field, subfields):
+    def handle_dict_field(self, resource, field_name, subfields):
         '''
         Handle fields of type dict - subfields
         '''
-        sub_resource = getattr( resource, field, None )
+        sub_resource = getattr( resource, field_name, None )
         builder = self.__class__( self.api, subfields )
-        json_ = { field: builder.to_json( sub_resource ) }
+        json = { field_name: builder.to_json( sub_resource ) }
         self.links.update( builder.links )
-        return json_
+        return json
 
-    def __handle_field_type(self, resource, field, type_):
+    def handle_field_type(self, resource, field_name, field_type):
         '''
-        Handle fields of type string
+        Handle field_names of type string
         '''
-        args      = field.split()
+        args      = field_name.split()
         attribute = getattr( resource, args[0], None )
         if is_method( attribute ):
             attribute = attribute( *args[1:] )
         try:
-            if type_ is fields.URI:
-                return {args[0]: type_( attribute, self.api )}
-            if type_ is fields.Link:
-                pk, link = type_( attribute, self.api )
+            if field_type is fields.URI:
+                return {args[0]: field_type( attribute, self.api )}
+            if field_type is fields.Link:
+                pk, link = field_type( attribute, self.api )
                 self.links[args[0]] = link
                 return {args[0]: pk}
         except (NoReverseMatch, NoResourceMatch):
             return {args[0]: None}
-        return {args[0]: type_( attribute )}
+        return {args[0]: field_type( attribute )}
 
 
 class JSONbuilderForMobile(JSONbuilder):
     '''
     Responsible for creating the JSON response optimized for mobile
     '''
-    def _init_json(self, resource):
+    def init_json(self, resource):
         '''
         init JSON for the resource for mobile-driven response 
         '''

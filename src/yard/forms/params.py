@@ -116,19 +116,19 @@ class DateTimeParam(Parameter):
             self.default_date    = default_date
             self.formats['time'] = iter_( time_formats )
             if default == None:
-                default = self.__default_date_only
+                default = self.get_default_date_only
             else:       
-                default = self.__default_with_default_date( default )
+                default = self.get_default_with_default_date( default )
         super(DateTimeParam, self).__init__( description=description, alias=alias, aliases=aliases, required=required, default=default, validate=validate)
     
-    def __default_date_only(self, value):
+    def get_default_date_only(self, value):
         if isinstance(value, Time):
             if callable(self.default_date):
                 return datetime.combine( self.default_date(), value )
             return datetime.combine( self.default_date, value )
         return value
         
-    def __default_with_default_date(self, default_value):
+    def get_default_with_default_date(self, default_value):
         def default(value):
             if value==None:
                 return default_value() if callable(default_value) else default_value

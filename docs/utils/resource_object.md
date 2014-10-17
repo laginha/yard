@@ -1,7 +1,7 @@
 # The Resource Object
 
 
-## Instance methods
+## Methods
 
 ### serialize
 
@@ -80,7 +80,7 @@ result in the same *JSON* response
 However, with the latter *Yard* is able to recognize the relation and adds `author` to `select_related`. In other words, it performs fewer database queries, hence is faster.
 
 
-## Class attributes
+## Attributes
 
 ### fields
 
@@ -188,7 +188,7 @@ class FooResource(resources.Resource):
 ```
 
 
-### _api
+### api
 
 The `Api` instance the `Resouce` belongs to.
 
@@ -198,6 +198,6 @@ from yard import resources
 class FooResource(resources.Resource):
     def index(self, request, params):
     	foos = Foo.objects.all()
-    	return {'resource_uri': self._api.get_uri(i) for i in foos}
+    	return {'resource_uri': self.api.get_uri(i) for i in foos}
 ```
 
