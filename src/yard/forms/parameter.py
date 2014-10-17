@@ -51,14 +51,14 @@ class Parameter(object):
         return float(value) if is_strfloat(value) else (
             int(value) if is_strint(value) else value )
 
-    def _value(self, request):
+    def get_value(self, request):
         '''
         Gets value from request
         '''
         value = request.GET.get( self.name )
         return None if value==None else self.convert(value)
 
-    def _default(self, value):
+    def get_default(self, value):
         '''
         Returns/transforms value according to default value/function
         '''
@@ -81,7 +81,7 @@ class Parameter(object):
             return self.default(), is_default 
         return self.default, is_default
 
-    def _validate(self, value):
+    def do_validate(self, value):
         '''
         Validates param value
         '''
@@ -104,9 +104,9 @@ class Parameter(object):
         '''
         is_default = False
         try:
-            value = self._value( request )
-            value, is_default = self._default( value )
-            value = self._validate( value )
+            value = self.get_value( request )
+            value, is_default = self.get_default( value )
+            value = self.do_validate( value )
         except (ConversionError, InvalidParameterValue, RequiredParamMissing) as e:
             return {self.name: e}, is_default
         if value!=None:

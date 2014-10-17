@@ -6,6 +6,7 @@ from yard.utils import is_file, is_int, is_str, is_dict, is_list, is_generator
 from yard.utils import is_httpresponse, is_queryset, is_modelinstance, is_valuesset
 import simplejson, mimetypes
 
+DEBUG_TOOLBAR_TAG = getattr(settings, 'DEBUG_TOOLBAR_CONFIG', {}).get('TAG', 'body')
 DEFAULT_STATUS_CODE = getattr(settings, 'DEFAULT_STATUS_CODE', 200)
 IN_DEBUG_MODE = getattr(settings, 'DEBUG', False) and\
                 getattr(settings, 'YARD_DEBUG_MODE', False) and\
@@ -46,30 +47,29 @@ class JSONPResponse(HttpResponse):
                                     content_type = 'application/javascript; charset=utf-8', )
 
 
-class _DebugResponse(HttpResponse):
+class JsonDebugResponse(type):
     '''
     HTTP Response for debug purposes (django-debug-toolbar)
     '''
     def __call__(self, content='', status=None, context=None):
         content = simplejson.dumps( content, ensure_ascii=False )
-        return HttpResponse(content  = self.__to_html(content),
-                            status   = status, )
-
-    def __to_html(self, content):
-        TAG = settings.DEBUG_TOOLBAR_CONFIG.get('TAG', 'body') 
-        return "<%s>%s</%s>" %(TAG, content, TAG)
+        return HttpResponse(content = "<%s>%s</%s>" %(DEBUG_TOOLBAR_TAG, content, DEBUG_TOOLBAR_TAG),
+                            status  = status, )
 
 
-class _JsonResponse(type):
-    
+class SmartJsonResponse(type):
+    '''
+    HTTP Response for either JSON or JSONp
+    '''
     def __call__(self, content='', status=None, context=None):
         callback = context.GET.get('callback', None) if context else None
         if callback:
             return JSONPResponse(content, status, callback)
         return JSONResponse(content, status)
 
+
 class JsonResponse(HttpResponse):        
-    __metaclass__ = _DebugResponse if IN_DEBUG_MODE else _JsonResponse
+    __metaclass__ = JsonDebugResponse if IN_DEBUG_MODE else SmartJsonResponse
 
 
 def to_http(request, content=None, status=DEFAULT_STATUS_CODE):

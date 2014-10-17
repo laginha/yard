@@ -15,20 +15,18 @@ class MetaDict(dict):
         self.resources = resources
         self.params    = params
         self.page      = page
-        self._page_count     = None
-        self._resource_count = None
-        self.__results_name = pagination.results_per_page['parameter']
-        self.__offset_name  = pagination.offset_parameter
+        self.results_name = pagination.results_per_page['parameter']
+        self.offset_name  = pagination.offset_parameter
         if is_generator(self.resources):
-            self.total_objects = self.__no_support
-            self.previous_page = self.__no_support
+            self.total_objects = lambda: None
+            self.previous_page = lambda: None
 
     @property
     def page_count(self):
         '''
         Get the number of objects paginated in the response
         '''
-        if self._page_count == None:
+        if not hasattr(self, '_page_count'):
             if isinstance(self.page, (list, tuple)) or is_generator(self.resources):
                 self._page_count = len( self.page )
             else:
@@ -40,34 +38,28 @@ class MetaDict(dict):
         '''
         Get the total number of objects in the resource
         '''
-        if self._resource_count == None:
+        if not hasattr(self, '_resource_count'):
             if isinstance(self.resources, (list, tuple)):
                 self._resource_count = len( self.resources )
             else:
                 self._resource_count = self.resources.count()
         return self._resource_count
 
-    def __no_support(self):
+    def get_page_uri(self, offset):
         '''
-        No support available for self.resource given its type
+        Get the URI with the offset value
         '''
-        pass
+        dic_to_query = lambda x,y: "%s&%s=%s" % (x, y[0], y[1])
+        get = self.request.GET.copy()
+        get[self.offset_name] = offset
+        query_string = reduce(dic_to_query, get.items(), '?')[2:]
+        return self.request.path + "?" + query_string
 
     def with_errors(self):
         '''
         Adds the errors cought while processing the input parameters
         '''
         self.update( self.params.errors() )
-
-    def __page_uri(self, offset):
-        '''
-        Get the URI with the offset value
-        '''
-        dic_to_query = lambda x,y: "%s&%s=%s" % (x, y[0], y[1])
-        get = self.request.GET.copy()
-        get[self.__offset_name] = offset
-        query_string = reduce(dic_to_query, get.items(), '?')[2:]
-        return self.request.path + "?" + query_string
 
     def next_page(self):
         '''
@@ -76,27 +68,27 @@ class MetaDict(dict):
         params = self.params.validated
         if not self.page_count:
             self['next_page'] = None
-        elif self.page_count < params[ self.__results_name ]:
+        elif self.page_count < params[ self.results_name ]:
             self['next_page'] = None
         else:
-            next_offset = params[ self.__offset_name ] + self.page_count
+            next_offset = params[ self.offset_name ] + self.page_count
             if next_offset > self.resource_count:
                 self['next_page'] = None
             else:
-                self['next_page'] = self.__page_uri(next_offset)
+                self['next_page'] = self.get_page_uri(next_offset)
 
     def previous_page(self):
         '''
         Adds the URI for the previous page
         '''
         params = self.params.validated
-        offset = min( self.resource_count, params[ self.__offset_name ] )
-        previous_offset = offset - (self.page_count or params[ self.__results_name ])
+        offset = min( self.resource_count, params[ self.offset_name ] )
+        previous_offset = offset - (self.page_count or params[ self.results_name ])
         if previous_offset < 0 and offset <= 0:
             self['previous_page'] = None
         else:
             previous_offset = max( previous_offset, 0 )
-            self['previous_page'] = self.__page_uri(previous_offset)
+            self['previous_page'] = self.get_page_uri(previous_offset)
 
     def total_objects(self):
         '''
@@ -116,7 +108,7 @@ class MetaDict(dict):
         '''
         self['validated_parameters'] = self.params.validated
 
-    def __aggregation(self, value, call):
+    def set_aggregation(self, value, call):
         '''
         Auxiliar method for aggregation based metadata options
         '''
@@ -128,25 +120,25 @@ class MetaDict(dict):
         '''
         Adds the returned queryset's Min aggregation of value
         '''
-        self.__aggregation(value, Min)
+        self.set_aggregation(value, Min)
 
     def maximum(self, value):
         '''
         Adds the returned queryset's Max aggregation of value
         '''
-        self.__aggregation(value, Max)
+        self.set_aggregation(value, Max)
 
     def average(self, value):
         '''
         Adds the returned queryset's Avg aggregation of value
         '''
-        self.__aggregation(value, Avg)
+        self.set_aggregation(value, Avg)
 
     def count(self, value):
         '''
         Adds the queryset's Count aggregation of value
         '''
-        self.__aggregation(value, Count)
+        self.set_aggregation(value, Count)
 
     def custom(self, name, call):
         '''
@@ -163,7 +155,7 @@ class ResourceMeta(object):
     Class responsible for generating resource's metadata 
     '''
     
-    __defaults = [
+    DEFAULTS = [
         ('no_meta',               False),
         ('with_errors',           False),
         ('validated_parameters',  True),
@@ -178,11 +170,11 @@ class ResourceMeta(object):
     ]
 
     def __init__(self, pagination, meta=type('Meta', (), {})):
-        self.__pagination = pagination
-        self.__new_meta = [
+        self.pagination = pagination
+        self.new_meta = [
             (k,v) for k,v in meta.__dict__.iteritems() if callable(v)
         ]
-        for k,v in self.__defaults:
+        for k,v in self.DEFAULTS:
             setattr(self, k, getattr(meta, k, v))
 
     def generate(self, request, resources, page, params):
@@ -190,18 +182,18 @@ class ResourceMeta(object):
         Generate metadata according to given args
         '''
         try:
-            meta = MetaDict( request, resources, page, params, self.__pagination )
-            self.__generate_defaults( meta )
-            self.__generate_custom_meta( meta )
+            meta = MetaDict( request, resources, page, params, self.pagination )
+            self.generate_defaults( meta )
+            self.generate_custom_meta( meta )
             return meta
         except NoMeta:
             return meta
 
-    def __generate_defaults(self, meta):
+    def generate_defaults(self, meta):
         '''
         Generate metadata available by default
         '''
-        for name,default in self.__defaults:
+        for name,default in self.DEFAULTS:
             value = getattr(self, name)
             if name=='no_meta' and value:
                 raise NoMeta()
@@ -211,9 +203,9 @@ class ResourceMeta(object):
                 getattr(meta, name)()
         return meta
 
-    def __generate_custom_meta(self, meta):
+    def generate_custom_meta(self, meta):
         '''
         Generate custom made metadata
         '''
-        for name,call in self.__new_meta:
+        for name,call in self.new_meta:
             meta.custom( name, call )

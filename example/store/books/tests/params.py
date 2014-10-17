@@ -11,7 +11,7 @@ RANDOM = Randomizer()
 
 def fail_validation(p, x):
     try:
-        p._validate(x)
+        p.do_validate(x)
         return False
     except InvalidParameterValue:
         return True
@@ -35,18 +35,18 @@ class IntegerParamTestCase(TestCase):
     def test_default(self, param=IntegerParam):
         p = param()
         for i in range(-RANDOM.number(),RANDOM.number()):
-            assert p._default(i)[0] == i
+            assert p.get_default(i)[0] == i
         
         default = RANDOM.number()
         p = param(default=default)
         number = RANDOM.number()
-        assert p._default(number)[0] == number
-        assert p._default(None)[0] == default
+        assert p.get_default(number)[0] == number
+        assert p.get_default(None)[0] == default
 
     def test_validate(self, param=IntegerParam):
         p = param()
         for i in range(-RANDOM.number(),RANDOM.number()):
-            assert p._validate(i) != None
+            assert p.do_validate(i) != None
             
         min_, max_ = -RANDOM.number(), RANDOM.number()
         p = param(min_value=min_, max_value=max_)
@@ -55,13 +55,13 @@ class IntegerParamTestCase(TestCase):
         
         max_ = RANDOM.number()
         p = param(max_value=max_)
-        assert p._validate(-max_)
+        assert p.do_validate(-max_)
         assert fail_validation(p, max_+RANDOM.number())
         
         min_ = -RANDOM.number()
         p = param(min_value=min_)
         assert fail_validation(p, min_-RANDOM.number())
-        assert p._validate(min_*-1)
+        assert p.do_validate(min_*-1)
     
 
 class PositiveIntegerParamTestCase(IntegerParamTestCase):
@@ -75,7 +75,7 @@ class PositiveIntegerParamTestCase(IntegerParamTestCase):
     def test_validate(self, param=PositiveIntegerParam):
         p = param()
         for i in range(0,RANDOM.number()):
-            assert p._validate(i) != None
+            assert p.do_validate(i) != None
         assert fail_validation(p, -RANDOM.number())
         
         max_ = RANDOM.number()
@@ -120,16 +120,16 @@ class CharParamTestCase(TestCase):
     def test_default(self, param=CharParam):
         default = RANDOM.string()
         p = param(default=default)
-        assert p._default(None)[0] == default
+        assert p.get_default(None)[0] == default
         string = RANDOM.string()
-        assert p._default(string)[0] == string
+        assert p.get_default(string)[0] == string
         
     def test_validate(self, param=CharParam):
         max_ = RANDOM.number()
         p = param(max_length=max_)
         assert fail_validation(p, RANDOM.string()*max_)
-        assert p._validate(RANDOM.string(max_)) != None
-        assert p._validate(RANDOM.string(max_))
+        assert p.do_validate(RANDOM.string(max_)) != None
+        assert p.do_validate(RANDOM.string(max_))
 
 
 class RegexParamTestCase(TestCase):
@@ -141,14 +141,14 @@ class RegexParamTestCase(TestCase):
     def test_default(self):
         default = RANDOM.string()
         p = RegexParam(r'.*', default=default)
-        assert p._default(None)[0] == default
+        assert p.get_default(None)[0] == default
         string = RANDOM.string()
-        assert p._default(string)[0] == string
+        assert p.get_default(string)[0] == string
     
     def test_validate(self, param=CharParam):
         p = RegexParam(r'[0-9]*')
         assert fail_validation(p, RANDOM.string())
-        assert p._validate(RANDOM.char_number())
+        assert p.do_validate(RANDOM.char_number())
         assert fail_validation(p, RANDOM.string())
 
 
@@ -165,9 +165,9 @@ class DateTimeParamTestCase(TestCase):
     def test_default(self, param=DateTimeParam):
         today = datetime.today()
         p = param(default=today)
-        assert p._default(None)[0] == today
+        assert p.get_default(None)[0] == today
         string = RANDOM.string()
-        assert p._default(string)[0] == string
+        assert p.get_default(string)[0] == string
 
 
 class DateParamTestCase(DateTimeParamTestCase):
@@ -204,9 +204,9 @@ class BooleanParamTestCase(TestCase):
     def test_default(self, param=BooleanParam):
         default = RANDOM.boolean()
         p = BooleanParam(default=default)
-        assert p._default(None)[0] == default, str(p._default(None))
+        assert p.get_default(None)[0] == default, str(p.get_default(None))
         boolean = RANDOM.boolean()
-        assert p._default(boolean)[0] == boolean
+        assert p.get_default(boolean)[0] == boolean
         
 
 class ChoiceParamTestCase(TestCase):
@@ -214,7 +214,7 @@ class ChoiceParamTestCase(TestCase):
     def test_validate(self):
         options = RANDOM.list_of_numbers()
         p = ChoiceParam(options)
-        assert p._validate(RANDOM.choice(options))
+        assert p.do_validate(RANDOM.choice(options))
         assert fail_validation(p, RANDOM.string())
 
 
@@ -230,7 +230,7 @@ class MultipleChoiceParamTestCase(TestCase):
     def test_validate(self):
         options = RANDOM.list_of_numbers()
         p = MultipleChoiceParam(options)
-        assert p._validate([RANDOM.choice(options),RANDOM.choice(options)])
+        assert p.do_validate([RANDOM.choice(options),RANDOM.choice(options)])
         assert fail_validation(p, [RANDOM.string(), RANDOM.string()])
 
 
