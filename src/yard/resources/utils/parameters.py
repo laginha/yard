@@ -9,8 +9,8 @@ class ResourceParameters(dict):
     Dictionary with given resource parameters values
     '''   
     def __init__(self, params={}):
-        self.__errors  = {}
-        self.__path    = params
+        self.dict_of_errors = {}
+        self.path = params
         self.validated = {}
         self.update( params )
 
@@ -20,7 +20,7 @@ class ResourceParameters(dict):
         '''
         for key,value in params.iteritems():
             if isinstance(value, Exception):
-                self.__errors[key] = unicode(value)
+                self.dict_of_errors[key] = unicode(value)
             elif isinstance(key, Parameter):
                 self.validated[key.name] = value if is_serializable(value) else unicode(value)
                 if key.aliases != None:
@@ -37,23 +37,23 @@ class ResourceParameters(dict):
         '''
         Returns parameters of type path
         '''
-        return self.__path
+        return self.path
         
     def from_query(self):
         '''
         Returns parameters of type query
         '''
-        return dict( [(k,v) for k,v in self.items() if k not in self.__path] )
+        return dict( [(k,v) for k,v in self.items() if k not in self.path] )
     
     def is_valid(self):
         '''
         Were there any errors while processing the parameters
         '''
-        return not bool(self.__errors)
+        return not bool(self.dict_of_errors)
 
     def errors(self):
         '''
         Returns JSON with evaluated errors 
         '''
-        return {'Errors': self.__errors if self.__errors else {}}
+        return {'Errors': self.dict_of_errors if self.dict_of_errors else {}}
 

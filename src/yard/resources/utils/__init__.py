@@ -14,9 +14,9 @@ def with_pagination_and_meta(f):
     '''
     def wrapper(self, request, resources, parameters, fields):
         if hasattr(parameters, 'validated'):
-            page = self._paginate( request, resources, parameters )
+            page = self.paginate( request, resources, parameters )
             objects, links = f(self, request, page, parameters, fields)
-            meta = self._meta.generate(request, resources, page, parameters)
+            meta = self.meta.generate(request, resources, page, parameters)
             if meta and not links:
                 return {'Objects': objects, 'Meta': meta}
             if meta and links:

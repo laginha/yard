@@ -121,8 +121,7 @@ class Parameter(object):
             value = self.get_value( request )
             value, is_default = self.get_default( value )
             value = self.do_validate( value )
-        except (ConversionError, InvalidParameterValue, 
-                RequiredParamMissing) as e:
+        except (ConversionError, InvalidParameterValue, RequiredParamMissing) as e:
             return {self.name: e}, is_default
         if value!=None:
             return {self: value}, is_default 
