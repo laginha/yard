@@ -39,7 +39,7 @@ class BookResource(resources.Resource):
 ```
 
 
-## perm_required
+## permission_required
 
 Check if user has the required permissions. 
 
@@ -48,12 +48,12 @@ Uses the *django's* `permission_required` decorator thus it accepts the same arg
 - `redirect`: determines whether it should redirect to the login url or return a *Not Authorized* response (status 401), if the user is not authenticated. (defaults to `False`)
 
 ```python
-from yard.resources.decorators import perm_required
+from yard.resources.decorators import permission_required
 from yard import resources
 
 class BookResource(resources.Resource):
 
-    @perm_required('books.can_read')
+    @permission_required('books.can_read')
     def index(self, request, params):
         return Book.objects.filter( **params )
 ```
@@ -109,15 +109,15 @@ class BookResource(resources.Resource):
 ```
 
 
-## decorator\_for\_response_methods
+## resource_decorator
 
 In case the same decorator is needed for all *HTTP* response methods (*index*, *show*, *create*, *update*, *destroy*).
 
 ```python
 from yard import resources
-from yard.resources.decorators import login_required, decorator_for_response_methods
+from yard.resources.decorators import login_required, resource_decorator
 
-@decorator_for_response_methods( login_required )
+@resource_decorator( login_required )
 class FooResource(resources.Resource):
 
     def show(self, request, book_id):
