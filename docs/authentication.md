@@ -64,10 +64,10 @@ In case this decorator is needed for all *HTTP* response methods (*index*, *show
 
 ```python
 from yard import resources
-from yard.resources.decorators import decorator_for_response_methods
+from yard.resources.decorators import resource_decorator
 from yard.apps.keyauth.decorators import key_required
 
-@decorator_for_response_methods( key_required )
+@resource_decorator( key_required )
 class FooResource(resources.Resource):
 
     def show(self, request, book_id):
