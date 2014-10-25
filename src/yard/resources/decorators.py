@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
-from django.contrib.auth.decorators import permission_required, login_required as django_login_required
+from django.contrib.auth.decorators import permission_required as django_permission_required
+from django.contrib.auth.decorators import login_required as django_login_required
 from django.http import HttpResponseRedirect
 import inspect
 
@@ -46,7 +47,7 @@ def login_required(*args, **kwargs):
     return django_to_yard_decorator( dec )(*args, **kwargs)
 
 
-def perm_required(*args, **kwargs):
+def permission_required(*args, **kwargs):
     '''
     Check if user has permissions
     '''
@@ -90,7 +91,7 @@ def exceptionHandling(exception, return_value):
     return decorator
 
 
-def decorator_for_response_methods(decorator):
+def resource_decorator(decorator):
     '''
     Apply one decorator to all HTTP response methods
     Based on: stackoverflow.com/questions/2237624/applying-python-decorators-to-methods-in-a-class
