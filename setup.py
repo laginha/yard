@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name             = 'yard',
-    version          = '2.1.0',
+    version          = '2.1a0',
     author           = "Diogo Laginha",
     url              = 'https://github.com/laginha/yard',
     description      = "Yet Another Resftul Django-app",
