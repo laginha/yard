@@ -1,10 +1,10 @@
-from yard.resources.decorators import validate, decorator_for_response_methods, login_required
+from yard.resources.decorators import validate, resource_decorator, login_required
 from yard import forms, version, resources, fields
 from yard.apps.keyauth.decorators import key_required
 from models import Book, Author
 
 
-@decorator_for_response_methods( key_required )
+@resource_decorator( key_required )
 class AuthorResource(resources.Resource):
     model  = Author
     fields = {

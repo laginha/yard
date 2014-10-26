@@ -15,19 +15,6 @@ class Api(object):
     Class responsible for generating the urlpatterns for the Resources
     '''
     
-    COLLECTION_ROUTES = {
-        'GET':'index', 
-        'POST':'create',
-        'OPTIONS': 'options'
-    }
-    SINGLE_ROUTES = {
-        'GET':'show', 
-        'PUT':'update', 
-        'POST':'update', 
-        'DELETE': 'destroy',
-        'OPTIONS': 'options', 
-    }
-
     def __init__(self, path=r'^', discover=False):
         self.list_of_urlpatterns = []
         self.model_to_urlname = {}
@@ -51,20 +38,20 @@ class Api(object):
         def build_single_pattern():
             name = single_name or "single."+resource_class.__name__
             path = r'%s%s/(?P<pk>[0-9]+)/?$' %(self.path, resource_path)
-            resource = resource_class( self, self.SINGLE_ROUTES )
+            resource = resource_class.as_single_view( self )
             return url( path, csrf_exempt( resource ), name=name )
         
         def build_collection_pattern():
             name = collection_name or "collection."+resource_class.__name__
             path = r'%s%s/?$' %(self.path, resource_path)
-            resource = resource_class( self, self.COLLECTION_ROUTES )
+            resource = resource_class.as_collection_view( self )
             return url( path, csrf_exempt( resource ), name=name )
         
-        if resource_class.has_any_method(self.SINGLE_ROUTES.values()):
+        if resource_class.is_single_view():
             self.list_of_urlpatterns.append( build_single_pattern() )
             if getattr(resource_class, 'model', None):
                 self.model_to_urlname[ resource_class.model ] = self.list_of_urlpatterns[-1].name
-        if resource_class.has_any_method(self.COLLECTION_ROUTES.values()):
+        if resource_class.is_collection_view():
             self.list_of_urlpatterns.append( build_collection_pattern() )
 
     def extend(self, path, to_include, name=None):
