@@ -8,6 +8,7 @@ from yard.resources.utils.meta import ResourceMeta
 from yard.resources.utils.page import ResourcePage
 from yard import fields
 
+
 def with_pagination_and_meta(f):
     '''
     Paginates and appends Meta data into the json response if in index view
