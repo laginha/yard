@@ -55,14 +55,18 @@ def permission_required(*args, **kwargs):
     return django_to_yard_decorator( dec )(*args, **kwargs)
 
 
-def validateForm(form_class):
+def validate_form(form_class, extra=None):
     '''
     Validate request according to given form
     '''
     def decorator(f):
         def wrapper(klass, request, *args, **kwargs):
             
-            def validate(*form_args):
+            def validate(**form_kwargs):
+                if extra != None:
+                    form_kwargs.update(
+                        extra(klass, request)
+                    )
                 form = form_class(*form_args)
                 if form.is_valid():
                     request.form = form
@@ -77,7 +81,7 @@ def validateForm(form_class):
     return decorator
 
 
-def exceptionHandling(exception, return_value):
+def exception_handling(exception, response):
     '''
     Handle a specific exception
     '''
