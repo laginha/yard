@@ -6,7 +6,7 @@ import simplejson, gpolyencode
 
 def verify(f):
     def wrapper(data, *args):
-        return f(data, *args) if data != None else None
+        return f(data, *args) if data else None
     return wrapper
 
 

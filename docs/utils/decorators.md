@@ -77,7 +77,7 @@ class FooResource(resources.Resource):
 Don't forget to add `yard.apps.keyauth` to `INSTALLED_APPS` and `yard.apps.keyauth.backends.KeyAuthBackend` to `AUTHENTICATION_BACKENDS` in your settings.
 
 
-## validateForm
+## validate_form
 
 Check if a *Django's* form is valid. If not, returns a *Bad Request* response (status 400).
 
@@ -87,13 +87,16 @@ from yard import resources
 
 class BookResource(resources.Resource):
 
-    @validateForm(SomeForm)
+    def get_extra_context(self, request):
+        return {'instance': request.user}
+
+    @validate_form(SomeForm, extra=get_extra_context)
     def index(self, request, params):
         return Book.objects.filter( **params )
 ```
 
 
-## exceptionHandling
+## exception_handling
 
 Handles a given exception, returning a `HttpResponse` with a given status code if caught.
 
@@ -103,7 +106,7 @@ from yard import resources
 
 class BookResource(resources.Resource):
 
-    @exceptionHandling(SomeException, 400)
+    @exception_handling(SomeException, response=400)
     def index(self, request, params):
         return Book.objects.filter( **params )
 ```
