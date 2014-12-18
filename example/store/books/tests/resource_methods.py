@@ -45,8 +45,8 @@ class ResourceHttpMethodsTestCase( BaseTestCase ):
         self.factory = RequestFactory()
         SomeResource = Resource
         #SomeResource.model = Book
-        self.collection_resource = SomeResource(Api(), {'GET':'index', 'POST':'create'})
-        self.single_resource = SomeResource(Api(), {'GET':'show', 'PUT':'update', 'POST':'update', 'DELETE':'destroy'})
+        self.collection_resource = SomeResource.as_list_view(Api())['view']
+        self.single_resource = SomeResource.as_detail_view(Api())['view']
     
     def get_response(self, request, resource, params={}, content_type="application/json", status=200):
         response = resource(request, **params)

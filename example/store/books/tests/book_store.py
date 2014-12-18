@@ -98,8 +98,8 @@ class BookStoreTestCase( BaseTestCase ):
     
     def test_update(self):
         response = self.client.post( '/books/%s/' %self.book1.id )
-        assert response.status_code == 404, response.status_code
+        assert response.status_code == 405, response.status_code
      
     def test_destroy(self):
         response = self.client.delete( '/books/%s/' %self.book1.id )
-        assert response.status_code == 404, response.status_code
+        assert response.status_code == 405, response.status_code
