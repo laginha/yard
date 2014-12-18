@@ -18,7 +18,7 @@ class HttpMethodNotAllowed(Exception):
         self.model = model
     
     def __str__(self):
-        return "No resource found for model '%s'" %self.model
+        return "Http method %s not allowed." %self.method
 
 
 class RequiredParamMissing(Exception):

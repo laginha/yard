@@ -3,129 +3,46 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
-from yard.exceptions import HttpMethodNotAllowed, MethodNotImplemented, RequiredParamMissing
+from yard.exceptions import HttpMethodNotAllowed, RequiredParamMissing
 from yard.utils import is_tuple, is_queryset, is_modelinstance, is_generator, is_list
 from yard.utils import is_valuesset, is_dict, is_many_related_manager
 from yard.utils.http import to_http
-from yard.forms import Form
-from yard.resources.utils import *
+from yard.resources.utils import (
+    ResourceParameters, ResourceMeta, ResourcePage, JSONbuilder, with_pagination_and_meta, model_to_fields
+)
 from yard.resources.utils.uglify import uglify_json
+from yard.resources.utils.parameters import ResourceParameters
+from yard.resources.utils.mixins import DetailMixin, ListMixin, EditMixin, NewMixin
 from yard import fields as YardFields
 
-
-
-class SingleResourceMixin(object):
-    SINGLE_ROUTES = {
-        'GET':'show', 
-        'PUT':'update', 
-        'POST':'update', 
-        'DELETE': 'destroy',
-        'OPTIONS': 'options', 
-    }
     
-    @classmethod
-    def as_single_view(cls, api):
-        return cls(api, cls.SINGLE_ROUTES)
-      
-    @classmethod
-    def is_single_view(cls):
-        return cls.has_any_method( cls.SINGLE_ROUTES.values() ) 
-    
-    def get_show_fields(self):
-        return getattr(self, "show_fields", self.fields)
-    
-    @method_required('show')
-    def handle_show(self, request, parameters):
-        response = self.show(request, parameters.pop('pk'), **parameters)
-        return self.handle_response(request, response, self.show_fields, parameters)
-    
-    @method_required('update')    
-    def handle_update(self, request, parameters):
-        response = self.update(request, parameters.pop('pk'), **parameters)
-        return self.handle_response(request, response, self.fields, parameters)
-    
-    @method_required('destroy')
-    def handle_destroy(self, request, parameters):
-        response = self.destroy(request, parameters.pop('pk'), **parameters)
-        return self.handle_response(request, response, self.fields, parameters)
-    
-
-
-class CollectionResourceMixin(object):
-    COLLECTION_ROUTES = {
-        'GET':'index', 
-        'POST':'create',
-        'OPTIONS': 'options'
-    }
-    
-    @classmethod
-    def as_collection_view(cls, api):
-        return cls(api, cls.COLLECTION_ROUTES)
-        
-    @classmethod
-    def is_collection_view(cls):
-        return cls.has_any_method( cls.COLLECTION_ROUTES.values() )
-    
-    def get_index_fields(self):
-        return getattr(self, "index_fields", self.fields)
-    
-    def get_parameters(self):
-        parameters = Form( self.Parameters ) if hasattr(self, "Parameters") else None
-        if not parameters:
-            self.get_resource_parameters = lambda r,p: ResourceParameters( p )
-        return parameters
-    
-    @method_required('index')
-    def handle_index(self, request, parameters):
-        parameters = self.get_resource_parameters( request, parameters )
-        response = self.index(request, parameters)
-        return self.handle_response(request, response, self.index_fields, parameters)
-    
-    @method_required('create')
-    def handle_create(self, request, parameters):
-        response = self.create(request, **parameters)
-        return self.handle_response(request, response, self.fields, parameters)
-    
-
-
-class Resource(SingleResourceMixin, CollectionResourceMixin):
+class BaseResource(object):
     '''
     API Resource object
     '''
     
     @classmethod
-    def has_any_method(cls, routes):
-        '''
-        Check if Resource has any http method implemented
-        '''
-        return any([hasattr(cls, i) for i in routes if i!='options'])
+    def get_views(cls, api):
+        for each in dir(cls):
+            if each.startswith('as_') and each.endswith('_view'):
+                yield getattr(cls, each)(api)
     
-    def __init__(self, api, routes):    
+    def __init__(self, api, routes, show_fields=None, index_fields=None):    
         self.api            = api
         self.routes         = routes
-        self.default_status = self.get_default_status_code()
+        self.fields         = self.get_fields()
+        self.show_fields    = show_fields or self.fields
+        self.index_fields   = index_fields or self.fields
+        self.default_status = getattr(settings, 'DEFAULT_STATUS_CODE', 200)
+        self.description    = getattr(self, "description", "not provided")
+        self.uglify         = getattr(self, "uglify", False)
         self.pagination     = self.get_resource_page()
         self.meta           = self.get_resource_meta()
-        self.fields         = self.get_fields()
-        self.show_fields    = self.get_show_fields()
-        self.index_fields   = self.get_index_fields()
-        self.description    = self.get_description()
-        self.uglify         = self.get_uglify()
-        self.parameters     = self.get_parameters()
         self.builders       = self.get_json_builders()
     
     @property
     def json_builder_class(self):
         return JSONbuilder
-    
-    def get_default_status_code(self):
-        return getattr(settings, 'DEFAULT_STATUS_CODE', 200)
-    
-    def get_uglify(self):
-        return getattr(self, "uglify", False)
-    
-    def get_description(self):
-        return getattr(self, "description", "not provided")
     
     def get_resource_page(self):
         return ResourcePage( self.get_class_attribute('Pagination') )
@@ -149,7 +66,7 @@ class Resource(SingleResourceMixin, CollectionResourceMixin):
             id(i): self.json_builder_class(self.api, i) for i in fields if not callable(i)
         }
 
-    def __call__(self, request, **parameters):
+    def __call__(self, request, **kwargs):
         '''
         Called in every request made to Resource
         '''
@@ -157,9 +74,11 @@ class Resource(SingleResourceMixin, CollectionResourceMixin):
             if request.method not in self.routes:
                 return to_http(request, status=404)
             method = self.routes[request.method]
-            return getattr(self, 'handle_'+method)(request, parameters)
-        except (MethodNotImplemented, ObjectDoesNotExist, IOError):
-            # MethodNotImplemented: if view not implemented
+            if not getattr(self, method, None):
+                # method not implemented
+                return HttpResponse(status=405)
+            return getattr(self, 'handle_'+method)(request, **kwargs)
+        except (ObjectDoesNotExist, IOError):
             # ObjectDoesNotExist: if return model instance does not exist
             # IOError: if return file not found
             return HttpResponse(status=404)
@@ -277,7 +196,6 @@ class Resource(SingleResourceMixin, CollectionResourceMixin):
         response.update( uglify_json(response.pop('Objects')) )
         return response
     
-    @method_required('options')
     def handle_options(self, request, parameters):
         response = self.options(request, **parameters)
         response = self.handle_response(request, response, self.fields, parameters)
@@ -300,3 +218,6 @@ class Resource(SingleResourceMixin, CollectionResourceMixin):
             # }
         }
 
+
+class Resource(BaseResource, DetailMixin, ListMixin, EditMixin, NewMixin):
+    pass

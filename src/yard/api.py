@@ -31,28 +31,21 @@ class Api(object):
         '''
         return patterns( '', *self.list_of_urlpatterns )
 
-    def include(self, resource_path, resource_class, single_name=None, collection_name=None):
+    def include(self, resource_path, resource_class, name=None):
         '''
         Include url pattern for a given Resource
-        '''
-        def build_single_pattern():
-            name = single_name or "single."+resource_class.__name__
-            path = r'%s%s/(?P<pk>[0-9]+)/?$' %(self.path, resource_path)
-            resource = resource_class.as_single_view( self )
-            return url( path, csrf_exempt( resource ), name=name )
-        
-        def build_collection_pattern():
-            name = collection_name or "collection."+resource_class.__name__
-            path = r'%s%s/?$' %(self.path, resource_path)
-            resource = resource_class.as_collection_view( self )
-            return url( path, csrf_exempt( resource ), name=name )
-        
-        if resource_class.is_single_view():
-            self.list_of_urlpatterns.append( build_single_pattern() )
-            if getattr(resource_class, 'model', None):
-                self.model_to_urlname[ resource_class.model ] = self.list_of_urlpatterns[-1].name
-        if resource_class.is_collection_view():
-            self.list_of_urlpatterns.append( build_collection_pattern() )
+        '''        
+        for info in resource_class.get_views(api=self):
+            viewname = "%s.%s" %(name or resource_class.__name__, info['name'])
+            self.list_of_urlpatterns.append(
+                url(
+                    self.path+resource_path+info['path'], 
+                    csrf_exempt( info['view'] ), 
+                    name=viewname
+                )
+            )
+            if info['name'] == 'detail' and getattr(resource_class, 'model', None):
+                self.model_to_urlname[ resource_class.model ] = viewname
 
     def extend(self, path, to_include, name=None):
         '''
