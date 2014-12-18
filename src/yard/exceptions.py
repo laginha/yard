@@ -23,17 +23,6 @@ class HttpMethodNotAllowed(Exception):
         return "Http method %s not allowed." %self.method
 
 
-class MethodNotImplemented(Exception):
-    '''
-    For when a Http method is not implemented in a resource
-    '''
-    def __init__(self, method):
-        self.method = method
-
-    def __str__(self):
-        return "Method '%s' not implemented" %self.method
-
-
 class RequiredParamMissing(Exception):
     '''
     For when a required resource parameter is not in request

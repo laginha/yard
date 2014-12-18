@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from django.conf import settings
-from yard.exceptions import MethodNotImplemented
 from yard.resources.utils.parameters import ResourceParameters
 from yard.resources.utils.builders import JSONbuilder, JSONbuilderForMobile
 from yard.resources.utils.meta import ResourceMeta
@@ -28,16 +27,6 @@ def with_pagination_and_meta(f):
         return f(self, request, resources, parameters, fields)[0]
     return wrapper
 
-class method_required(object):
-    def __init__(self, method):
-        self.method = method
-        
-    def __call__(self, f):
-        def wrapper(klass, *args, **kwargs):
-            if not hasattr(klass, self.method):
-                raise MethodNotImplemented(self.method)
-            return f(klass, *args, **kwargs)
-        return wrapper
 
 def model_to_fields(model):
     return dict(

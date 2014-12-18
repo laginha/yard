@@ -14,19 +14,25 @@ class ApiTestCase( BaseTestCase ):
         api = Api()
         api.include('a', BookResource)
         api.include('b', BookResourceVersions)
-        assert len( api.urlpatterns ) == 2*2
+        assert len( api.urlpatterns ) == 2*4
         
         api = Api()
-        api.include('a', BookResource, single_name='single_name', collection_name='collection_name')
-        assert len( api.urlpatterns ) == 2*1
-        assert api.urlpatterns[0].name == 'single_name'
-        assert api.urlpatterns[1].name == 'collection_name'
+        api.include('a', BookResource, name='books')
+        assert len( api.urlpatterns ) == 4
+        viewnames = [each.name for each in api.urlpatterns]
+        assert 'books.detail' in viewnames
+        assert 'books.list' in viewnames
+        assert 'books.edit' in viewnames
+        assert 'books.new' in viewnames
         
         api = Api()
-        api.include('b', BookResourceVersions, single_name='single_name', collection_name='collection_name')
-        assert len( api.urlpatterns ) == 2*1
-        assert api.urlpatterns[0].name == 'single_name'
-        assert api.urlpatterns[1].name == 'collection_name'
+        api.include('b', BookResourceVersions)
+        assert len( api.urlpatterns ) == 4
+        viewnames = [each.name for each in api.urlpatterns]
+        assert 'BookResourceVersions.detail' in viewnames
+        assert 'BookResourceVersions.list' in viewnames
+        assert 'BookResourceVersions.edit' in viewnames
+        assert 'BookResourceVersions.new' in viewnames
         
         api = Api(discover=True)
         api.include('a', BookResource)
@@ -36,6 +42,6 @@ class ApiTestCase( BaseTestCase ):
         api = Api('path/')
         api.include('a', BookResource)
         api.include('b', BookResourceVersions)
-        assert len( api.urlpatterns ) == 2*2
+        assert len( api.urlpatterns ) == 2*4
         for path in api.urlpatterns:
             assert path._regex.startswith('path/')
