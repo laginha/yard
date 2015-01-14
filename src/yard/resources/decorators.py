@@ -13,7 +13,7 @@ def django_to_yard_decorator(django_decorator):
     def django_to_yard_wrapper(*args, **kwargs):
         redirect = kwargs.pop('redirect', False)
         
-        def actual_decorator(f):    
+        def actual_decorator(f):
             def decorator_wrapper(klass, request, *rargs, **rkwargs):
                 def aux(request, *a, **k):
                     return f(klass, request, *rargs, **rkwargs)
@@ -51,7 +51,7 @@ def permission_required(*args, **kwargs):
     '''
     Check if user has permissions
     '''
-    dec = permission_required
+    dec = django_permission_required
     return django_to_yard_decorator( dec )(*args, **kwargs)
 
 
@@ -62,7 +62,7 @@ def validate_form(form_class, extra=None):
     def decorator(f):
         def wrapper(klass, request, *args, **kwargs):
             
-            def validate(**form_kwargs):
+            def do_validation(*form_args):
                 if extra != None:
                     form_kwargs.update(
                         extra(klass, request)
@@ -74,8 +74,8 @@ def validate_form(form_class, extra=None):
                 return 400
                 
             if not hasattr(request, "FILES"): 
-                return validate( request.REQUEST )
-            return validate( request.REQUEST, request.FILES )
+                return do_validation( request.REQUEST )
+            return do_validation( request.REQUEST, request.FILES )
 
         return wrapper
     return decorator
