@@ -5,7 +5,8 @@ from yard.resources.utils.parameters import ResourceParameters
 class DetailMixin(object):
     DETAIL_ROUTES = {
         'GET':'show', 
-        'PUT':'update', 
+        'PUT':'update',
+        'PATCH': 'update',
         'POST':'update', 
         'DELETE': 'destroy',
         'OPTIONS': 'options', 
