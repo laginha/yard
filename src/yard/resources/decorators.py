@@ -11,7 +11,7 @@ def django_to_yard_decorator(django_decorator):
     Adapt django's decorators in yard resources
     '''
     def django_to_yard_wrapper(*args, **kwargs):
-        redirect = kwargs.pop('redirect', False)
+        # redirect = kwargs.pop('redirect', False)
         
         def actual_decorator(f):
             def decorator_wrapper(klass, request, *rargs, **rkwargs):
@@ -19,8 +19,8 @@ def django_to_yard_decorator(django_decorator):
                     return f(klass, request, *rargs, **rkwargs)
                 user_test_decorator = django_decorator(*args, **kwargs)
                 result =  user_test_decorator( aux )(request, *rargs, **rkwargs)
-                if not redirect and isinstance(result, HttpResponseRedirect):
-                    return 401
+                # if not redirect and isinstance(result, HttpResponseRedirect):
+                #     return 401
                 return result
             return decorator_wrapper
             
@@ -62,20 +62,20 @@ def validate_form(form_class, extra=None):
     def decorator(f):
         def wrapper(klass, request, *args, **kwargs):
             
-            def do_validation(*form_args):
+            def do_validation(**form_kwargs):
                 if extra != None:
                     form_kwargs.update(
                         extra(klass, request)
                     )
-                form = form_class(*form_args)
+                form = form_class(**form_kwargs)
                 if form.is_valid():
                     request.form = form
                     return f(klass, request, *args, **kwargs)
                 return 400
                 
             if not hasattr(request, "FILES"): 
-                return do_validation( request.REQUEST )
-            return do_validation( request.REQUEST, request.FILES )
+                return do_validation( data=request.REQUEST )
+            return do_validation( data=request.REQUEST, files=request.FILES )
 
         return wrapper
     return decorator

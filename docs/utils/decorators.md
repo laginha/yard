@@ -23,9 +23,9 @@ class BookResource(resources.Resource):
 
 Check if user is authenticated. 
 
-Uses the *django's* `login_required` decorator thus it accepts the same arguments plus an extra one:
+<!-- Uses the *django's* `login_required` decorator thus it accepts the same arguments plus an extra one:
 
-- `redirect`: determines whether it should redirect to the login url or return a *Not Authorized* response (status 401), if the user is not authenticated. (defaults to `False`)
+- `redirect`: determines whether it should redirect to the login url or return a *Not Authorized* response (status 401), if the user is not authenticated. (defaults to `False`) -->
 
 ```python
 from yard.resources.decorators import login_required
@@ -43,9 +43,9 @@ class BookResource(resources.Resource):
 
 Check if user has the required permissions. 
 
-Uses the *django's* `permission_required` decorator thus it accepts the same arguments plus an extra one:
+<!-- Uses the *django's* `permission_required` decorator thus it accepts the same arguments plus an extra one:
 
-- `redirect`: determines whether it should redirect to the login url or return a *Not Authorized* response (status 401), if the user is not authenticated. (defaults to `False`)
+- `redirect`: determines whether it should redirect to the login url or return a *Not Authorized* response (status 401), if the user is not authenticated. (defaults to `False`) -->
 
 ```python
 from yard.resources.decorators import permission_required
