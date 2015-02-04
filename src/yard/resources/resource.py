@@ -8,65 +8,28 @@ from yard.utils import is_tuple, is_queryset, is_modelinstance, is_generator, is
 from yard.utils import is_valuesset, is_dict, is_many_related_manager
 from yard.utils.http import to_http
 from yard.resources.utils import (
-    ResourceParameters, ResourceMeta, ResourcePage, JSONbuilder, with_pagination_and_meta, model_to_fields
+    ResourceParameters, JSONbuilder, with_pagination_and_meta
 )
 from yard.resources.utils.uglify import uglify_json
 from yard.resources.utils.parameters import ResourceParameters
-from yard.resources.utils.mixins import DetailMixin, ListMixin, EditMixin, NewMixin
+from yard.resources.utils.mixins import (
+    DetailMixin, ListMixin, EditMixin, NewMixin, OptionsMixin
+)
 from yard import fields as YardFields
+     
 
-    
-class BaseResource(object):
-    '''
-    API Resource object
-    '''
-    
+class BaseResource(object): 
     @classmethod
     def get_views(cls, api):
         for each in dir(cls):
             if each.startswith('as_') and each.endswith('_view'):
                 yield getattr(cls, each)(api)
     
-    def __init__(self, api, routes, show_fields=None, index_fields=None):    
-        self.api            = api
-        self.routes         = routes
-        self.fields         = self.get_fields()
-        self.show_fields    = show_fields or self.fields
-        self.index_fields   = index_fields or self.fields
-        self.default_status = getattr(settings, 'DEFAULT_STATUS_CODE', 200)
-        self.description    = getattr(self, "description", "not provided")
-        self.uglify         = getattr(self, "uglify", False)
-        self.pagination     = self.get_resource_page()
-        self.meta           = self.get_resource_meta()
-        self.builders       = self.get_json_builders()
+    def __init__(self, **kwargs):
+        for k,v in kwargs.iteritems():
+            setattr(self, k, v)
     
-    @property
-    def json_builder_class(self):
-        return JSONbuilder
-    
-    def get_resource_page(self):
-        return ResourcePage( self.get_class_attribute('Pagination') )
-    
-    def get_resource_meta(self):
-        return ResourceMeta( self.pagination, self.get_class_attribute('Meta') )
-        
-    def get_class_attribute(self, name):
-        return getattr(self, name, type(name, (), {}))
-        
-    def get_allowed_methods(self):
-        return [k for k,v in self.routes.items() if k!="OPTIONS" and hasattr(self, v)]
-
-    def get_fields(self):
-        return self.fields if hasattr(self, "fields") else (
-            model_to_fields(self.model) if hasattr(self, "model") else {} )
-
-    def get_json_builders(self):
-        fields = [self.index_fields, self.show_fields, self.fields]
-        return {
-            id(i): self.json_builder_class(self.api, i) for i in fields if not callable(i)
-        }
-
-    def __call__(self, request, **kwargs):
+    def handle_request(self, request, **kwargs):
         '''
         Called in every request made to Resource
         '''
@@ -81,16 +44,42 @@ class BaseResource(object):
         except (ObjectDoesNotExist, IOError):
             # ObjectDoesNotExist: if return model instance does not exist
             # IOError: if return file not found
-            return HttpResponse(status=404)
-
-    def get_resource_parameters(self, request, parameters):
-        '''
-        Gets parameters from resource request
-        '''
-        resource_params = ResourceParameters( parameters )
-        for i in self.parameters.get( request ):
-            resource_params.update( i )
-        return resource_params
+            return HttpResponse(status=404)  
+    
+    def handle_show(self, request, **kwargs):
+        return self.show(request, kwargs.pop('pk'), **kwargs)
+    
+    def handle_update(self, request, **kwargs):
+        return self.update(request, kwargs.pop('pk'), **kwargs)
+    
+    def handle_destroy(self, request, **kwargs):
+        return self.destroy(request, kwargs.pop('pk'), **kwargs)
+    
+    def handle_index(self, request, **kwargs):
+        return self.index(request, **kwargs)
+    
+    def handle_create(self, request, **kwargs):
+        return self.create(request, **kwargs)
+    
+    def handle_new(self, request, **kwargs):
+        return self.new(request, **kwargs)
+        
+    def handle_edit(self, request, **kwargs):
+        return self.edit(request, **kwargs)
+        
+    def handle_options(self, request, **kwargs):
+        return self.options(request, **kwargs)
+    
+    def handle_response(self, request, response, fields, kwargs):
+        return response
+    
+        
+    
+class JsonResource(BaseResource):
+    '''
+    API Resource object
+    '''
+    json_builder_class = JSONbuilder
 
     def get_builder(self, fields):
         '''
@@ -102,7 +91,7 @@ class BaseResource(object):
         '''
         Proccess response into a JSON serializable object
         '''
-        current_fields = fields(parameters) if callable(fields) else fields
+        current_fields = fields(kwargs) if callable(fields) else fields
         status = self.default_status
         if is_tuple(response):
             status, response = response
@@ -195,29 +184,7 @@ class BaseResource(object):
     def uglify_json(self, response):
         response.update( uglify_json(response.pop('Objects')) )
         return response
-    
-    def handle_options(self, request, parameters):
-        response = self.options(request, **parameters)
-        response = self.handle_response(request, response, self.fields, parameters)
-        response['Allow'] = ','.join( self.get_allowed_methods() )
-        return response
-    
-    def options(self, request, **parameters):
-        return 200, {
-            "Index parameters": {
-                'parameters':[
-                    each.documentation for each in self.parameters.params
-                ],
-                'logic': unicode(self.parameters),
-            },
-            # "Index response fields": {
-            #     k: unicode(v) for k,v in self.index_fields.iteritems()
-            # },
-            # "Show response fields": {
-            #     k: unicode(v) for k,v in self.show_fields.iteritems()
-            # }
-        }
+        
 
-
-class Resource(BaseResource, DetailMixin, ListMixin, EditMixin, NewMixin):
+class Resource(DetailMixin, ListMixin, EditMixin, NewMixin, OptionsMixin, JsonResource):
     pass
