@@ -1,5 +1,6 @@
 from yard.forms import Form
 from yard.resources.utils.parameters import ResourceParameters
+from yard.resources.utils.preprocessor import ResourcePreprocessor
 
 
 class DetailMixin(object):
@@ -17,7 +18,10 @@ class DetailMixin(object):
         return {
             'name': 'detail',
             'path': r'/(?P<pk>[0-9]+)/?$',
-            'view': cls(api, cls.DETAIL_ROUTES,
+            'view': ResourcePreprocessor(
+                api = api, 
+                resource_class = cls,
+                routes = cls.DETAIL_ROUTES,
                 show_fields = getattr(cls, "show_fields", None),
             )
         }
@@ -58,24 +62,30 @@ class ListMixin(object):
     
     @classmethod
     def as_list_view(cls, api):
-        view = cls(api, cls.COLLECTION_ROUTES,
-            index_fields = getattr(cls, "index_fields", None),
-        )
-        view.parameters = view.get_parameters()
         return {
             'name': 'list',
             'path': r'/?$',
-            'view': view
+            'view': ResourcePreprocessor(
+                api = api, 
+                resource_class = cls,
+                routes = cls.COLLECTION_ROUTES,
+                index_fields = getattr(cls, "index_fields", None),
+            ),
         }
-    
-    def get_parameters(self):
-        parameters = Form( self.Parameters ) if hasattr(self, "Parameters") else None
-        if not parameters:
-            self.get_resource_parameters = lambda r,p: ResourceParameters( p )
-        return parameters
+
+    def get_resource_parameters(self, request, **kwargs):
+        '''
+        Gets parameters from resource request
+        '''
+        resource_params = ResourceParameters( kwargs )
+        if not self.parameters:
+            return resource_params
+        for i in self.parameters.get( request ):
+            resource_params.update( i )
+        return resource_params
 
     def handle_index(self, request, **kwargs):
-        parameters = self.get_resource_parameters( request, kwargs )
+        parameters = self.get_resource_parameters( request, **kwargs )
         response = self.index(request, parameters)
         return self.handle_response(request, response, self.index_fields, parameters)
     
@@ -94,7 +104,11 @@ class EditMixin(object):
         return {
             'name': 'edit',
             'path': r'/(?P<pk>[0-9]+)/edit/?$',
-            'view': cls(api, cls.EDIT_ROUTES)
+            'view': ResourcePreprocessor(
+                api = api, 
+                resource_class = cls,
+                routes = cls.EDIT_ROUTES,
+            )
         }
 
     def handle_edit(self, request, **kwargs):
@@ -112,9 +126,35 @@ class NewMixin(object):
         return {
             'name': 'new',
             'path': r'/new/?$',
-            'view': cls(api, cls.NEW_ROUTES)
+            'view': ResourcePreprocessor(
+                api = api, 
+                resource_class = cls,
+                routes = cls.NEW_ROUTES,
+            )
         }
         
     def handle_new(self, request, **kwargs):
         response = self.new(request, **kwargs)
         return self.handle_response(request, response, self.fields, kwargs)
+
+
+class OptionsMixin(object):
+    
+    def get_allowed_methods(self):
+        return [k for k,v in self.routes.items() if k!="OPTIONS" and hasattr(self, v)]
+    
+    def handle_options(self, request, **kwargs):
+        response = self.options(request, **kwargs)
+        response = self.handle_response(request, response, self.fields, kwargs)
+        response['Allow'] = ','.join( self.get_allowed_methods() )
+        return response
+    
+    def options(self, request, **kwargs):
+        return 200, {
+            "Index parameters": {
+                'parameters':[
+                    each.documentation for each in self.parameters.params
+                ],
+                'logic': unicode(self.parameters),
+            },
+        }
