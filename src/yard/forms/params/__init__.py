@@ -76,8 +76,7 @@ class RegexParam(Parameter):
                 required=False, default=None):
         self.compiled = re.compile(r'^%s$'%regex)
         super(RegexParam, self).__init__(description=description, alias=alias, 
-            aliases=aliases, required=required, default=default, 
-            validate=validate)
+            aliases=aliases, required=required, default=default)
             
     def validate(self, value):
         return self.compiled.match( value )
@@ -247,7 +246,7 @@ class ChoiceParam(Parameter):
         self.choices = choices
         super(ChoiceParam, self).__init__(
             description=description, alias=alias, aliases=aliases, 
-            required=required, default=default, validate=validate)
+            required=required, default=default)
             
     def validate(self, value):
         return value in self.choices
@@ -263,10 +262,10 @@ class MultipleChoiceParam(Parameter):
         self.choices = choices
         super(MultipleChoiceParam, self).__init__(
             description=description, alias=alias, aliases=aliases, 
-            required=required, default=default, validate=validate)
+            required=required, default=default)
     
     def validate(self, value):
-        return all(each in choices for each in value)
+        return all(each in self.choices for each in value)
         
     def convert(self, value):
         '''
@@ -281,14 +280,15 @@ class IpAddressParam(Parameter):
     '''
     def __init__(self, description=None, alias=None, aliases=None, 
                 required=False, default=None):
-        def validate(x):
-            try: 
-                return socket.inet_aton( x )
-            except socket.error:
-                return False 
         super(IpAddressParam, self).__init__(
             description=description, alias=alias, aliases=aliases, 
-            required=required, default=default, validate=validate)
+            required=required, default=default)
+
+    def validate(self, value):
+        try: 
+            return socket.inet_aton( value )
+        except socket.error:
+            return False
 
     def convert(self, value):
         return value
@@ -300,14 +300,15 @@ class EmailParam(Parameter):
     '''
     def __init__(self, description=None, alias=None, aliases=None, 
                 required=False, default=None):
-        def validate(x):
-            try:
-                return EmailField().clean(x)
-            except:
-                return False
         super(EmailParam, self).__init__(
             description=description, alias=alias, aliases=aliases, 
-            required=required, default=default, validate=validate)    
+            required=required, default=default)    
+
+    def validate(self, value):
+        try:
+            return EmailField().clean(value)
+        except:
+            return False
 
     def convert(self, value):
         return value

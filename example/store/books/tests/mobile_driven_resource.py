@@ -9,16 +9,17 @@ from books.models  import *
 from books.resources import AuthorResource
 import simplejson
 
+
 class TestResource(MobileDrivenResource):
     model = Book
     fields = {
         'author': fields.Link
     }
 
-    def index(self, request, params):
+    def list(self, request, params):
         return Book.objects.filter( **params )
 
-    def show(self, request, book_id):
+    def detail(self, request, book_id):
         return Book.objects.get( id=book_id )
 
 
@@ -27,13 +28,14 @@ class MobileDrivenResourceTestCase( BaseTestCase ):
     def setUp(self):
         super(MobileDrivenResourceTestCase, self).setUp()
         self.factory = RequestFactory()
-        SomeResource = TestResource
         self.api = Api()
         self.api.include('test', TestResource)
-        self.collection_resource = [i._callback for i in self.api.urlpatterns if '.list' in i.name][0]
-        self.single_resource = [i._callback for i in self.api.urlpatterns if '.detail' in i.name][0]
+        self.collection_resource = [
+            i._callback for i in self.api.urlpatterns if '.list' in i.name][0]
+        self.single_resource = [
+            i._callback for i in self.api.urlpatterns if '.detail' in i.name][0]
         
-    def test_index_method(self):
+    def test_list_method(self):
         def get_content():
             request = self.factory.get('/test/')
             response = self.collection_resource(request, **{})
@@ -49,7 +51,7 @@ class MobileDrivenResourceTestCase( BaseTestCase ):
         self.api.include('author', AuthorResource)
         assert len(get_content()['Links']) == 2
         
-    def test_show_method(self):
+    def test_detail_method(self):
         def get_content():
             request = self.factory.get('/test/1')
             response = self.single_resource(request, **{'pk':1})

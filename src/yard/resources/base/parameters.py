@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-from yard.forms.parameters.base import Parameter
+from yard.forms.params.base import Parameter
 from yard.utils import is_serializable
 
 
