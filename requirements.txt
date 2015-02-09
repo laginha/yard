@@ -1,0 +1,8 @@
+Django
+simplejson
+rstr
+django
+gpolyencode
+
+git+https://github.com/laginha/django-simple-response/
+git+https://github.com/laginha/django-key-auth/

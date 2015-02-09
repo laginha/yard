@@ -18,7 +18,7 @@ class BookResourceV2(BookResource):
     fields = ('id', 'title')
     
 class BookResourceV3(BookResource):
-    index_fields = ('id',)
+    list_fields = ('id',)
 ```    
 
 

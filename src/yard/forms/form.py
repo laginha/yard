@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 # encoding: utf-8
-from yard.utils           import is_tuple
-from yard.forms.parameter import Parameter
+from yard.utils import is_tuple
+from .parameters.base import Parameter
 
 
 class Form(object):
     '''
     Form for acceptable Resource parameters
     '''
-    
     def __init__(self, parameters):
         
         def set_names(params):

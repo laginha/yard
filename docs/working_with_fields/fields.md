@@ -148,10 +148,10 @@ class BookResource(resources.Resource):
 from yard import resources, fields
 
 class BookResource(resources.Resource):
-    index_fields = {
+    list_fields = {
         'id': fields.Integer, 
     }
-    show_fields = {
+    detail_fields = {
         'id': fields.Integer, 
         'title': fields.Unicode, 
         'author': {

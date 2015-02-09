@@ -1,7 +1,6 @@
-import simplejson
-
 ALPHABET = [chr(i) for i in range(97, 123)]
 ALPHABET_SIZE = len(ALPHABET)
+
 
 class Mapping(dict):
     def __init__(self):
@@ -23,6 +22,7 @@ class Mapping(dict):
         self[ char ] = key
         self.inverted[key] = char
         return char
+
 
 def uglify_json(json):
     def uglify(value):

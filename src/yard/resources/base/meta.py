@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
-from django.db.models    import Avg, Max, Min, Count
-from yard.exceptions     import NoMeta
-from yard.utils          import is_list, is_generator
-from yard.resources.utils.page import ResourcePage
+from django.db.models import Avg, Max, Min, Count
+from yard.exceptions import NoMeta
+from yard.utils import is_generator
 
 
 class MetaDict(dict):

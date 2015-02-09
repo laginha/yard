@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-from django.core.paginator import Paginator
-from yard.utils            import is_generator
+from yard.utils import is_generator
 
 
 class ResourcePage(object):
@@ -19,8 +18,9 @@ class ResourcePage(object):
     }
 
     def __init__(self, page=type('Pagination', (), {})):
-        for k,v in self.DEFAULTS.iteritems():
-            setattr(self, k, getattr(page,k) if hasattr(page, k) else v)
+        for key,value in self.DEFAULTS.iteritems():
+            set_value = getattr(page, key) if hasattr(page, key) else value
+            setattr(self, key, set_value)
         self.pre_select()
         
     def pre_select(self):
@@ -31,11 +31,12 @@ class ResourcePage(object):
             self.select = lambda request,resources: (resources, {})
         else:
             if 'default' in self.results_per_page:
-                self.default_number_of_resources = self.results_per_page['default'] 
+                self.default_number_of_objs = self.results_per_page['default']
             else:
-                self.default_number_of_resources = self.DEFAULTS['results_per_page']['default']
+                default = self.DEFAULTS['results_per_page']['default']
+                self.default_number_of_objs = default
             if 'parameter' not in self.results_per_page:
-                self.get_number_of_resources = lambda request: (self.default_number_of_resources, [])
+                self.get_number = lambda r: (self.default_number_of_objs, [])
             if 'limit' not in self.results_per_page:
                 self.get_limit = lambda number: number
     
@@ -44,7 +45,7 @@ class ResourcePage(object):
         Paginate the resources according to Resource.Pagination attributes
         '''
         offset, param1 = self.get_offset( request.REQUEST )
-        number, param2 = self.get_number_of_resources( request.REQUEST )
+        number, param2 = self.get_number( request.REQUEST )
         return self.paginate(resources, offset, number), dict(param1+param2)
     
     def get_limit(self, number):
@@ -52,9 +53,9 @@ class ResourcePage(object):
         Define the number of resources to return considering the default limit
         '''
         number = min(number, self.results_per_page['limit'])
-        return number if number > 0 else self.default_number_of_resources
+        return number if number > 0 else self.default_number_of_objs
     
-    def get_number_of_resources(self, request):
+    def get_number(self, request):
         '''
         Define the real number of resources to return in the pagination
         '''
@@ -63,7 +64,9 @@ class ResourcePage(object):
         if number.isdigit():
             number = self.get_limit( int(number) )
             return number, [(parameter, number)]
-        return self.default_number_of_resources, [(parameter, self.default_number_of_resources)]
+        return self.default_number_of_objs, [
+            (parameter, self.default_number_of_objs)
+        ]
     
     def get_offset(self, request):
         '''

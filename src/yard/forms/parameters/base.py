@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
-
-from yard.utils      import is_strfloat, is_strint
-from yard.exceptions import RequiredParamMissing, InvalidParameterValue, ConversionError, AndParameterException
+from yard.utils import is_strfloat, is_strint
+from yard.exceptions import (
+    RequiredParamMissing, InvalidParameterValue, 
+    ConversionError, AndParameterException,)
 import inspect
 
 
@@ -10,7 +11,8 @@ class Parameter(object):
     '''
     Parent class to all Form's parameter types
     '''    
-    def __init__(self, description='', alias=None, aliases=None, validate=None, default=None, required=False, ignore_invalids=False):
+    def __init__(self, description='', alias=None, aliases=None, validate=None,
+                default=None, required=False, ignore_invalids=False):
         self.alias           = alias
         self.aliases         = aliases
         self.validate        = validate
@@ -26,13 +28,15 @@ class Parameter(object):
     
     def __or__(self, other):
         '''
-        Called when parameter is joined with another parameter through boolean 'or'
+        Called when parameter is joined with another parameter 
+        through boolean 'or'
         '''
         return OR(other, self)
 
     def __and__(self, other):
         '''
-        Called when parameter is joined with another parameter through boolean 'and'
+        Called when parameter is joined with another parameter 
+        through boolean 'and'
         '''
         return AND(self, other)
 
@@ -100,14 +104,16 @@ class Parameter(object):
 
     def get_value_and_info(self, request):
         '''
-        Handles a normal/single param (returns value and if it is default or not)
+        Handles a normal/single param 
+        (returns value and if it is default or not)
         '''
         is_default = False
         try:
             value = self.get_value( request )
             value, is_default = self.get_default( value )
             value = self.do_validate( value )
-        except (ConversionError, InvalidParameterValue, RequiredParamMissing) as e:
+        except (ConversionError, InvalidParameterValue, 
+                RequiredParamMissing) as e:
             return {self.name: e}, is_default
         if value!=None:
             return {self: value}, is_default 
@@ -118,6 +124,7 @@ class Parameter(object):
         Handles a normal/single param (returns only value)
         '''
         value, is_default = self.get_value_and_info(request)
+        print value
         return value
 
 

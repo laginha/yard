@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-from django.contrib.gis.db import models
-import simplejson, gpolyencode
+from django.db import models
 
 
 def verify(f):
@@ -58,9 +57,6 @@ def URI(data, api):
 def Link(data, api): 
     return data.pk, api.get_link(data)
 
-@verify     
-def GeoJSON(data):
-    return simplejson.loads(data.geojson)
 
 JSON = Dict
 ForeignKey = GenericForeignKey = Unicode
@@ -74,11 +70,6 @@ def RelatedManager(data):
 def QuerySet(data): 
     return [unicode(i) for i in data]
 
-@verify
-def EncodedPolyline(data):
-    encoder = gpolyencode.GPolyEncoder()
-    return encoder.encode(data.coords)
-
 
 OBJECT_TO_JSONFIELD = {
     int: Integer,
@@ -91,14 +82,6 @@ OBJECT_TO_JSONFIELD = {
     dict: Dict,
     models.query.QuerySet: QuerySet,
     models.query.ValuesQuerySet: ValuesSet,
-    models.fields.LineStringField: GeoJSON,
-    models.fields.MultiLineStringField: GeoJSON,
-    models.fields.PointField: GeoJSON,
-    models.fields.MultiPointField: GeoJSON,
-    models.fields.PolygonField: GeoJSON,
-    models.fields.MultiPolygonField: GeoJSON,
-    models.fields.GeometryField: GeoJSON,
-    models.fields.GeometryCollectionField: GeoJSON,
 }
 
 @verify   
@@ -122,13 +105,11 @@ MODELFIELD_TO_JSONFIELD = {
     models.ImageField: File,
     models.FilePathField: FilePath,
     models.ManyToManyField: RelatedManager,
-    models.GeometryField: GeoJSON,
-    models.PointField: GeoJSON,
-    models.LineStringField: GeoJSON,
-    models.PolygonField: GeoJSON,
-    models.MultiPointField: GeoJSON,
-    models.MultiLineStringField: GeoJSON,
-    models.MultiPolygonField: GeoJSON,
 }    
 
-get_field = lambda obj: MODELFIELD_TO_JSONFIELD.get( type(obj), Unicode )
+def get_field(obj): 
+    return MODELFIELD_TO_JSONFIELD.get( type(obj), Unicode )
+
+
+SELECT_RELATED_FIELDS = [URI, Link, ForeignKey]
+PREFETCH_RELATED_FIELDS = [GenericForeignKey, RelatedManager]
