@@ -1,24 +1,26 @@
 from yard.resources.decorators import validate, resource_decorator, login_required
-from yard import forms, version, resources, fields
-from yard.apps.keyauth.decorators import key_required
+from yard import forms, fields
+from yard.version import VersionController
+from yard.resources import Resource
+from yard.resources.decorators import key_required
 from models import Book, Author
 
 
-@resource_decorator( key_required )
-class AuthorResource(resources.Resource):
+@resource_decorator( key_required() )
+class AuthorResource(Resource):
     model  = Author
     fields = {
         'name': fields.Unicode,
         'book_set': fields.RelatedManager,
     }
-    def index(self, request, params):
+    def list(self, request, params):
         return Author.objects.filter( **params )
         
-    def show(self, request, author_id):
+    def detail(self, request, author_id):
         return Author.objects.get( pk=author_id )
 
 
-class BookResource(resources.Resource):
+class BookResource(Resource):
     description = "Search books in our store."
     model  = Book
     fields = {
@@ -47,12 +49,13 @@ class BookResource(resources.Resource):
         average = (('average_pages', 'number_of_pages'),)
     
     @validate
-    #@key_required
-    def index(self, request, params):
+    # @key_required()
+    def list(self, request, params):
+        print type(params), params
         return Book.objects.filter( **params )
 
-    @key_required
-    def show(self, request, book_id):
+    @key_required()
+    def detail(self, request, book_id):
         return Book.objects.get( id=book_id )
         
     def create(self, *args, **kwargs):
@@ -67,7 +70,7 @@ class BookResourceV2(BookResource):
     }
 
 
-class BookResourceVersions(version.ResourceVersions):
+class BookResourceVersions(VersionController):
     versions = {
         '1.0': BookResource, 
         '2.0': BookResourceV2,

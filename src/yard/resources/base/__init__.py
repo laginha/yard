@@ -3,11 +3,8 @@
 from django.conf import settings
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
-from easy_response.utils.process import to_http
+from django_simple_response.utils.process import to_http
 from yard.forms import Form
-from yard.consts import (
-    DEFAULT_STATUS_CODE, JSON_OBJECTS_KEYNAME, JSON_META_KEYNAME, 
-    JSON_LINKS_KEYNAME,)
 from yard.fields import (
     SELECT_RELATED_FIELDS, PREFETCH_RELATED_FIELDS,
     get_field as get_json_field)
@@ -18,7 +15,42 @@ from .builders import JSONbuilder
 from .uglify import uglify_json
 from .meta import ResourceMeta
 from .page import ResourcePage
-from .mixins import DocumentationMixin
+
+
+class BaseResource(object):   
+    
+    @classmethod
+    def preprocess(cls, api):
+        cls.api = api
+      
+    @classmethod
+    def get_views(cls):
+        for each in dir(cls):
+            if each.startswith('as_') and each.endswith('_view'):
+                yield getattr(cls, each)()
+    
+    def __init__(self, routes):
+        self.routes = routes
+        
+    def handle_response(self, request, response, *args, **kwargs):
+        return response
+    
+    def handle_request(self, request, **kwargs):
+        '''
+        Called in every request made to Resource
+        '''
+        try:
+            if request.method not in self.routes:
+                return to_http(request, status=404)
+            method = self.routes[request.method]
+            if not hasattr(self, method):
+                # method not implemented
+                return HttpResponse(status=405)
+            return getattr(self, 'handle_'+method)(request, kwargs)
+        except (ObjectDoesNotExist, IOError):
+            # ObjectDoesNotExist: if return model instance does not exist
+            # IOError: if return file not found
+            return HttpResponse(status=404)
 
 
 def include_metadata(f):
@@ -42,14 +74,14 @@ def model_to_fields(model):
     ])
 
 
-class BaseResource(DocumentationMixin):
+class JsonResource(BaseResource):
     '''
     API Resource object
     '''
     json_builder_class = JSONbuilder
 
     @classmethod
-    def preprocess(cls, api, version_name=None):
+    def preprocess(cls, api):
 
         def get_resource_attribute(name):
             return getattr(cls, name, type(name, (), {}))
@@ -57,7 +89,9 @@ class BaseResource(DocumentationMixin):
         def get_fields():
             if hasattr(cls, "fields"):
                 return cls.fields
-            return model_to_fields(cls.model)
+            elif hasattr(cls, "model"):
+                return model_to_fields(cls.model)
+            return {}
     
         def get_resource_page():
             return ResourcePage( get_resource_attribute('Pagination') )
@@ -80,46 +114,18 @@ class BaseResource(DocumentationMixin):
             if hasattr(cls, "Parameters"):
                 return Form( cls.Parameters )
 
-        cls.api           = api
-        cls.version_name  = version_name
-        cls.fields        = get_fields()
-        cls.detail_fields = getattr(cls, "detail_fields", cls.fields)
+        cls.api            = api
+        cls.fields         = get_fields()
+        cls.detail_fields    = getattr(cls, "detail_fields", cls.fields)
         cls.list_fields   = getattr(cls, "list_fields", cls.fields)
-        cls.description   = getattr(cls, "description", "not provided")
-        cls.uglify        = getattr(cls, "uglify", False)
-        cls.pagination    = get_resource_page()
-        cls.meta          = get_resource_meta()
-        cls.builders      = get_json_builders()
-        cls.parameters    = get_parameters()
+        cls.default_status = getattr(settings, 'DEFAULT_STATUS_CODE', 200)
+        cls.description    = getattr(cls, "description", "not provided")
+        cls.uglify         = getattr(cls, "uglify", False)
+        cls.pagination     = get_resource_page()
+        cls.meta           = get_resource_meta()
+        cls.builders       = get_json_builders()
+        cls.parameters     = get_parameters()
 
-    @classmethod
-    def get_views(cls):
-        for each in dir(cls):
-            if each.startswith('as_') and each.endswith('_view'):
-                yield getattr(cls, each)()
-    
-    def __init__(self, routes):
-        self.routes = routes
-
-    @property
-    def tagname(self):
-        return self.model.__name__.lower()
-        
-    def handle_request(self, request, **kwargs):
-        '''
-        Called in every request made to Resource
-        '''
-        try:
-            if request.method not in self.routes:
-                return to_http(request, status=404)
-            method = self.routes[request.method]
-            if not hasattr(self, method):
-                return HttpResponse(status=405)
-            return getattr(self, 'handle_'+method)(request, kwargs)
-        except (ObjectDoesNotExist, IOError):
-            # ObjectDoesNotExist: if return model instance does not exist
-            # IOError: if return file not found
-            return HttpResponse(status=404)
 
     def get_builder(self, fields):
         '''
@@ -133,7 +139,7 @@ class BaseResource(DocumentationMixin):
         Proccess response into a JSON serializable object
         '''
         current_fields = fields(kwargs) if callable(fields) else fields
-        status = DEFAULT_STATUS_CODE
+        status = self.default_status
         if is_tuple(response):
             status, response = response
         if is_valuesset(response):
@@ -182,20 +188,16 @@ class BaseResource(DocumentationMixin):
         builder = self.get_builder(fields)
         response = self.serialize(resource, fields, builder, collection=False)
         if builder.links:
-            response = {
-                JSON_OBJECTS_KEYNAME: response, 
-                JSON_LINKS_KEYNAME: builder.links
-            }
+            response = {'Object': response, 'Links': builder.links}
         return response
     
     def to_json(self, objects, meta=None, links=None):
-        if meta or links:
-            result = {JSON_OBJECTS_KEYNAME: objects}
-            if meta:
-                result[JSON_META_KEYNAME] = meta
-            if links:
-                result[JSON_LINKS_KEYNAME] = links
-            return result
+        if meta and not links:
+            return {'Objects': objects, 'Meta': meta}
+        if meta and links:
+            return {'Objects': objects, 'Meta': meta, 'Links':links}
+        if not meta and links:
+            return {'Objects': objects, 'Links': links}
         return objects
         
     def paginate(self, request, resources, parameters):
@@ -244,7 +246,6 @@ class BaseResource(DocumentationMixin):
         return builder.to_json(resource, collection)
     
     def uglify_json(self, response):
-        response.update(
-            uglify_json(response.pop(JSON_OBJECTS_KEYNAME))
-        )
+        response.update( uglify_json(response.pop('Objects')) )
         return response
+

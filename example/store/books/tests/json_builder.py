@@ -2,8 +2,7 @@
 # encoding: utf-8
 from django.test.client import Client, RequestFactory
 from yard.resources import Resource
-from yard.resources.utils.preprocessor import ResourcePreprocessor
-from yard.resources.utils import model_to_fields
+from yard.resources.base import model_to_fields
 from yard.api import Api
 from yard import fields as FIELDS
 from books.tests.base import BaseTestCase
@@ -15,8 +14,9 @@ class JSONBuilderTestCase( BaseTestCase ):
     def setUp(self):
         super(JSONBuilderTestCase, self).setUp()
         self.api = Api()
-        preprocessor = ResourcePreprocessor(Resource, self.api, {})
-        self.resource = preprocessor.create_resource_instance()
+        self.resource_class = type('TestResouce', (Resource,), {})
+        self.resource_class.preprocess(self.api)
+        self.resource = self.resource_class({})
     
     def assert_json(self, objects, fields, json):
         assert len(json) == len(objects)

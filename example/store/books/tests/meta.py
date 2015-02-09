@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from django.test.client import Client, RequestFactory
-from yard.resources.utils.page import ResourcePage
-from yard.resources.utils.meta import ResourceMeta
-from yard.resources.utils.parameters import ResourceParameters
+from yard.resources.base.page import ResourcePage
+from yard.resources.base.meta import ResourceMeta
+from yard.resources.base.parameters import ResourceParameters
 from books.tests.base import BaseTestCase
 from books.models  import *
 

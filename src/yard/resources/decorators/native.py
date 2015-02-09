@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from django.shortcuts import get_object_or_404
-from django.forms import ModelForm
-from functools import wraps
 import inspect
 
 
@@ -10,7 +8,6 @@ def validate(func):
     '''
     Check if resource parameters is valid
     '''
-    @wraps(func)
     def wrapper(klass, request, params):
         if not params.is_valid():
             return 400, params.errors()
@@ -18,32 +15,33 @@ def validate(func):
     return wrapper
 
 
-def validate_form(form_class, extra=None):
+def validate_form(form_class, include_instance=True, 
+                    instance_name='instance', extra=None):
     '''
     Validate request according to given form
-    ''' 
-    def decorator(func):        
-        func.form_class = form_class
-        
-        @wraps(func)
-        def wrapper(resource, request, *args, **kwargs):
+    '''
+    def decorator(func):
+        def wrapper(klass, request, *args, **kwargs):
             
             def do_validation(form_kwargs):
                 if extra != None:
-                    form_kwargs.update( extra(resource, request) )
+                    form_kwargs.update( extra(klass, request) )
                 form = form_class(**form_kwargs)
                 if form.is_valid():
                     request.form = form
-                    return func(resource, request, *args, **kwargs)
+                    return func(klass, request, *args, **kwargs)
                 return 400
             
-            form_kwargs = {'data': request.POST}
+            form_kwargs = {'data': request.REQUEST}
             if not hasattr(request, "FILES"): 
                 form_kwargs['files'] = request.FILES
-            if issubclass(form_class, ModelForm) and args:
-                if isinstance(args[0], int):
-                    instance = get_object_or_404(model, pk=args[0])
-                    form_kwargs['instance'] = instance
+            if include_instance:
+                argspec = inspect.getargspec(form_class.__init__).args
+                if instance_name in argspec:
+                    if kwargs.get('pk', None) and hasattr(klass, model):
+                        model = klass.model
+                        obj = get_object_or_404(model, pk=kwargs['pk'])
+                        form_kwargs[instance_name] = obj
             return do_validation(form_kwargs)
 
         return wrapper
@@ -55,7 +53,6 @@ def exception_handling(exception, response):
     Handle a specific exception
     '''
     def decorator(func):
-        @wraps(func)
         def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)

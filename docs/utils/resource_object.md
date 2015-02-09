@@ -94,7 +94,7 @@ class FooResource(resources.Resource):
 ```
 
 
-### index_fields
+### list_fields
 
 Same as `fields` but for the `index` method only. It has priority over `fields`. 
 
@@ -102,11 +102,11 @@ Same as `fields` but for the `index` method only. It has priority over `fields`.
 from yard import resources
 
 class FooResource(resources.Resource):
-    index_fields  = ('id',)
+    list_fields  = ('id',)
 ```
 
 
-### show_fields
+### detail_fields
 
 Same as `fields` but for the `show` method only. It has priority over `fields`. 
 
@@ -114,7 +114,7 @@ Same as `fields` but for the `show` method only. It has priority over `fields`.
 from yard import resources
 
 class FooResource(resources.Resource):
-    show_fields  = ('id', 'bar' )
+    detail_fields  = ('id', 'bar' )
 ```
 
 

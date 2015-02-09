@@ -12,15 +12,6 @@ class NoResourceMatch(Exception):
         return "No resource found for model '%s'" %self.model
 
 
-class HttpMethodNotAllowed(Exception):
-    '''
-    def __init__(self, model):
-        self.model = model
-    
-    def __str__(self):
-        return "Http method %s not allowed." %self.method
-
-
 class RequiredParamMissing(Exception):
     '''
     For when a required resource parameter is not in request
