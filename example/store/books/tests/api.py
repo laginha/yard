@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from django.test.client import Client, RequestFactory
-from yard.resources.utils.builders import JSONbuilder
+from yard.resources.base.builders import JSONbuilder
 from yard.api import Api
 from books.tests.base import BaseTestCase
 from books.models  import *

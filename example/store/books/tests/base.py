@@ -3,7 +3,7 @@
 from django.test import TestCase
 from django.test.client import Client
 from django.contrib.auth.models import User
-from yard.apps.keyauth.models import Key
+from keyauth.models import Key
 from books.models  import *
 from datetime import date
 import json

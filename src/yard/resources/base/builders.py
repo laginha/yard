@@ -2,7 +2,7 @@
 # encoding: utf-8
 from django.core.urlresolvers import NoReverseMatch
 from yard.utils import is_related_manager, is_method, is_dict
-from yard import fields
+from yard.fields import URI, Link
 from yard.exceptions import NoResourceMatch
 
 
@@ -64,9 +64,9 @@ class JSONbuilder(object):
         if is_method( attribute ):
             attribute = attribute( *args[1:] )
         try:
-            if field_type is fields.URI:
+            if field_type is URI:
                 return {args[0]: field_type( attribute, self.api )}
-            if field_type is fields.Link:
+            if field_type is Link:
                 pk, link = field_type( attribute, self.api )
                 self.links[args[0]] = link
                 return {args[0]: pk}

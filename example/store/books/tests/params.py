@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from django.test import TestCase
-from yard.forms.params import *
+from yard.forms.parameters import *
 from yard.exceptions import InvalidParameterValue, ConversionError
 from .randomizer import Randomizer
 from datetime import datetime
