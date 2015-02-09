@@ -4,7 +4,7 @@ from yard.forms.params import (
     ChoiceParam, MultipleChoiceParam, IpAddressParam, EmailParam,
     InstanceParam, TimestampParam, CommaSeparatedValueParam, 
     CommaSeparatedIntegerParam,)
-from yard.forms.parameters.base import Parameter
+from .params.base import Parameter
 from django.contrib.gis.geos import Point
 
 

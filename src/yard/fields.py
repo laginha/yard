@@ -31,7 +31,10 @@ def String(data):
     
 @verify
 def Unicode(data):
-    return unicode(data)
+    try:
+        return unicode(data)
+    except:
+        return repr(data)
         
 @verify
 def Boolean(data):

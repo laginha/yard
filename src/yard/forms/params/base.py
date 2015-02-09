@@ -15,7 +15,8 @@ class Parameter(object):
                 default=None, required=False, ignore_invalids=False):
         self.alias           = alias
         self.aliases         = aliases
-        self.validate        = validate
+        if not hasattr(self, 'validate'):
+            self.validate    = validate
         self.default         = default
         self.required        = required
         self.ignore_invalids = ignore_invalids
@@ -124,7 +125,6 @@ class Parameter(object):
         Handles a normal/single param (returns only value)
         '''
         value, is_default = self.get_value_and_info(request)
-        print value
         return value
 
 
