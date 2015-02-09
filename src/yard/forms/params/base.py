@@ -15,7 +15,8 @@ class Parameter(object):
     def __init__(self, description='', alias=None, aliases=None, validate=None, default=None, required=False, ignore_invalids=False):
         self.alias           = alias
         self.aliases         = aliases
-        self.validate        = validate
+        if not hasattr(self, 'validate'):
+            self.validate    = validate
         self.default         = default
         self.required        = required
         self.ignore_invalids = ignore_invalids

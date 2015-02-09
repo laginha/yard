@@ -51,7 +51,6 @@ class BookResource(Resource):
     @validate
     # @key_required()
     def list(self, request, params):
-        print type(params), params
         return Book.objects.filter( **params )
 
     @key_required()

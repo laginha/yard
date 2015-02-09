@@ -2,7 +2,7 @@
 # encoding: utf-8
 from django.test import TestCase
 from yard.forms import Form
-from yard.forms.parameters.base import Parameter, Logic, AND, OR
+from yard.forms.params.base import Parameter, Logic, AND, OR
 
 A = Parameter()
 B = Parameter()

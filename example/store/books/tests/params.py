@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from django.test import TestCase
-from yard.forms.parameters import *
+try:
+    from yard.gis.params import *
+    HAS_GIS_SUPPORT = True
+except ImportError:
+    from yard.forms.params import *
+    HAS_GIS_SUPPORT = False
+
 from yard.exceptions import InvalidParameterValue, ConversionError
 from .randomizer import Randomizer
 from datetime import datetime
@@ -234,13 +240,14 @@ class MultipleChoiceParamTestCase(TestCase):
         assert fail_validation(p, [RANDOM.string(), RANDOM.string()])
 
 
-class PointParamTestCase(TestCase):
-
-    def test_convert(self):
-        p = PointParam()
-        assert p.convert('1,1.1')
-        assert fail_conversion(p, '1.1')
-        assert fail_conversion(p, '190,190')
+if HAS_GIS_SUPPORT:
+    
+    class PointParamTestCase(TestCase):
+        def test_convert(self):
+            p = PointParam()
+            assert p.convert('1,1.1')
+            assert fail_conversion(p, '1.1')
+            assert fail_conversion(p, '190,190')
 
 
 class IpAddressParamTestCase(TestCase):

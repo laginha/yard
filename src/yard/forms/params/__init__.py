@@ -103,12 +103,9 @@ class RegexParam(Parameter):
     '''
     def __init__(self, regex, description=None, alias=None, aliases=None, 
                 required=False, default=None):
-        # self.regex = r'^%s$'%regex
-        self.regex = regex
-        self.compiled = re.compile(self.regex)
-        super(RegexParam, self).__init__(
-            description=description, alias=alias, aliases=aliases, 
-            required=required, default=default)
+        self.compiled = re.compile(r'^%s$'%regex)
+        super(RegexParam, self).__init__(description=description, alias=alias, 
+            aliases=aliases, required=required, default=default)
             
     def validate(self, value):
         return self.compiled.match( value )
@@ -321,14 +318,8 @@ class MultipleChoiceParam(Parameter):
         self.sep = sep
         self.choices = choices
         super(MultipleChoiceParam, self).__init__(
-             description=description, alias=alias, 
-            aliases=aliases, required=required, default=default)
-    
-    def get_documentation(self):
-        result = super(MultipleChoiceParam, self).get_documentation()
-        result['pattern'] = r'(.*%s.*)+' %self.seq
-        result['items'] = {'type': 'string'}
-        return result
+            description=description, alias=alias, aliases=aliases, 
+            required=required, default=default)
     
     def validate(self, value):
         return all(each in self.choices for each in value)
@@ -350,11 +341,6 @@ class IpAddressParam(Parameter):
             description=description, alias=alias, aliases=aliases, 
             required=required, default=default)
 
-    def get_documentation(self):
-        result = super(IpAddressParam, self).get_documentation()
-        result['pattern'] = r'\d+\.\d+\.\d+\.\d+'
-        return result
-
     def validate(self, value):
         try: 
             return socket.inet_aton( value )
@@ -369,21 +355,16 @@ class EmailParam(Parameter):
     '''
     Parameter for E-mail values
     '''
-    def __init__(self, description=None, alias=None, 
-                aliases=None, required=False, default=None):
+    def __init__(self, description=None, alias=None, aliases=None, 
+                required=False, default=None):
         super(EmailParam, self).__init__(
             description=description, alias=alias, aliases=aliases, 
             required=required, default=default)    
 
-    def get_documentation(self):
-        result = super(IpAddressParam, self).get_documentation()
-        result['pattern'] = r'.+@.+'
-        return result
-
     def validate(self, value):
         try:
             return EmailField().clean(value)
-        except ValidationError:
+        except:
             return False
 
     def convert(self, value):
