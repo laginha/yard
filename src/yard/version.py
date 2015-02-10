@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from yard.exceptions import NoDefaultVersion
+from yard.consts import RESOURCE_VERSION_RE
 import re
 
 
@@ -11,7 +12,7 @@ class Metaclass(type):
 
 class VersionController(object):
     __metaclass__ = Metaclass
-    re_version = re.compile(r'.*version=(.*)')
+    re_version = re.compile( RESOURCE_VERSION_RE )
     
     @classmethod
     def preprocess(cls, api):
@@ -41,7 +42,6 @@ class VersionController(object):
         def dispatch(resource):
             return resource(self.routes).handle_request(request, **kwargs)
         
-        http_accept = request.META.get('HTTP_ACCEPT', '')
         requested_version = self.get_version( request )
         if requested_version in self.version_to_resource:
             return dispatch( self.version_to_resource[requested_version] )
