@@ -128,7 +128,7 @@ class OptionsMixin(object):
     
     def options(self, request, **kwargs):
         return 200, {
-            "Index parameters": {
+            "List parameters": {
                 'parameters':[
                     each.documentation for each in self.parameters.params
                 ],
