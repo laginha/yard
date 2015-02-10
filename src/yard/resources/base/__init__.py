@@ -5,6 +5,9 @@ from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django_simple_response.utils.process import to_http
 from yard.forms import Form
+from yard.consts import (
+    DEFAULT_STATUS_CODE, JSON_OBJECTS_KEYNAME, 
+    JSON_META_KEYNAME, JSON_LINKS_KEYNAME,)
 from yard.fields import (
     SELECT_RELATED_FIELDS, PREFETCH_RELATED_FIELDS,
     get_field as get_json_field)
@@ -116,9 +119,8 @@ class JsonResource(BaseResource):
 
         cls.api            = api
         cls.fields         = get_fields()
-        cls.detail_fields    = getattr(cls, "detail_fields", cls.fields)
-        cls.list_fields   = getattr(cls, "list_fields", cls.fields)
-        cls.default_status = getattr(settings, 'DEFAULT_STATUS_CODE', 200)
+        cls.detail_fields  = getattr(cls, "detail_fields", cls.fields)
+        cls.list_fields    = getattr(cls, "list_fields", cls.fields)
         cls.description    = getattr(cls, "description", "not provided")
         cls.uglify         = getattr(cls, "uglify", False)
         cls.pagination     = get_resource_page()
@@ -139,7 +141,7 @@ class JsonResource(BaseResource):
         Proccess response into a JSON serializable object
         '''
         current_fields = fields(kwargs) if callable(fields) else fields
-        status = self.default_status
+        status = DEFAULT_STATUS_CODE
         if is_tuple(response):
             status, response = response
         if is_valuesset(response):
@@ -188,16 +190,20 @@ class JsonResource(BaseResource):
         builder = self.get_builder(fields)
         response = self.serialize(resource, fields, builder, collection=False)
         if builder.links:
-            response = {'Object': response, 'Links': builder.links}
+            response = {
+                JSON_OBJECTS_KEYNAME: response, 
+                JSON_LINKS_KEYNAME: builder.links
+            }
         return response
     
     def to_json(self, objects, meta=None, links=None):
-        if meta and not links:
-            return {'Objects': objects, 'Meta': meta}
-        if meta and links:
-            return {'Objects': objects, 'Meta': meta, 'Links':links}
-        if not meta and links:
-            return {'Objects': objects, 'Links': links}
+        if meta or links:
+            result = {JSON_OBJECTS_KEYNAME: objects}
+            if meta:
+                result[JSON_META_KEYNAME] = meta
+            if links
+                result[JSON_LINKS_KEYNAME] = links
+            return result
         return objects
         
     def paginate(self, request, resources, parameters):
@@ -246,6 +252,8 @@ class JsonResource(BaseResource):
         return builder.to_json(resource, collection)
     
     def uglify_json(self, response):
-        response.update( uglify_json(response.pop('Objects')) )
+        response.update(
+            uglify_json(response.pop(JSON_OBJECTS_KEYNAME))
+        )
         return response
 

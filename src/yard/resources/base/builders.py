@@ -4,6 +4,7 @@ from django.core.urlresolvers import NoReverseMatch
 from yard.utils import is_related_manager, is_method, is_dict
 from yard.fields import URI, Link
 from yard.exceptions import NoResourceMatch
+from yard.consts import RESOURCE_URI_KEYNAME, RESOURCE_PK_KEYNAME
 
 
 class JSONbuilder(object):
@@ -35,7 +36,7 @@ class JSONbuilder(object):
         '''
         init JSON for the resource
         '''
-        return {'resource_uri': self.api.get_uri(resource)}
+        return {RESOURCE_URI_KEYNAME: self.api.get_uri(resource)}
 
     def handle_field(self, resource, key, value):
         '''
@@ -84,4 +85,4 @@ class JSONbuilderForMobile(JSONbuilder):
         init JSON for the resource for mobile-driven response 
         '''
         self.links[resource.__class__.__name__] = self.api.get_link( resource )
-        return {'pk': resource.pk}
+        return {RESOURCE_PK_KEYNAME: resource.pk}
