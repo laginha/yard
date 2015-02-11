@@ -12,7 +12,9 @@ class Parameter(object):
     '''
     Parent class to all Form's parameter types
     '''    
-    def __init__(self, description='', alias=None, aliases=None, validate=None, default=None, required=False, ignore_invalids=False):
+    def __init__(self, description='', help_text='', alias=None, aliases=None,
+                 validate=None, default=None, required=False, 
+                 ignore_invalids=False):
         self.alias           = alias
         self.aliases         = aliases
         if not hasattr(self, 'validate'):
@@ -22,10 +24,10 @@ class Parameter(object):
         self.ignore_invalids = ignore_invalids
         self.name            = None
         self.description     = description
-        self.type            = self.__class__.__name__.split('Param')[0]
+        self.help_text       = help_text
     
     def __str__(self):
-        return self.name if self.name else self.type
+        return self.name if self.name else self.typename
     
     def __or__(self, other):
         '''
@@ -41,27 +43,23 @@ class Parameter(object):
         '''
         return AND(self, other)
         
-    def get_documentation(self):
-        def get_default():
-            if self.default:
-                if callable(self.default):
-                    if not inspect.getargspec(self.default).args:
-                        return self.default()
-                return self.default
-            
-        return build_swagger_parameter(
-            location = 'query', name = self.name, typename = self.typename,
-            description = self.description, required = self.required,
-            default = get_default()
-        )
+    @property
+    def typename(self):
+        return self.__class__.__name__.split('Param')[0].lower()
 
     @property
     def documentation(self):
-        return {
+        result = {
+            'in': 'query',
             'name': self.name,
-            'type': self.type,
+            'type': self.typename,
             'description': self.description,
+            'requred': self.required,
+            'help_text': self.help_text
         }
+        if not callable(self.default):
+            result['default'] = self.default
+        return result
 
     def convert(self, value):
         '''

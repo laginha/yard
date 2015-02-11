@@ -30,6 +30,10 @@ class VersionController(object):
     def __init__(self, routes):
         self.routes = routes
 
+    def full_documentation(self):
+        resource = self.versions[self.default](self.routes)
+        return resource.full_documentation()
+
     def get_version(self, request):
         http_accept = request.META.get('HTTP_ACCEPT', '')
         match = self.re_version.match( http_accept )

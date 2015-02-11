@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from django.conf.urls import patterns, include, url
-from django.views.decorators.csrf import csrf_exempt
 from django.core.urlresolvers import reverse
 from django_simple_response.http import JsonResponse
-from yard.exceptions import NoResourceMatch
+from .exceptions import NoResourceMatch
+from .consts import SWAGGER_INFO
 import re
 
 
@@ -21,7 +21,7 @@ class Api(object):
         if self.discoverable:
             self.list_of_urlpatterns.append(
                 url(self.path+"$", self.discover_view))
-        self.discoverable_response = None
+        self.discoverable_paths = None
 
     @property
     def urlpatterns(self):
@@ -35,19 +35,29 @@ class Api(object):
         Include url pattern for a given Resource
         '''
         
-        def launcher(resource_class, routes):
-            def wrapper(*args, **kwargs):
-                resource_class(routes)
-                return resource_class(routes).handle_request(*args, **kwargs)
-            return wrapper
+        class Dispatcher(object):
+            def __init__(self, resource_class, routes):
+                self.resource_class = resource_class
+                self.routes = routes
+                
+            def __call__(self, *args, **kwargs):
+                resource_instance = self.resource_class(self.routes)
+                return resource_instance.handle_request(*args, **kwargs)
+        
+            def full_documentation(self):
+                resource_instance = self.resource_class(self.routes)
+                return resource_instance.full_documentation()
         
         resource_class.preprocess(self)
         for info in resource_class.get_views():
+            items = info['routes'].iteritems()
+            if not any(hasattr(resource_class, v) for k,v in items):
+                continue
             viewname = "%s.%s" %(name or resource_class.__name__, info['name'])
             self.list_of_urlpatterns.append(
                 url(
                     self.path + resource_path + info['path'], 
-                    csrf_exempt( launcher(resource_class, info['routes']) ),
+                    Dispatcher(resource_class, info['routes']),
                     name = viewname,
                 )
             )
@@ -70,12 +80,15 @@ class Api(object):
             name = self.model_to_urlname[ modelinstance.__class__ ]
             return reverse( name, kwargs={'pk':modelinstance.pk} )
         raise NoResourceMatch( modelinstance.__class__ )
+    
+    def clean_pattern(self, pattern, sub='{pk}'):
+        pattern = re.sub(r'\(\?P<(.+)>.+\)', sub, pattern)
+        return re.sub(r'\?|\$|\^', '', pattern)
         
     def get_link(self, modelinstance):
         '''
         GET the to-fill-in-URL link
         '''
-
         def get_path_by_name(urlpatterns, name):
             for entry in urlpatterns:
                 if hasattr(entry, 'url_patterns'):
@@ -88,40 +101,42 @@ class Api(object):
         if modelinstance.__class__ in self.model_to_urlname:
             name = self.model_to_urlname[ modelinstance.__class__ ]
             path = get_path_by_name(self.list_of_urlpatterns, name)
-            path = re.sub(r'\(\?P<(.+)>.+\)', "%s", path)
-            return re.sub(r'\?|\$|\^', '', path)
+            return self.clean_pattern(path, sub="%s")
         raise NoResourceMatch( modelinstance.__class__ )
 
     def discover_view(self, request):
         '''
         Callback to return discoverable response from this Api object
         '''
-        if self.discoverable_response == None:
-            self.discoverable_response = self.get_discoverable_response()
-        return JsonResponse(
-            content=self.discoverable_response, context=request)
+        if self.discoverable_paths == None:
+            self.discoverable_paths = self.get_discoverable_paths()
+        content = {
+            # 'swagger': "2.0",
+            'info': SWAGGER_INFO,
+            'host': request.get_host(),
+            'basePath': request.path,
+            'schemes': [request.scheme],
+            'paths': self.discoverable_paths
+        }
+        return JsonResponse(content=content, context=request)
 
-    def get_discoverable_response(self):
+    def get_discoverable_paths(self):
         '''
         JSON response with the discoveble Resources from this Api object
         '''
         def get_entry_paths(urllist, lambda_):
-            pathlist = []
+            pathlist = {}
             for entry in urllist:
-                regex = r'\?|\$|\^|\(|P|\)|<.*>'
-                entry.clean_pattern = re.sub( regex, '', entry.regex.pattern )
+                entry.clean_pattern = self.clean_pattern( entry.regex.pattern )
                 if hasattr(entry, 'url_patterns'):
                     for each in get_entry_paths( entry.url_patterns, lambda_ ):
                         pathlist.append( entry.clean_pattern + each )
                 elif not entry.clean_pattern:
                     continue
                 else:
-                    pathlist.append( lambda_(entry) )
+                    pathlist.update( lambda_(entry) )
             return pathlist
         
-        return {
-            "Resources": get_entry_paths(self.list_of_urlpatterns, lambda entry: {
-                "uri": entry.clean_pattern,
-                "description": entry._callback.__dict__["description"]
-            })
-        }    
+        return get_entry_paths(self.list_of_urlpatterns, lambda entry: {
+            entry.clean_pattern: entry._callback.full_documentation()
+        })
