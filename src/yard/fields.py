@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from django.db import models
+from functools import wraps
 
 
 def verify(f):
+    @wraps(f)
     def wrapper(data, *args):
         return f(data, *args) if data else None
     return wrapper
