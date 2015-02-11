@@ -6,8 +6,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from django_simple_response.utils.process import to_http
 from yard.forms import Form
 from yard.consts import (
-    DEFAULT_STATUS_CODE, JSON_OBJECTS_KEYNAME, 
-    JSON_META_KEYNAME, JSON_LINKS_KEYNAME,)
+    DEFAULT_STATUS_CODE, JSON_OBJECTS_KEYNAME, JSON_META_KEYNAME, 
+    JSON_LINKS_KEYNAME, DEFAULT_SWAGGER_RESPONSES, ALL_SWAGGER_RESPONSES, 
+    SWAGGER_CONTENT_TYPES,)
 from yard.fields import (
     SELECT_RELATED_FIELDS, PREFETCH_RELATED_FIELDS,
     get_field as get_json_field)
@@ -18,42 +19,7 @@ from .builders import JSONbuilder
 from .uglify import uglify_json
 from .meta import ResourceMeta
 from .page import ResourcePage
-
-
-class BaseResource(object):   
-    
-    @classmethod
-    def preprocess(cls, api):
-        cls.api = api
-      
-    @classmethod
-    def get_views(cls):
-        for each in dir(cls):
-            if each.startswith('as_') and each.endswith('_view'):
-                yield getattr(cls, each)()
-    
-    def __init__(self, routes):
-        self.routes = routes
-        
-    def handle_response(self, request, response, *args, **kwargs):
-        return response
-    
-    def handle_request(self, request, **kwargs):
-        '''
-        Called in every request made to Resource
-        '''
-        try:
-            if request.method not in self.routes:
-                return to_http(request, status=404)
-            method = self.routes[request.method]
-            if not hasattr(self, method):
-                # method not implemented
-                return HttpResponse(status=405)
-            return getattr(self, 'handle_'+method)(request, kwargs)
-        except (ObjectDoesNotExist, IOError):
-            # ObjectDoesNotExist: if return model instance does not exist
-            # IOError: if return file not found
-            return HttpResponse(status=404)
+from .mixins import OptionsMixin
 
 
 def include_metadata(f):
@@ -77,7 +43,7 @@ def model_to_fields(model):
     ])
 
 
-class JsonResource(BaseResource):
+class BaseResource(OptionsMixin):
     '''
     API Resource object
     '''
@@ -127,6 +93,32 @@ class JsonResource(BaseResource):
         cls.meta           = get_resource_meta()
         cls.builders       = get_json_builders()
         cls.parameters     = get_parameters()
+
+    @classmethod
+    def get_views(cls):
+        for each in dir(cls):
+            if each.startswith('as_') and each.endswith('_view'):
+                yield getattr(cls, each)()
+    
+    def __init__(self, routes):
+        self.routes = routes
+        
+    def handle_request(self, request, **kwargs):
+        '''
+        Called in every request made to Resource
+        '''
+        try:
+            if request.method not in self.routes:
+                return to_http(request, status=404)
+            method = self.routes[request.method]
+            if not hasattr(self, method):
+                # method not implemented
+                return HttpResponse(status=405)
+            return getattr(self, 'handle_'+method)(request, kwargs)
+        except (ObjectDoesNotExist, IOError):
+            # ObjectDoesNotExist: if return model instance does not exist
+            # IOError: if return file not found
+            return HttpResponse(status=404)
 
 
     def get_builder(self, fields):
@@ -201,7 +193,7 @@ class JsonResource(BaseResource):
             result = {JSON_OBJECTS_KEYNAME: objects}
             if meta:
                 result[JSON_META_KEYNAME] = meta
-            if links
+            if links:
                 result[JSON_LINKS_KEYNAME] = links
             return result
         return objects
@@ -256,4 +248,3 @@ class JsonResource(BaseResource):
             uglify_json(response.pop(JSON_OBJECTS_KEYNAME))
         )
         return response
-
