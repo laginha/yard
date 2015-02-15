@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import (
     permission_required as original_permission_required,
     login_required as original_login_required,)
 from keyauth.decorators import key_required as original_key_required
+from functools import wraps
 
 
 class DjangoToYardDecorator(object):
@@ -15,6 +16,7 @@ class DjangoToYardDecorator(object):
     
     def __call__(self, *args, **kwargs):
         def decorator(func):
+            @wraps(func)
             def wrapper(klass, request, *rargs, **rkwargs):
                 def func_wrapper(request, *a, **k):
                     return func(klass, request, *rargs, **rkwargs)
