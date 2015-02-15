@@ -1,79 +1,59 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from django.db import models
-from functools import wraps
 
 
-def verify(f):
-    @wraps(f)
-    def wrapper(data, *args):
-        return f(data, *args) if data else None
-    return wrapper
-
-
-@verify
-def Integer(data):
-    return int(data)
+class JsonField(object):
+    def __init__(self, typename, converter=None):
+        self.typename = typename
+        if not converter:
+            self.converter = lambda data: str(data)
+        self.converter = converter
     
-@verify
-def Float(data):
-    return float(data)
+    def get_documentation(self):
+        json = {'type': self.typename}
+        if self.typename == 'array':
+            json['items'] = {'type': 'string'}
+        return json
+    
+    def __call__(self, data):
+        if data:
+            return self.converter(data)
 
-@verify
-def List(data):
-    return list(data)
-    
-@verify
-def Dict(data):
-    return dict(data)
-    
-@verify
-def String(data):
-    return str(data)
-    
-@verify
-def Unicode(data):
+
+Integer = JsonField('integer', lambda data: int(data))
+Float = JsonField('number', lambda data: float(data))
+String = JsonField('string', lambda data: str(data))
+Boolean = JsonField('boolean', lambda data: bool(data))
+File = JsonField('string', lambda data: data.url)
+FilePath = JsonField('boolean', lambda data: data.path)
+QuerySet = JsonField('array', lambda data: [unicode(i) for i in data])
+ValuesSet = List = JsonField('array', lambda data: list(data))
+JSON = Dict = JsonField('string', lambda data: list(data))
+RelatedManager = JsonField('array', lambda data: [unicode(i) for i in data.all()])
+CommaSeparatedValue = JsonField('string', lambda data: [i for i in data.split(',')])
+
+
+def unicode_converter(data):
     try:
         return unicode(data)
-    except:
+    except StopIteration:
         return repr(data)
-        
-@verify
-def Boolean(data):
-    return bool(data)
-            
-@verify
-def CommaSeparatedValue(data):
-    return lambda data: [i for i in data.split(',')]
 
-@verify
-def File(data): 
-    return data.url
-    
-@verify    
-def FilePath(data): 
-    return data.path
-    
-@verify   
-def URI(data, api): 
+Unicode = JsonField('string',  unicode_converter)
+ForeignKey = GenericForeignKey = Unicode
+
+
+def link_converter(data, api):
+    return data.pk, api.get_link(data) 
+
+Link = JsonField('boolean', link_converter)
+
+
+def uri_converter(data, api):
     return api.get_uri(data)
 
-@verify   
-def Link(data, api): 
-    return data.pk, api.get_link(data)
-
-
-JSON = Dict
-ForeignKey = GenericForeignKey = Unicode
-ValuesSet = List
-
-@verify  
-def RelatedManager(data): 
-    return [unicode(i) for i in data.all()]
-    
-@verify   
-def QuerySet(data): 
-    return [unicode(i) for i in data]
+URI = JsonField('boolean', uri_converter)
 
 
 OBJECT_TO_JSONFIELD = {
@@ -88,10 +68,11 @@ OBJECT_TO_JSONFIELD = {
     models.query.QuerySet: QuerySet,
     models.query.ValuesQuerySet: ValuesSet,
 }
-
-@verify   
-def Auto(data):
+   
+def auto_converter(data):
     return OBJECT_TO_JSONFIELD.get( type(data), Unicode )(data)
+
+Auto = JsonField('string', auto_converter)
 
 
 MODELFIELD_TO_JSONFIELD = {

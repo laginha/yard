@@ -1,23 +1,22 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from yard.fields import (
-    Integer, Float, List, Dict, String, Unicode, Boolean, CommaSeparatedValue,
-    File, FilePath, URI, Link, JSON, ForeignKey, GenericForeignKey, ValuesSet,
-    RelatedManager, QuerySet, OBJECT_TO_JSONFIELD, Auto, 
-    MODELFIELD_TO_JSONFIELD, get_field,)
+    JsonField, Integer, Float, List, Dict, String, Unicode, Boolean, 
+    CommaSeparatedValue, File, FilePath, URI, Link, JSON, ForeignKey, 
+    GenericForeignKey, ValuesSet, RelatedManager, QuerySet, OBJECT_TO_JSONFIELD, 
+    Auto, MODELFIELD_TO_JSONFIELD, get_field,)
 from django.contrib.gis.db import models
 import simplejson
 import gpolyencode
 
 
-@verify     
-def GeoJSON(data):
-    return simplejson.loads(data.geojson)
-    
-@verify
-def EncodedPolyline(data):
+def encoded_polyline_converter(data):
     encoder = gpolyencode.GPolyEncoder()
     return encoder.encode(data.coords)
+
+GeoJson = JsonField('string', lambda data: simplejson.loads(data.geojson))
+EncodedPolyline = JsonField('string', encoded_polyline_converter)
+
 
 OBJECT_TO_JSONFIELD.update({
     models.fields.LineStringField: GeoJSON,

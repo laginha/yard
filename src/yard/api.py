@@ -4,7 +4,7 @@ from django.conf.urls import patterns, include, url
 from django.core.urlresolvers import reverse
 from django_simple_response.http import JsonResponse
 from .exceptions import NoResourceMatch
-from .consts import SWAGGER_INFO
+from .utils.swagger import build_swagger_object
 import re
 
 
@@ -20,7 +20,8 @@ class Api(object):
         self.discoverable = discover
         if self.discoverable:
             self.list_of_urlpatterns.append(
-                url(self.path+"$", self.discover_view))
+                url(self.path+r'$', self.discover_view, name="api_documentation")
+            )
         self.discoverable_paths = None
 
     @property
@@ -44,9 +45,9 @@ class Api(object):
                 resource_instance = self.resource_class(self.routes)
                 return resource_instance.handle_request(*args, **kwargs)
         
-            def full_documentation(self):
+            def get_documentation(self):
                 resource_instance = self.resource_class(self.routes)
-                return resource_instance.full_documentation()
+                return resource_instance.get_documentation()
         
         resource_class.preprocess(self)
         for info in resource_class.get_views():
@@ -110,14 +111,7 @@ class Api(object):
         '''
         if self.discoverable_paths == None:
             self.discoverable_paths = self.get_discoverable_paths()
-        content = {
-            # 'swagger': "2.0",
-            'info': SWAGGER_INFO,
-            'host': request.get_host(),
-            'basePath': request.path,
-            'schemes': [request.scheme],
-            'paths': self.discoverable_paths
-        }
+        content = build_swagger_object(request, paths=self.discoverable_paths)
         return JsonResponse(content=content, context=request)
 
     def get_discoverable_paths(self):
@@ -134,9 +128,11 @@ class Api(object):
                 elif not entry.clean_pattern:
                     continue
                 else:
+                    if not entry.clean_pattern.startswith('/'):
+                        entry.clean_pattern = '/' + entry.clean_pattern
                     pathlist.update( lambda_(entry) )
             return pathlist
         
         return get_entry_paths(self.list_of_urlpatterns, lambda entry: {
-            entry.clean_pattern: entry._callback.full_documentation()
+            entry.clean_pattern: entry._callback.get_documentation()
         })

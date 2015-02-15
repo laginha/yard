@@ -1,9 +1,11 @@
-from yard.resources.decorators import validate, resource_decorator, login_required
+from yard.resources.decorators import (
+    validate, validate_form,resource_decorator, login_required)
 from yard import forms, fields
 from yard.version import VersionController
 from yard.resources import Resource
 from yard.resources.decorators import key_required
-from models import Book, Author
+from .models import Book, Author
+from .forms import CreateBook
 
 
 @resource_decorator( key_required() )
@@ -41,8 +43,9 @@ class BookResource(Resource):
         genre  = forms.CharParam( alias='genres' )
         author = forms.CharParam( alias='author__id' )
         house  = forms.CharParam( alias='publishing_house__id' ) 
+        datetime = forms.DateTimeParam()
 
-        __logic__ = year, title, genre & (author|house)    
+        __logic__ = year, title, genre & (author|house), datetime  
     
     class Meta:
         maximum = (('longest_title', 'title'),)
@@ -56,9 +59,17 @@ class BookResource(Resource):
     @key_required()
     def detail(self, request, book_id):
         return Book.objects.get( id=book_id )
-        
+    
+    @validate_form(CreateBook)    
     def create(self, *args, **kwargs):
         return 401
+    
+    @validate_form(CreateBook)    
+    def update(self, *args, **kwargs):
+        return 405
+
+    def edit(self, *args, **kwargs):
+        return 405
 
 
 class BookResourceV2(BookResource):
