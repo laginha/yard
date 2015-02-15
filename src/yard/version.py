@@ -17,22 +17,20 @@ class VersionController(object):
     @classmethod
     def preprocess(cls, api):
         cls.api = api
-        cls.version_to_resource = {}
-        for version_name, resource in cls.versions.items():
-            resource.preprocess(cls.api)
-            cls.version_to_resource[ version_name ] = resource
         if hasattr(cls, 'default'):
-            cls.default_resource = cls.version_to_resource[ cls.default ]
+            cls.default_resource = cls.versions[ cls.default ]
             cls.description = cls.default_resource.description
         else:
             raise NoDefaultVersion()
+        for version_name, resource in cls.versions.items():
+            resource.preprocess(cls.api, version_name=version_name)
 
     def __init__(self, routes):
         self.routes = routes
 
-    def full_documentation(self):
+    def get_documentation(self):
         resource = self.versions[self.default](self.routes)
-        return resource.full_documentation()
+        return resource.get_documentation()
 
     def get_version(self, request):
         http_accept = request.META.get('HTTP_ACCEPT', '')
@@ -47,12 +45,12 @@ class VersionController(object):
             return resource(self.routes).handle_request(request, **kwargs)
         
         requested_version = self.get_version( request )
-        if requested_version in self.version_to_resource:
-            return dispatch( self.version_to_resource[requested_version] )
+        if requested_version in self.versions:
+            return dispatch( self.versions[requested_version] )
         elif hasattr(self, requested_version):
             alias_version = getattr(self, requested_version)
-            if alias_version in self.version_to_resource:
-                return dispatch( self.version_to_resource[alias_version] )
+            if alias_version in self.versions:
+                return dispatch( self.versions[alias_version] )
         return dispatch( self.default_resource )
 
                 

@@ -7,8 +7,7 @@ from django_simple_response.utils.process import to_http
 from yard.forms import Form
 from yard.consts import (
     DEFAULT_STATUS_CODE, JSON_OBJECTS_KEYNAME, JSON_META_KEYNAME, 
-    JSON_LINKS_KEYNAME, DEFAULT_SWAGGER_RESPONSES, ALL_SWAGGER_RESPONSES, 
-    SWAGGER_CONTENT_TYPES,)
+    JSON_LINKS_KEYNAME,)
 from yard.fields import (
     SELECT_RELATED_FIELDS, PREFETCH_RELATED_FIELDS,
     get_field as get_json_field)
@@ -19,7 +18,7 @@ from .builders import JSONbuilder
 from .uglify import uglify_json
 from .meta import ResourceMeta
 from .page import ResourcePage
-from .mixins import OptionsMixin
+from .mixins import DocumentationMixin
 
 
 def include_metadata(f):
@@ -43,14 +42,14 @@ def model_to_fields(model):
     ])
 
 
-class BaseResource(OptionsMixin):
+class BaseResource(DocumentationMixin):
     '''
     API Resource object
     '''
     json_builder_class = JSONbuilder
 
     @classmethod
-    def preprocess(cls, api):
+    def preprocess(cls, api, version_name=None):
 
         def get_resource_attribute(name):
             return getattr(cls, name, type(name, (), {}))
@@ -58,9 +57,7 @@ class BaseResource(OptionsMixin):
         def get_fields():
             if hasattr(cls, "fields"):
                 return cls.fields
-            elif hasattr(cls, "model"):
-                return model_to_fields(cls.model)
-            return {}
+            return model_to_fields(cls.model)
     
         def get_resource_page():
             return ResourcePage( get_resource_attribute('Pagination') )
@@ -83,16 +80,17 @@ class BaseResource(OptionsMixin):
             if hasattr(cls, "Parameters"):
                 return Form( cls.Parameters )
 
-        cls.api            = api
-        cls.fields         = get_fields()
-        cls.detail_fields  = getattr(cls, "detail_fields", cls.fields)
-        cls.list_fields    = getattr(cls, "list_fields", cls.fields)
-        cls.description    = getattr(cls, "description", "not provided")
-        cls.uglify         = getattr(cls, "uglify", False)
-        cls.pagination     = get_resource_page()
-        cls.meta           = get_resource_meta()
-        cls.builders       = get_json_builders()
-        cls.parameters     = get_parameters()
+        cls.api           = api
+        cls.version_name  = version_name
+        cls.fields        = get_fields()
+        cls.detail_fields = getattr(cls, "detail_fields", cls.fields)
+        cls.list_fields   = getattr(cls, "list_fields", cls.fields)
+        cls.description   = getattr(cls, "description", "not provided")
+        cls.uglify        = getattr(cls, "uglify", False)
+        cls.pagination    = get_resource_page()
+        cls.meta          = get_resource_meta()
+        cls.builders      = get_json_builders()
+        cls.parameters    = get_parameters()
 
     @classmethod
     def get_views(cls):
@@ -102,6 +100,10 @@ class BaseResource(OptionsMixin):
     
     def __init__(self, routes):
         self.routes = routes
+    
+    @property
+    def tagname(self):
+        return self.model.__name__.lower()
         
     def handle_request(self, request, **kwargs):
         '''
@@ -112,14 +114,12 @@ class BaseResource(OptionsMixin):
                 return to_http(request, status=404)
             method = self.routes[request.method]
             if not hasattr(self, method):
-                # method not implemented
                 return HttpResponse(status=405)
             return getattr(self, 'handle_'+method)(request, kwargs)
         except (ObjectDoesNotExist, IOError):
             # ObjectDoesNotExist: if return model instance does not exist
             # IOError: if return file not found
             return HttpResponse(status=404)
-
 
     def get_builder(self, fields):
         '''

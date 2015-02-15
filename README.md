@@ -12,7 +12,7 @@ from yard import resources, forms, fields
 from models import Book
 
 class BooksResource(resources.Resource):
-    # model associated with the resource
+    # model associated with the resource (mandatory)
     model = Book
     # used in the index and show methods
     fields = {
@@ -33,11 +33,11 @@ class BooksResource(resources.Resource):
         house  = forms.CharParam( alias='publishing_house__id' )
         __logic__ = year, title, genre & (author|house)
 
-    def index(self, request, params):
+    def list(self, request, params):
         #GET /resource/
         return Book.objects.filter( **params )
 
-    def show(self, request, book_id):
+    def detail(self, request, book_id):
         #GET /resource/:id/
         return Book.objects.get( id=book_id )
 

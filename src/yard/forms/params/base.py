@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from yard.utils import is_strfloat, is_strint
+from yard.utils.swagger import build_swagger_parameter
 from yard.exceptions import (
     RequiredParamMissing, InvalidParameterValue, 
     ConversionError, AndParameterException,)
@@ -11,6 +12,8 @@ class Parameter(object):
     '''
     Parent class to all Form's parameter types
     '''    
+    typename = 'string'
+    
     def __init__(self, description='', help_text='', alias=None, aliases=None,
                  validate=None, default=None, required=False, 
                  ignore_invalids=False):
@@ -42,23 +45,19 @@ class Parameter(object):
         '''
         return AND(self, other)
         
-    @property
-    def typename(self):
-        return self.__class__.__name__.split('Param')[0].lower()
-
-    @property
-    def documentation(self):
-        result = {
-            'in': 'query',
-            'name': self.name,
-            'type': self.typename,
-            'description': self.description,
-            'requred': self.required,
-            'help_text': self.help_text
-        }
-        if not callable(self.default):
-            result['default'] = self.default
-        return result
+    def get_documentation(self):
+        def get_default():
+            if self.default:
+                if callable(self.default):
+                    if not inspect.getargspec(self.default).args:
+                        return self.default()
+                return self.default
+            
+        return build_swagger_parameter(
+            location = 'query', name = self.name, typename = self.typename,
+            description = self.description, required = self.required,
+            default = get_default()
+        )
 
     def convert(self, value):
         '''
@@ -78,19 +77,14 @@ class Parameter(object):
         '''
         Returns/transforms value according to default value/function
         '''
-        def inspect_args(func):
-            try:
-                return inspect.getargspec(self.default).args
-            except TypeError:
-                return None
-        
         is_default = True
         if self.default==None:
             if value==None and self.required:
                 raise RequiredParamMissing(self)
             return value, not is_default
-        elif callable(self.default) and inspect_args(self.default):
-            return self.default( value ), is_default
+        elif callable(self.default):
+            if inspect.getargspec(self.default).args:
+                return self.default( value ), is_default
         elif value!=None:
             return value, not is_default
         if callable(self.default):
