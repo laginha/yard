@@ -152,7 +152,7 @@ class RegexParamTestCase(TestCase):
         assert p.get_default(string)[0] == string
     
     def test_validate(self, param=CharParam):
-        p = RegexParam(r'[0-9]*')
+        p = RegexParam(r'^[0-9]*$')
         assert fail_validation(p, RANDOM.string())
         assert p.do_validate(RANDOM.char_number())
         assert fail_validation(p, RANDOM.string())

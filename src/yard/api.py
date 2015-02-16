@@ -52,8 +52,8 @@ class Api(object):
         resource_class.preprocess(self)
         for info in resource_class.get_views():
             items = info['routes'].iteritems()
-            if not any(hasattr(resource_class, v) for k,v in items):
-                continue
+            # if not any(hasattr(resource_class, v) for k,v in items):
+            #     continue
             viewname = "%s.%s" %(name or resource_class.__name__, info['name'])
             self.list_of_urlpatterns.append(
                 url(
