@@ -43,7 +43,7 @@ class ResourceHttpMethodsTestCase( BaseTestCase ):
     def setUp(self):
         super(ResourceHttpMethodsTestCase, self).setUp()
         self.factory = RequestFactory()
-        TestResource = type('TestResource', (Resource,), {})
+        TestResource = type('TestResource', (Resource,), {'model': Book})
         TestResource.preprocess(Api())
         self.collection_resource = TestResource(
             TestResource.as_list_view()['routes'])

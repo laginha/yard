@@ -100,7 +100,7 @@ class BaseResource(DocumentationMixin):
     
     def __init__(self, routes):
         self.routes = routes
-    
+
     @property
     def tagname(self):
         return self.model.__name__.lower()

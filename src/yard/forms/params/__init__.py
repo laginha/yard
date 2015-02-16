@@ -55,17 +55,16 @@ class PositiveIntegerParam(IntegerParam):
     Parameter for positive integer values
     '''
     def __init__(self, description=None, alias=None, aliases=None, 
-                required=False, default=None, min_value=0, max_value=None):
-        self.max_value = max_value
-        self.min_value = 0
-        Parameter.__init__(self, 
+                required=False, default=None, max_value=None):
+        super(PositiveIntegerParam, self).__init__( 
             description=description, alias=alias, aliases=aliases, 
-            required=required, default=default, validate=validate)
+            required=required, default=default, min_value=0, 
+            max_value=max_value)
             
     def validate(self, value):
         if self.max_value != None:
-            return value <= self.max_value and value >= max(self.min_value, 0)
-        return value >= max(self.min_value, 0)
+            return value <= self.max_value and value >= self.min_value
+        return value >= self.min_value
 
 
 class CharParam(Parameter):

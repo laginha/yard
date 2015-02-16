@@ -16,9 +16,9 @@ class JsonField(object):
             json['items'] = {'type': 'string'}
         return json
     
-    def __call__(self, data):
+    def __call__(self, data, api=None):
         if data:
-            return self.converter(data)
+            return self.converter(data, api) if api else self.converter(data)
 
 
 Integer = JsonField('integer', lambda data: int(data))

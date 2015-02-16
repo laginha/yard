@@ -6,7 +6,7 @@ from yard.resources.base import model_to_fields
 from yard.api import Api
 from yard import fields as FIELDS
 from books.tests.base import BaseTestCase
-from books.models  import *
+from books.models  import Book, Author
 
 
 class JSONBuilderTestCase( BaseTestCase ):
@@ -14,7 +14,7 @@ class JSONBuilderTestCase( BaseTestCase ):
     def setUp(self):
         super(JSONBuilderTestCase, self).setUp()
         self.api = Api()
-        self.resource_class = type('TestResouce', (Resource,), {})
+        self.resource_class = type('TestResouce', (Resource,), {'model': Book})
         self.resource_class.preprocess(self.api)
         self.resource = self.resource_class({})
     
