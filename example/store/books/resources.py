@@ -60,11 +60,11 @@ class BookResource(Resource):
     def detail(self, request, book_id):
         return Book.objects.get( id=book_id )
     
-    @validate_form(CreateBook)    
+    # @validate_form(CreateBook)
     def create(self, *args, **kwargs):
         return 401
     
-    @validate_form(CreateBook)    
+    # @validate_form(CreateBook)
     def update(self, *args, **kwargs):
         return 405
 
