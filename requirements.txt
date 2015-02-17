@@ -1,7 +1,6 @@
 Django
 simplejson
 rstr
-django
 gpolyencode
 
 git+https://github.com/laginha/django-simple-response/
