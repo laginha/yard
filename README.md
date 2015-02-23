@@ -8,8 +8,9 @@
 *views.py*
 
 ```python
-from yard import resources, forms, fields
-from models import Book
+from yard import resources, fields
+from .models import Book
+from .forms import BookListForm
 
 class BooksResource(resources.Resource):
     # model associated with the resource (mandatory)
@@ -24,18 +25,11 @@ class BooksResource(resources.Resource):
             'name': fields.Unicode
         }        
     }
-    
-    class Parameters:
-        year   = forms.IntegerParam( alias='publication_date__year', min=1970, max=2012 )
-        title  = forms.CharParam( required=True )
-        genre  = forms.CharParam( alias='genres' )
-        author = forms.CharParam( alias='author__id' )
-        house  = forms.CharParam( alias='publishing_house__id' )
-        __logic__ = year, title, genre & (author|house)
 
-    def list(self, request, params):
+    @validate(BookListForm)
+    def list(self, request):
         #GET /resource/
-        return Book.objects.filter( **params )
+        return Book.objects.filter(**request.form.parameters)
 
     def detail(self, request, book_id):
         #GET /resource/:id/
@@ -52,6 +46,26 @@ class BooksResource(resources.Resource):
     def destroy(self, request, book_id):
         #DELETE /resource/:id/
         ...
+```
+
+*forms.py*
+
+```
+from yard import forms
+
+class BookListForm(forms.Form):
+    year = forms.IntegerField(
+        required=False, min_value=1970, max_value=2012).maps_to('publication_date__year')
+    title = forms.CharField(
+        required=False, max_length=100).maps_to('title__icontains')
+    genre = forms.CharField(
+        required=False, max_length=100).maps_to('genres')
+    author = forms.CharField(
+        required=False, max_length=100).maps_to('author_id')
+    house = forms.CharField(
+        required=False, max_length=100).maps_to('publishing_house__id')
+    
+    __extralogic__ = [ genre & (author|house) ]
 ```
 
 *urls.py*

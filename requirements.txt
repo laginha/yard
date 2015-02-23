@@ -5,3 +5,4 @@ gpolyencode
 
 git+https://github.com/laginha/django-simple-response/
 git+https://github.com/laginha/django-key-auth/
+git+https://github.com/laginha/django-alo-forms/

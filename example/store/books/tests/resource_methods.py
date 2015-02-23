@@ -17,15 +17,15 @@ create_return_modelinstance = lambda r, **p: Book.objects.all()[0]
 create_return_valuesset     = lambda r, **p: Book.objects.all().values('id')
 create_return_tuple         = lambda r, **p: (500, 'ups')
 
-list_return_list           = lambda r, p: range(10)
-list_return_str            = lambda r, p: 'foo'
-list_return_int            = lambda r, p: 200
-list_return_dict           = lambda r, p: {'foo': 'bar'}
-list_return_none           = lambda r, p: None
-list_return_queryset       = lambda r, p: Book.objects.all()
-list_return_modelinstance  = lambda r, p: Book.objects.all()[0]
-list_return_valuesset      = lambda r, p: Book.objects.all().values('id')
-list_return_tuple          = lambda r, p: (500, 'ups')
+list_return_list           = lambda r, **p: range(10)
+list_return_str            = lambda r, **p: 'foo'
+list_return_int            = lambda r, **p: 200
+list_return_dict           = lambda r, **p: {'foo': 'bar'}
+list_return_none           = lambda r, **p: None
+list_return_queryset       = lambda r, **p: Book.objects.all()
+list_return_modelinstance  = lambda r, **p: Book.objects.all()[0]
+list_return_valuesset      = lambda r, **p: Book.objects.all().values('id')
+list_return_tuple          = lambda r, **p: (500, 'ups')
 
 element_return_list          = lambda r, id, **p: range(10)
 element_return_str           = lambda r, id, **p: 'foo'

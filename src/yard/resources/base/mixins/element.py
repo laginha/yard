@@ -1,4 +1,4 @@
-from yard.utils.swagger import build_swagger_parameter
+from yard.swagger.functions import build_swagger_parameter
 
 
 class ElementMixin(object):
@@ -75,24 +75,16 @@ class ElementMixin(object):
             responses = self.get_destroy_responses(),
             parameters = self.get_destroy_parameters(),
         )
-        
-    def handle_detail_method(self, method, request, fields=None, **kwargs):
-        response = method(request, kwargs.pop('pk'), **kwargs)
-        return self.handle_response(
-            request, response, fields or self.fields, kwargs)
     
     def handle_detail(self, request, kwargs):
-        return self.handle_detail_method(
-            request = request, method = self.detail, 
-            fields = self.detail_fields, **kwargs)
+        response = self.detail(request, kwargs.pop('pk'), **kwargs)
+        return self.handle_response(request, response, self.detail_fields)
     
     def handle_update(self, request, kwargs):
-        return self.handle_detail_method(
-            request = request, method = self.update, 
-            **kwargs)
-    
+        response = self.update(request, kwargs.pop('pk'), **kwargs)
+        return self.handle_response(request, response, self.fields)
+
     def handle_destroy(self, request, kwargs):
-        return self.handle_detail_method(
-            request = request, method = self.destroy, 
-            **kwargs)
+        response = self.destroy(request, kwargs.pop('pk'), **kwargs)
+        return self.handle_response(request, response, self.fields)
     

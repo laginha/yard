@@ -54,12 +54,6 @@ class MetaDict(dict):
         query_string = reduce(dic_to_query, get.items(), '?')[2:]
         return self.request.path + "?" + query_string
 
-    def with_errors(self):
-        '''
-        Adds the errors cought while processing the input parameters
-        '''
-        self.update( self.params.errors() )
-
     def next_page(self):
         '''
         Adds the URI for the next page
@@ -82,7 +76,8 @@ class MetaDict(dict):
         '''
         params = self.params.validated
         offset = min( self.resource_count, params[ self.offset_name ] )
-        previous_offset = offset - (self.page_count or params[ self.results_name ])
+        sub = (self.page_count or params[ self.results_name ])
+        previous_offset = offset - sub
         if previous_offset < 0 and offset <= 0:
             self['previous_page'] = None
         else:
@@ -156,7 +151,6 @@ class ResourceMeta(object):
     
     DEFAULTS = [
         ('no_meta',               False),
-        ('with_errors',           False),
         ('validated_parameters',  True),
         ('total_objects',         True),
         ('paginated_objects',     True),

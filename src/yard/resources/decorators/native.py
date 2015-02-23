@@ -6,19 +6,7 @@ from functools import wraps
 import inspect
 
 
-def validate(func):
-    '''
-    Check if resource parameters is valid
-    '''
-    @wraps(func)
-    def wrapper(klass, request, params):
-        if not params.is_valid():
-            return 400, params.errors()
-        return func(klass, request, params)
-    return wrapper
-
-
-def validate_form(form_class, extra=None):
+def validate(form_class, extra=None):
     '''
     Validate request according to given form
     ''' 
@@ -35,9 +23,9 @@ def validate_form(form_class, extra=None):
                 if form.is_valid():
                     request.form = form
                     return func(resource, request, *args, **kwargs)
-                return 400
+                return 400, form.errors
             
-            form_kwargs = {'data': request.POST}
+            form_kwargs = {'data': request.REQUEST}
             if not hasattr(request, "FILES"): 
                 form_kwargs['files'] = request.FILES
             if issubclass(form_class, ModelForm) and args:

@@ -41,7 +41,7 @@ class Book( models.Model ):
     number_of_pages = models.PositiveIntegerField(blank=True, null=True)
     
     def genres_(self):
-        return self.genres.all()#.values('name')
+        return self.genres.all()
     
     def __str__(self):
         return self.title

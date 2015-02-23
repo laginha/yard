@@ -1,4 +1,4 @@
-from yard.resources.base.parameters import ResourceParameters
+from yard.forms import QueryForm, QueryModelForm
 
 
 class CollectionMixin(object):
@@ -17,12 +17,8 @@ class CollectionMixin(object):
         }
     
     def get_list_parameters(self):
-        parameters = self.get_form_parameters(self.list)
+        parameters = self.get_form_parameters(self.list, params_type='query')
         parameters.extend( self.get_header_parameters() )
-        if self.parameters:
-            parameters.extend([
-                each.get_documentation() for each in self.parameters.params
-            ])
         return parameters
 
     def get_list_responses(self):
@@ -59,25 +55,28 @@ class CollectionMixin(object):
             parameters = self.get_create_parameters(),
             responses = self.get_create_responses(),
         )
-    
-    def get_resource_parameters(self, request, **kwargs):
-        '''
-        Gets parameters from resource request
-        '''
-        resource_params = ResourceParameters( kwargs )
-        if not self.parameters:
-            return resource_params
-        for each in self.parameters.get( request ):
-            resource_params.update( each )
-        return resource_params
 
     def handle_list(self, request, kwargs):
-        parameters = self.get_resource_parameters( request, **kwargs )
-        response = self.list(request, parameters)
+        response = self.list(request, **kwargs)
+        Parameters = type('Parameters', (dict,), {})
+        if hasattr(request, 'form'):
+            form = request.form
+            if isinstance(form, (QueryForm, QueryModelForm)):
+                parameters = Parameters( form.parameters )
+                parameters.validated = form.non_empty_data
+            else:
+                parameters = Parameters( form.cleaned_data )
+                parameters.validated = dict([
+                    each for each in form.cleaned_data.items() if each[1]
+                ])
+        else:
+            parameters = Parameters()
+            parameters.validated = {}
         return self.handle_response(
             request, response, self.list_fields, parameters)
+        # return self.handle_response(request, response, self.list_fields)
     
     def handle_create(self, request, kwargs):
         response = self.create(request, **kwargs)
-        return self.handle_response(request, response, self.fields, kwargs)
+        return self.handle_response(request, response, self.fields)
     

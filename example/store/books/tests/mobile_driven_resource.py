@@ -16,8 +16,8 @@ class TestResource(MobileDrivenResource):
         'author': fields.Link
     }
 
-    def list(self, request, params):
-        return Book.objects.filter( **params )
+    def list(self, request):
+        return Book.objects.all()
 
     def detail(self, request, book_id):
         return Book.objects.get( id=book_id )

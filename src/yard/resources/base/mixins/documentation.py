@@ -1,4 +1,4 @@
-from yard.utils.swagger import (
+from yard.swagger.functions import (
     build_swagger_operation, build_swagger_schema, build_swagger_parameter)
 
 
@@ -12,7 +12,7 @@ class DocumentationMixin(object):
         
     def handle_options(self, request, kwargs):
         response = self.options(request, **kwargs)
-        response = self.handle_response(request, response, self.fields, kwargs)
+        response = self.handle_response(request, response, self.fields)
         response['Allow'] = ','.join( self.get_allowed_methods() )
         return response
     
@@ -27,7 +27,7 @@ class DocumentationMixin(object):
             )]
         return []
     
-    def get_form_parameters(self, method):
+    def get_form_parameters(self, method, params_type='form'):
         def get_typename(widget): 
             if getattr(widget, 'input_type', '') == 'number':
                 return 'number', None
@@ -49,7 +49,7 @@ class DocumentationMixin(object):
                 typename, items = get_typename(each.field.widget)
                 parameters.append( 
                     build_swagger_parameter(
-                        location    = 'form', 
+                        location    = params_type, 
                         name        = each.name, 
                         typename    = typename,
                         description = each.field.help_text, 

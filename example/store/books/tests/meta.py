@@ -3,7 +3,7 @@
 from django.test.client import Client, RequestFactory
 from yard.resources.base.page import ResourcePage
 from yard.resources.base.meta import ResourceMeta
-from yard.resources.base.parameters import ResourceParameters
+from yard.forms.mixin import Parameters
 from books.tests.base import BaseTestCase
 from books.models  import *
 
@@ -16,7 +16,7 @@ class MetaTestCase( BaseTestCase ):
             'parameter': 'results',
             'default': 1,
         }}))
-        self.params = ResourceParameters()
+        self.params = Parameters()
         self.factory = RequestFactory()
         
     def get_resource_meta(self, meta=None):
@@ -71,7 +71,6 @@ class MetaTestCase( BaseTestCase ):
         self.assert_defaults_not_in_meta( metadata )
         self.assert_aggregates_not_in_meta( metadata )
         assert 'no_meta' not in metadata
-        assert 'Errors' not in metadata
         return metadata
 
     def assert_custom_meta(self, request, objects):
@@ -99,7 +98,6 @@ class MetaTestCase( BaseTestCase ):
         request = self.factory.get('/books/', {'offset': 1})
         self.assert_default_meta( request, objects )
         meta = self.get_resource_meta(type('Meta', (), {
-            'with_errors': True,
             'validated_parameters': False,
             'total_objects': False,
             'paginated_objects': False,
@@ -114,7 +112,6 @@ class MetaTestCase( BaseTestCase ):
         metadata = self.get_metadata(request, meta, objects)
         self.assert_defaults_not_in_meta( metadata )
         assert 'no_meta' not in metadata
-        assert 'Errors' in metadata
         self.assert_aggregates_in_meta(metadata)
         self.assert_no_meta(request, objects)
     

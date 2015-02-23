@@ -26,7 +26,7 @@ def include_metadata(f):
     Paginates and appends Meta data into the json response if in index view
     '''
     def wrapper(self, request, resources, fields, parameters):
-        if hasattr(parameters, 'validated'):
+        if parameters != None:
             page = self.paginate( request, resources, parameters )
             objects, links = f(self, request, page, fields, parameters)
             meta = self.meta.generate(request, resources, page, parameters)
@@ -75,10 +75,6 @@ class BaseResource(DocumentationMixin):
             return {
                 id(i): builder(cls.api, i) for i in fields if not callable(i)
             }
-        
-        def get_parameters():
-            if hasattr(cls, "Parameters"):
-                return Form( cls.Parameters )
 
         cls.api           = api
         cls.version_name  = version_name
@@ -90,7 +86,6 @@ class BaseResource(DocumentationMixin):
         cls.pagination    = get_resource_page()
         cls.meta          = get_resource_meta()
         cls.builders      = get_json_builders()
-        cls.parameters    = get_parameters()
 
     @classmethod
     def get_views(cls):
@@ -128,7 +123,7 @@ class BaseResource(DocumentationMixin):
         return self.builders.get(id(fields) ) or \
             self.json_builder_class( self.api, fields )
 
-    def handle_response(self, request, response, fields, parameters):
+    def handle_response(self, request, response, fields, parameters=None):
         '''
         Proccess response into a JSON serializable object
         '''
@@ -153,7 +148,7 @@ class BaseResource(DocumentationMixin):
         return to_http(request, response, status)
 
     @include_metadata
-    def handle_queryset_response(self, request, resources, fields, parameters):
+    def handle_queryset_response(self, request, resources, fields, kwargs):
         '''
         Serialize queryset based response
         '''
@@ -162,7 +157,7 @@ class BaseResource(DocumentationMixin):
         return serialized, builder.links
 
     @include_metadata
-    def handle_list_response(self, request, resources, fields, parameters):
+    def handle_list_response(self, request, resources, fields, kwargs):
         '''
         Serialize list based response
         '''
