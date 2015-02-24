@@ -22,7 +22,7 @@ class Api(object):
             self.list_of_urlpatterns.append(
                 url(self.path+r'$', self.discover_view, name="api_documentation")
             )
-        self.discoverable_paths = None
+        self.documentation_json = None
 
     @property
     def urlpatterns(self):
@@ -52,8 +52,8 @@ class Api(object):
         resource_class.preprocess(self)
         for info in resource_class.get_views():
             items = info['routes'].iteritems()
-            # if not any(hasattr(resource_class, v) for k,v in items):
-            #     continue
+            if not any(hasattr(resource_class, v) for k,v in items):
+                continue
             viewname = "%s.%s" %(name or resource_class.__name__, info['name'])
             self.list_of_urlpatterns.append(
                 url(
@@ -109,10 +109,10 @@ class Api(object):
         '''
         Callback to return discoverable response from this Api object
         '''
-        if self.discoverable_paths == None:
-            self.discoverable_paths = self.get_discoverable_paths()
-        content = build_swagger_object(request, paths=self.discoverable_paths)
-        return JsonResponse(content=content, context=request)
+        if self.documentation_json == None:
+            self.documentation_json = build_swagger_object(request, 
+                paths=self.get_discoverable_paths())
+        return JsonResponse(content=self.documentation_json, context=request)
 
     def get_discoverable_paths(self):
         '''

@@ -30,8 +30,8 @@ DEFAULT_SWAGGER_INFO = {
     'title':          getattr(settings, 'SWAGGER_TITLE',       'API documentation'),
     'description':    getattr(settings, 'SWAGGER_DESCRIPTION', 'API supported by YARD'),
     'termsOfService': getattr(settings, 'SWAGGER_TERMS',       ''),
-    'contact':        getattr(settings, 'SWAGGER_CONTACT',  DEFAULT_SWAGGER_CONTACT),
-    'license':        getattr(settings, 'SWAGGER_LICENSE', DEFAULT_SWAGGER_LICENSE),
+    'contact':        getattr(settings, 'SWAGGER_CONTACT',     DEFAULT_SWAGGER_CONTACT),
+    'license':        getattr(settings, 'SWAGGER_LICENSE',     DEFAULT_SWAGGER_LICENSE),
 }
 
 
@@ -47,30 +47,8 @@ SWAGGER_DEFINITIONS            = getattr(settings, 'SWAGGER_DEFINITIONS',       
 SWAGGER_PARAMETERS_DEFINITIONS = getattr(settings, 'SWAGGER_PARAMETERS_DEFINITIONS', {})
 
 
-# DEFAULT_SWAGGER_SUPPORTED_METHODS = ['get',]
-# DEFAULT_SWAGGER_DOC_EXPANSION = "none"
-# DEFAULT_SWAGGER_SORTER = "alpha"
-#
-# SWAGGER_SUPPORTED_METHODS = getattr(settings, 'SWAGGER_SUPPORTED_METHODS',
-#     DEFAULT_SWAGGER_SUPPORTED_METHODS)
-# SWAGGER_DOC_EXPANSION = getattr(settings, 'SWAGGER_DOC_EXPANSION',
-#     DEFAULT_SWAGGER_DOC_EXPANSION)
-# SWAGGER_SORTER = getattr(settings, 'SWAGGER_SORTER',
-#     DEFAULT_SWAGGER_SORTER)
-#
-# DEFAULT_SWAGGER_SETTINGS = {
-#     # 'url': url,
-#     'dom_id': "swagger-ui-container",
-#     'supportedSubmitMethods': SWAGGER_SUPPORTED_METHODS,
-#     'docExpansion': SWAGGER_DOC_EXPANSION,
-#     'sorter' : DEFAULT_SWAGGER_SORTER
-#     # 'highlightSizeThreshold':
-# }
-#     # 'api_version': '0.1',
-#     # 'api_path': '/',
-#     # 'api_key': '',
-#     # 'is_authenticated': False,
-#     # 'is_superuser': False,
-#     # 'permission_denied_handler': None,
-#
-# SWAGGER_SETTINGS = getattr(settings, 'SWAGGER_SETTINGS', DEFAULT_SWAGGER_SETTINGS)
+SWAGGER_SUPPORTED_METHODS = getattr(settings, 'SWAGGER_SUPPORTED_METHODS', ['get', 'post', 'put', 'delete'])
+SWAGGER_DOC_EXPANSION     = getattr(settings, 'SWAGGER_DOC_EXPANSION',     'list')
+SWAGGER_SORTER            = getattr(settings, 'SWAGGER_SORTER',            'alpha')
+SWAGGER_API_KEY_NAME      = getattr(settings, 'SWAGGER_API_KEY_NAME',      'key_name')
+SWAGGER_DEFAULT_KEY       = getattr(settings, 'SWAGGER_DEFAULT_KEY',       '')

@@ -14,11 +14,12 @@ from yard.fields import (
 from yard.utils import (
     is_tuple, is_queryset, is_modelinstance, is_generator, is_list,
     is_valuesset, is_dict,)
+from yard.swagger import Documentation
 from .builders import JSONbuilder
 from .uglify import uglify_json
 from .meta import ResourceMeta
 from .page import ResourcePage
-from .mixins import DocumentationMixin
+from .mixins import OptionsMixin
 
 
 def include_metadata(f):
@@ -42,11 +43,15 @@ def model_to_fields(model):
     ])
 
 
-class BaseResource(DocumentationMixin):
+class BaseResource(OptionsMixin):
     '''
     API Resource object
     '''
+    
     json_builder_class = JSONbuilder
+    description = "not provided"
+    uglify = False
+    documentation = Documentation
 
     @classmethod
     def preprocess(cls, api, version_name=None):
@@ -81,8 +86,6 @@ class BaseResource(DocumentationMixin):
         cls.fields        = get_fields()
         cls.detail_fields = getattr(cls, "detail_fields", cls.fields)
         cls.list_fields   = getattr(cls, "list_fields", cls.fields)
-        cls.description   = getattr(cls, "description", "not provided")
-        cls.uglify        = getattr(cls, "uglify", False)
         cls.pagination    = get_resource_page()
         cls.meta          = get_resource_meta()
         cls.builders      = get_json_builders()
@@ -95,6 +98,7 @@ class BaseResource(DocumentationMixin):
     
     def __init__(self, routes):
         self.routes = routes
+        self.documentation = self.documentation(self)
 
     @property
     def tagname(self):

@@ -53,19 +53,24 @@ class BooksResource(resources.Resource):
 ```
 from yard import forms
 
-class BookListForm(forms.Form):
-    year = forms.IntegerField(
-        required=False, min_value=1970, max_value=2012).maps_to('publication_date__year')
-    title = forms.CharField(
-        required=False, max_length=100).maps_to('title__icontains')
-    genre = forms.CharField(
-        required=False, max_length=100).maps_to('genres')
-    author = forms.CharField(
-        required=False, max_length=100).maps_to('author_id')
-    house = forms.CharField(
-        required=False, max_length=100).maps_to('publishing_house__id')
+class ListBook(forms.QueryForm):
+    year   = forms.IntegerField(required=False, min_value=1970, max_value=2012)
+    title  = forms.CharField(required=False)
+    genre  = forms.CharField(required=False)
+    author = forms.CharField(required=False)
+    house  = forms.CharField(required=False)
     
-    __extralogic__ = [ genre & (author|house) ]
+    class Meta:
+        aliases = {
+            'year': 'publication_date__year',
+            'title': 'title__icontains',
+            'genre': 'genres',
+            'author': 'author_id',
+            'house': 'publishing_house__id',
+        }
+        extralogic = [
+            AND('genre', OR('author', 'house'))   
+        ]
 ```
 
 *urls.py*

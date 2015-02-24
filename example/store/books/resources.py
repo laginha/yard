@@ -25,7 +25,7 @@ class AuthorResource(Resource):
 
 class BookResource(Resource):
     description = "Search books in our store."
-    model  = Book
+    model = Book
     fields = {
         'id': fields.Auto,
         'title': fields.Auto, 
@@ -43,7 +43,6 @@ class BookResource(Resource):
         average = (('average_pages', 'number_of_pages'),)
     
     @validate(ListBook)
-    # @key_required()
     def list(self, request):
         params = request.form.parameters
         return Book.objects.filter( **params )
@@ -52,11 +51,9 @@ class BookResource(Resource):
     def detail(self, request, book_id):
         return Book.objects.get( id=book_id )
     
-    # @validate(CreateBook)
     def create(self, *args, **kwargs):
         return 401
     
-    # @validate(CreateBook)
     def update(self, *args, **kwargs):
         return 405
 

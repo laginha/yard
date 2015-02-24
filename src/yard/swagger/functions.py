@@ -1,16 +1,15 @@
 from yard.consts import RESOURCE_VERSION_RE
-from yard.consts.swagger import (
+from yard.fields import JsonField
+from .consts import (
     SWAGGER_CONSUMES, SWAGGER_PRODUCES, SWAGGER_RESPONSES_DEFINITIONS, 
     SWAGGER_SECURITY_DEFINITIONS, SWAGGER_SECURITY, SWAGGER_TAGS,
     SWAGGER_EXTERNAL_DOCS, SWAGGER_DEFINITIONS, 
     SWAGGER_PARAMETERS_DEFINITIONS, SWAGGER_INFO)
-from yard.fields import JsonField
 import re
 
 
 def build_swagger_parameter(preset=None, location='', name='', typename='',
                             required=True, description='', **kwargs):
-    
     if preset == 'path':
         return {
             'in'         : 'path', 
@@ -108,7 +107,7 @@ def build_swagger_schema(fields):
         elif isinstance(fieldtype, bool):
             result[name] = {'type': 'boolean'}
         elif isinstance(fieldtype, int):
-            result[name] = {'type': 'integer'}
+            result[name] = {'type': 'number'}
         elif isinstance(fieldtype, float):
             result[name] = {'type': 'number'}
         else:
