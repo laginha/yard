@@ -91,3 +91,8 @@ class NoDefaultVersion(Exception):
     '''
     def __str__(self):
         return "Default version unknown"
+
+class NoModelError(Exception):
+    def __str__(self):
+        return "Resource related model unknown"
+        

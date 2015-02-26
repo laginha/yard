@@ -12,7 +12,8 @@ class OptionsMixin(object):
         
     def handle_options(self, request, kwargs):
         response = self.options(request, **kwargs)
-        response = self.handle_response(request, response, self.fields)
+        response = self.handle_response(
+            request, response, self._meta.fields)
         response['Allow'] = ','.join( self.get_allowed_methods() )
         return response
     
@@ -20,4 +21,4 @@ class OptionsMixin(object):
         return 200, self.get_documentation()
        
     def get_documentation(self):
-        return self.documentation.get_documentation()
+        return self._meta.documentation.get_documentation()

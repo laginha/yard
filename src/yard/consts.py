@@ -19,3 +19,28 @@ RESOURCE_PK_KEYNAME  = getattr(settings, 'RESOURCE_PK_KEYNAME', DEFAULT_RESOURCE
 RESOURCE_VERSION_RE = getattr(settings, 'RESOURCE_VERSION_RE', DEFAULT_RESOURCE_VERSION_RE)
     
 DEFAULT_STATUS_CODE = getattr(settings, 'DEFAULT_STATUS_CODE', 200)
+
+DEFAULT_METADATA_OPTIONS = {
+    'no_meta': False,
+    'validated_parameters': True,
+    'total_objects': True,
+    'paginated_objects': True,
+    'next_page': True,
+    'previous_page': True,
+    'average': None,
+    'minimum': None,
+    'maximum': None,
+    'count': None,
+    'custom': {},
+}
+METADATA_OPTIONS = getattr(settings, 'METADATA_OPTIONS', DEFAULT_METADATA_OPTIONS)
+
+
+DEFAULT_PAGINATION_OPTIONS = {
+    'offset_parameter': 'offset',
+    'results_parameter': 'results',
+    'results_per_page': 25,
+    'limit_per_page': 50,
+    'no_pagination': False,
+}
+PAGINATION_OPTIONS = getattr(settings, 'PAGINATION_OPTIONS', DEFAULT_PAGINATION_OPTIONS)

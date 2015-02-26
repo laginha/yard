@@ -4,11 +4,13 @@ from django.db import models
 
 
 class JsonField(object):
-    def __init__(self, typename, converter=None):
+    def __init__(self, typename, converter=None, is_link=False, is_uri=False):
         self.typename = typename
         if not converter:
             self.converter = lambda data: str(data)
         self.converter = converter
+        self.is_link = is_link
+        self.is_uri = is_uri
     
     def get_documentation(self):
         json = {'type': self.typename}
@@ -26,7 +28,7 @@ Float = JsonField('number', lambda data: float(data))
 String = JsonField('string', lambda data: str(data))
 Boolean = JsonField('boolean', lambda data: bool(data))
 File = JsonField('string', lambda data: data.url)
-FilePath = JsonField('boolean', lambda data: data.path)
+FilePath = JsonField('string', lambda data: data.path)
 QuerySet = JsonField('array', lambda data: [unicode(i) for i in data])
 ValuesSet = List = JsonField('array', lambda data: list(data))
 JSON = Dict = JsonField('string', lambda data: list(data))
@@ -47,13 +49,13 @@ ForeignKey = GenericForeignKey = Unicode
 def link_converter(data, api):
     return data.pk, api.get_link(data) 
 
-Link = JsonField('boolean', link_converter)
+Link = JsonField('string', link_converter, is_link=True)
 
 
 def uri_converter(data, api):
     return api.get_uri(data)
 
-URI = JsonField('boolean', uri_converter)
+URI = JsonField('string', uri_converter, is_uri=True)
 
 
 OBJECT_TO_JSONFIELD = {

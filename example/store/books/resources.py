@@ -1,20 +1,21 @@
-from yard.resources.decorators import (
-    validate, resource_decorator, login_required)
 from yard import forms, fields
 from yard.version import VersionController
 from yard.resources import Resource
-from yard.resources.decorators import key_required
+from yard.decorators import (
+    validate, resource_decorator, login_required, key_required)
 from .models import Book, Author
 from .forms import CreateBook, ListBook, QueryBookForm
     
 
 @resource_decorator( key_required() )
 class AuthorResource(Resource):
-    model  = Author
-    fields = {
-        'name': fields.Unicode,
-        'book_set': fields.RelatedManager,
-    }
+    
+    class Meta:
+        model  = Author
+        fields = {
+            'name': fields.Unicode,
+            'book_set': fields.RelatedManager,
+        }
     
     def list(self, request):
         return Author.objects.all()
@@ -24,24 +25,22 @@ class AuthorResource(Resource):
 
 
 class BookResource(Resource):
-    description = "Search books in our store."
-    model = Book
-    fields = {
-        'id': fields.Auto,
-        'title': fields.Auto, 
-        'publication_date': fields.Auto, 
-        'genres': fields.Auto,
-        'author': {
-            'name': fields.Auto,
-            'age': fields.Auto,
-            'gender_': fields.Auto,
-        }
-    }
     
     class Meta:
-        maximum = (('longest_title', 'title'),)
-        average = (('average_pages', 'number_of_pages'),)
-    
+        description = "Search books in our store."
+        model = Book
+        fields = {
+            'id': fields.Auto,
+            'title': fields.Auto, 
+            'publication_date': fields.Auto, 
+            'genres': fields.Auto,
+            'author': {
+                'name': fields.Auto,
+                'age': fields.Auto,
+                'gender_': fields.Auto,
+            }
+        }
+        
     @validate(ListBook)
     def list(self, request):
         params = request.form.parameters
@@ -53,11 +52,11 @@ class BookResource(Resource):
     
     def create(self, *args, **kwargs):
         return 401
-    
-    def update(self, *args, **kwargs):
-        return 405
 
     def edit(self, *args, **kwargs):
+        return 405
+    
+    def new(self, *args, **kwargs):
         return 405
 
 

@@ -96,7 +96,7 @@ class Documentation(object):
 
     def get_list_responses(self):
         name = "%sList" % self.resource.tagname
-        schema = self.get_response_schema(self.resource.list_fields)
+        schema = self.get_response_schema(self.resource._meta.list_fields)
         return {
             200: {
                 'description': 'Successful operation',
@@ -144,7 +144,7 @@ class Documentation(object):
     
     def get_detail_responses(self):
         name = "%sDetail" % self.resource.tagname
-        schema = self.get_response_schema(self.resource.detail_fields)
+        schema = self.get_response_schema(self.resource._meta.detail_fields)
         return {
             200: {
                 'description': 'Successful operation',

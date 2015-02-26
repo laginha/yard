@@ -21,13 +21,16 @@ class ElementMixin(object):
     
     def handle_detail(self, request, kwargs):
         response = self.detail(request, kwargs.pop('pk'), **kwargs)
-        return self.handle_response(request, response, self.detail_fields)
+        return self.handle_response(
+            request, response, self._meta.detail_fields)
     
     def handle_update(self, request, kwargs):
         response = self.update(request, kwargs.pop('pk'), **kwargs)
-        return self.handle_response(request, response, self.fields)
+        return self.handle_response(
+            request, response, self._meta.fields)
 
     def handle_destroy(self, request, kwargs):
         response = self.destroy(request, kwargs.pop('pk'), **kwargs)
-        return self.handle_response(request, response, self.fields)
+        return self.handle_response(
+            request, response, self._meta.fields)
     

@@ -13,5 +13,5 @@ class NewMixin(object):
           
     def handle_new(self, request, kwargs):
         response = self.new(request, **kwargs)
-        return self.handle_response(request, response, self.fields, kwargs)
-
+        return self.handle_response(
+            request, response, self._meta.fields, kwargs)

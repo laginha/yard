@@ -2,21 +2,25 @@
 # encoding: utf-8
 from django.test.client import Client, RequestFactory
 from yard.resources import Resource
-from yard.resources.base import model_to_fields
+from yard.resources.meta import model_to_fields
 from yard.api import Api
 from yard import fields as FIELDS
-from books.tests.base import BaseTestCase
+from yard.tests.base import BaseTestCase
 from books.models  import Book, Author
 
 
-class JSONBuilderTestCase( BaseTestCase ):
+class TestResource(Resource):
+    class Meta:
+        model = Book
+        
+
+class JsonSerializerTestCase( BaseTestCase ):
     
     def setUp(self):
-        super(JSONBuilderTestCase, self).setUp()
+        super(JsonSerializerTestCase, self).setUp()
         self.api = Api()
-        self.resource_class = type('TestResouce', (Resource,), {'model': Book})
-        self.resource_class.preprocess(self.api)
-        self.resource = self.resource_class({})
+        self.resource_class = TestResource
+        self.resource = self.resource_class(self.api, {})
     
     def assert_json(self, objects, fields, json):
         assert len(json) == len(objects)

@@ -13,5 +13,5 @@ class EditMixin(object):
     
     def handle_edit(self, request, kwargs):
         response = self.edit(request, kwargs.pop('pk'), **kwargs)
-        return self.handle_response(request, response, self.fields)
+        return self.handle_response(request, response, self._meta.fields)
 

@@ -4,10 +4,10 @@ from django.core.urlresolvers import NoReverseMatch
 from yard.utils import is_related_manager, is_method, is_dict
 from yard.fields import URI, Link
 from yard.exceptions import NoResourceMatch
-from yard.consts import RESOURCE_URI_KEYNAME, RESOURCE_PK_KEYNAME
+from yard.consts import RESOURCE_URI_KEYNAME
 
 
-class JSONbuilder(object):
+class BaseJsonSerializer(object):
     '''
     Responsible for creating the JSON response
     '''
@@ -65,9 +65,9 @@ class JSONbuilder(object):
         if is_method( attribute ):
             attribute = attribute( *args[1:] )
         try:
-            if field_type is URI:
+            if field_type.is_uri:
                 return {args[0]: field_type( attribute, self.api )}
-            if field_type is Link:
+            if field_type.is_link:
                 pk, link = field_type( attribute, self.api )
                 self.links[args[0]] = link
                 return {args[0]: pk}
@@ -76,13 +76,3 @@ class JSONbuilder(object):
         return {args[0]: field_type( attribute )}
 
 
-class JSONbuilderForMobile(JSONbuilder):
-    '''
-    Responsible for creating the JSON response optimized for mobile
-    '''
-    def init_json(self, resource):
-        '''
-        init JSON for the resource for mobile-driven response 
-        '''
-        self.links[resource.__class__.__name__] = self.api.get_link( resource )
-        return {RESOURCE_PK_KEYNAME: resource.pk}

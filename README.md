@@ -13,18 +13,20 @@ from .models import Book
 from .forms import BookListForm
 
 class BooksResource(resources.Resource):
-    # model associated with the resource (mandatory)
-    model = Book
-    # used in the index and show methods
-    fields = {
-        'id': fields.Integer, 
-        'title': fields.Unicode, 
-        'publication_date': fields.Unicode, 
-        'author': {
-            'age': fields.Integer,
-            'name': fields.Unicode
-        }        
-    }
+
+    class Meta:
+        # model associated with the resource (mandatory)
+        model = Book
+        # used in the list and detail methods
+        fields = {
+            'id': fields.Integer, 
+            'title': fields.Unicode, 
+            'publication_date': fields.Unicode, 
+            'author': {
+                'age': fields.Integer,
+                'name': fields.Unicode
+            }        
+        }
 
     @validate(BookListForm)
     def list(self, request):

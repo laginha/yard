@@ -1,20 +1,23 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from django.test.client import Client, RequestFactory
-from yard.resources import MobileDrivenResource
+from yard.resources import Resource
 from yard.api import Api
+from yard.serializers import MobileJsonSerializer
 from yard import fields
-from books.tests.base import BaseTestCase
+from yard.tests.base import BaseTestCase
 from books.models  import *
 from books.resources import AuthorResource
 import simplejson
 
 
-class TestResource(MobileDrivenResource):
-    model = Book
-    fields = {
-        'author': fields.Link
-    }
+class TestResource(Resource):
+    class Meta:
+        serializer = MobileJsonSerializer
+        model = Book
+        fields = {
+            'author': fields.Link
+        }
 
     def list(self, request):
         return Book.objects.all()

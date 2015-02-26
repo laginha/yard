@@ -3,7 +3,7 @@
 from django.test.client import Client, RequestFactory
 from yard.resources import Resource
 from yard.api import Api
-from books.tests.base import BaseTestCase
+from yard.tests.base import BaseTestCase
 from books.models  import *
 import simplejson
 
@@ -38,17 +38,22 @@ element_return_valuesset     = lambda r, id, **p: Book.objects.all().values('id'
 element_return_tuple         = lambda r, id, **p: (500, 'ups')
 
 
+class TestResource(Resource):
+    class Meta:
+        model = Book
+        
+
 class ResourceHttpMethodsTestCase( BaseTestCase ):
     
     def setUp(self):
         super(ResourceHttpMethodsTestCase, self).setUp()
         self.factory = RequestFactory()
-        TestResource = type('TestResource', (Resource,), {'model': Book})
-        TestResource.preprocess(Api())
         self.collection_resource = TestResource(
-            TestResource.as_list_view()['routes'])
+            Api(), TestResource.as_list_view()['routes']
+        )
         self.element_resource = TestResource(
-            TestResource.as_detail_view()['routes'])
+            Api(), TestResource.as_detail_view()['routes']
+        )
     
     def get_response(self, request, resource, params={}, 
             content_type="application/json", status=200):

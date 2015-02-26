@@ -1,27 +1,26 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from django.test.client import Client, RequestFactory
-from yard.resources.base.page import ResourcePage
-from yard.resources.base.meta import ResourceMeta
-from yard.forms.mixin import Parameters
-from books.tests.base import BaseTestCase
+from yard.metadata import Metadata
+from yard.pagination import Pagination
+from yard.forms import Parameters
+from yard.tests.base import BaseTestCase
 from books.models  import *
 
 
-class MetaTestCase( BaseTestCase ):
+class TestPagination(Pagination):
+    results_per_page = 1
+    results_parameter = 'results'
+
+
+class MetadataTestCase( BaseTestCase ):
     
     def setUp(self):
-        super(MetaTestCase, self).setUp()
-        self.pagination = ResourcePage(type("Pagination", (), {'results_per_page': {
-            'parameter': 'results',
-            'default': 1,
-        }}))
-        self.params = Parameters()
+        super(MetadataTestCase, self).setUp()
+        self.pagination = TestPagination()
+        self.params = Parameters.create()
         self.factory = RequestFactory()
-        
-    def get_resource_meta(self, meta=None):
-        return ResourceMeta(self.pagination) if not meta else ResourceMeta(self.pagination, meta)
-    
+
     def get_metadata(self, request, meta, objects):
         paged, page_params = self.pagination.select(request, objects)
         self.params.validated.update( page_params )
@@ -53,7 +52,7 @@ class MetaTestCase( BaseTestCase ):
         assert metadata['next_page']
         
     def assert_default_meta(self, request, objects):
-        meta = self.get_resource_meta()
+        meta = Metadata(self.pagination)
         paged, page_params = self.pagination.select(request, objects)
         self.params.validated.update( page_params )
         metadata = meta.generate( request, objects, paged, self.params )
@@ -64,20 +63,27 @@ class MetaTestCase( BaseTestCase ):
         return metadata
         
     def assert_no_meta(self, request, objects):
-        meta = self.get_resource_meta(type('Meta', (), {
-            'no_meta': True,
-        }))
-        metadata = self.get_metadata(request, meta, objects)
+        
+        class TestMetadata(Metadata):
+            no_meta = True
+        
+        metadata = self.get_metadata(
+            request, TestMetadata(self.pagination), objects)
         self.assert_defaults_not_in_meta( metadata )
         self.assert_aggregates_not_in_meta( metadata )
         assert 'no_meta' not in metadata
         return metadata
 
     def assert_custom_meta(self, request, objects):
-        meta = self.get_resource_meta(type('Meta', (), {
-           'number_of_objects_is_even': lambda x: not bool( len(x)%2 )
-        }))
-        metadata = self.get_metadata(request, meta, objects)
+        
+        class TestMetadata(Metadata):
+            custom = {
+                'number_of_objects_is_even': (lambda x: not bool( len(x)%2 ))
+            }
+        
+        meta = TestMetadata(self.pagination)
+        metadata = self.get_metadata(
+            request, meta, objects)
         assert 'number_of_objects_is_even' in metadata
 
     def test_custom(self):        
@@ -97,19 +103,21 @@ class MetaTestCase( BaseTestCase ):
         self.assert_default_meta( request, objects )
         request = self.factory.get('/books/', {'offset': 1})
         self.assert_default_meta( request, objects )
-        meta = self.get_resource_meta(type('Meta', (), {
-            'validated_parameters': False,
-            'total_objects': False,
-            'paginated_objects': False,
-            'next_page': False,
-            'previous_page': False,
-            'average': (('avg_pages', 'number_of_pages'),),
-            'minimum': (('min_pages', 'number_of_pages'),),
-            'maximum': (('max_pages', 'number_of_pages'),),
-            'count': (('count_pages', 'number_of_pages'),),
-        }))
+        
+        class TestMetadata(Metadata):
+            validated_parameters = False
+            total_objects = False
+            paginated_objects = False
+            next_page = False
+            previous_page = False
+            average = (('avg_pages', 'number_of_pages'),)
+            minimum = (('min_pages', 'number_of_pages'),)
+            maximum = (('max_pages', 'number_of_pages'),)
+            count   = (('count_pages', 'number_of_pages'),)
+        
         request = self.factory.get('/books/')
-        metadata = self.get_metadata(request, meta, objects)
+        metadata = self.get_metadata(
+            request, TestMetadata(self.pagination), objects)
         self.assert_defaults_not_in_meta( metadata )
         assert 'no_meta' not in metadata
         self.assert_aggregates_in_meta(metadata)

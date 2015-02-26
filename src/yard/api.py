@@ -8,6 +8,23 @@ from yard.exceptions import NoResourceMatch
 import re
 
 
+class Dispatcher(object):
+    def __init__(self, resource_class, api, routes):
+        self.resource_class = resource_class
+        self.routes = routes
+        self.api = api
+    
+    def __call__(self, *args, **kwargs):
+        return self.resource.handle_request(*args, **kwargs)
+    
+    @property    
+    def resource(self):
+        return self.resource_class(self.api, self.routes)
+    
+    def get_documentation(self):
+        return self.resource.get_documentation()
+
+
 class Api(object):
     '''
     Class responsible for generating the urlpatterns for the Resources
@@ -34,37 +51,20 @@ class Api(object):
     def include(self, resource_path, resource_class, name=None):
         '''
         Include url pattern for a given Resource
-        '''
-        
-        class Dispatcher(object):
-            def __init__(self, resource_class, routes):
-                self.resource_class = resource_class
-                self.routes = routes
-                
-            def __call__(self, *args, **kwargs):
-                resource_instance = self.resource_class(self.routes)
-                return resource_instance.handle_request(*args, **kwargs)
-        
-            def get_documentation(self):
-                resource_instance = self.resource_class(self.routes)
-                return resource_instance.get_documentation()
-        
-        resource_class.preprocess(self)
+        '''        
         for info in resource_class.get_views():
-            items = info['routes'].iteritems()
-            if not any(hasattr(resource_class, v) for k,v in items):
+            methods = info['routes'].values()
+            if not any(hasattr(resource_class, each) for each in methods):
                 continue
             viewname = "%s.%s" %(name or resource_class.__name__, info['name'])
+            urlpath  = self.path + resource_path + info['path']
+            dispatcher = Dispatcher(resource_class, self, info['routes'])
             self.list_of_urlpatterns.append(
-                url(
-                    self.path + resource_path + info['path'], 
-                    Dispatcher(resource_class, info['routes']),
-                    name = viewname,
-                )
+                url( urlpath, dispatcher, name=viewname )
             )
-            model = getattr(resource_class, 'model', None)
+            model = getattr(resource_class.Meta, 'model', None)
             if info['name'] == 'detail' and model:
-                self.model_to_urlname[ resource_class.model ] = viewname
+                self.model_to_urlname[ resource_class.Meta.model ] = viewname
 
     def extend(self, path, to_include, name=None):
         '''

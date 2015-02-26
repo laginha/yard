@@ -40,7 +40,8 @@ INSTALLED_APPS = (
     'keyauth',
     # example app
     'books',
-    'yard.swagger',   
+    'yard.swagger', 
+    'yard',  
 )
 
 MIDDLEWARE_CLASSES = (

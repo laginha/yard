@@ -8,18 +8,14 @@ from yard.forms import Form
 from yard.consts import (
     DEFAULT_STATUS_CODE, JSON_OBJECTS_KEYNAME, JSON_META_KEYNAME, 
     JSON_LINKS_KEYNAME,)
-from yard.fields import (
-    SELECT_RELATED_FIELDS, PREFETCH_RELATED_FIELDS,
-    get_field as get_json_field)
+from yard.fields import SELECT_RELATED_FIELDS, PREFETCH_RELATED_FIELDS
 from yard.utils import (
     is_tuple, is_queryset, is_modelinstance, is_generator, is_list,
     is_valuesset, is_dict,)
-from yard.swagger import Documentation
-from .builders import JSONbuilder
-from .uglify import uglify_json
-from .meta import ResourceMeta
-from .page import ResourcePage
+from yard.serializers import uglify_json
 from .mixins import OptionsMixin
+from .meta import ResourceMeta
+import copy
 
 
 def include_metadata(f):
@@ -30,65 +26,18 @@ def include_metadata(f):
         if parameters != None:
             page = self.paginate( request, resources, parameters )
             objects, links = f(self, request, page, fields, parameters)
-            meta = self.meta.generate(request, resources, page, parameters)
+            meta = self._meta.metadata.generate(request, resources, page, parameters)
             return self.to_json(objects=objects, meta=meta, links=links)
         return f(self, request, resources, fields, parameters)[0]
     return wrapper 
-
-
-def model_to_fields(model):
-    fields = model._meta.fields
-    return dict([
-        (each.name, get_json_field(each)) for each in fields
-    ])
 
 
 class BaseResource(OptionsMixin):
     '''
     API Resource object
     '''
-    
-    json_builder_class = JSONbuilder
-    description = "not provided"
-    uglify = False
-    documentation = Documentation
-
-    @classmethod
-    def preprocess(cls, api, version_name=None):
-
-        def get_resource_attribute(name):
-            return getattr(cls, name, type(name, (), {}))
-    
-        def get_fields():
-            if hasattr(cls, "fields"):
-                return cls.fields
-            return model_to_fields(cls.model)
-    
-        def get_resource_page():
-            return ResourcePage( get_resource_attribute('Pagination') )
-    
-        def get_resource_meta():
-            return ResourceMeta(cls.pagination, get_resource_attribute('Meta'))
-
-        def get_json_builders():
-            fields = [
-                cls.list_fields, 
-                cls.detail_fields, 
-                cls.fields,
-            ]
-            builder = cls.json_builder_class
-            return {
-                id(i): builder(cls.api, i) for i in fields if not callable(i)
-            }
-
-        cls.api           = api
-        cls.version_name  = version_name
-        cls.fields        = get_fields()
-        cls.detail_fields = getattr(cls, "detail_fields", cls.fields)
-        cls.list_fields   = getattr(cls, "list_fields", cls.fields)
-        cls.pagination    = get_resource_page()
-        cls.meta          = get_resource_meta()
-        cls.builders      = get_json_builders()
+    class Meta:
+        pass
 
     @classmethod
     def get_views(cls):
@@ -96,14 +45,16 @@ class BaseResource(OptionsMixin):
             if each.startswith('as_') and each.endswith('_view'):
                 yield getattr(cls, each)()
     
-    def __init__(self, routes):
-        self.routes = routes
-        self.documentation = self.documentation(self)
+    def __init__(self, api, routes, version_name=None):
+        self.routes        = routes
+        self.api           = api
+        self.version_name  = version_name
+        self._meta         = ResourceMeta(self)
 
     @property
     def tagname(self):
-        return self.model.__name__.lower()
-        
+        return self._meta.model.__name__.lower()
+    
     def handle_request(self, request, **kwargs):
         '''
         Called in every request made to Resource
@@ -124,8 +75,7 @@ class BaseResource(OptionsMixin):
         '''
         Get JSON builder for the given fields
         '''
-        return self.builders.get(id(fields) ) or \
-            self.json_builder_class( self.api, fields )
+        return self._meta.serializer(self.api, fields)
 
     def handle_response(self, request, response, fields, parameters=None):
         '''
@@ -148,7 +98,8 @@ class BaseResource(OptionsMixin):
             response = self.handle_list_response(
                 request, response, current_fields, parameters)
         
-        response = self.uglify_json(response) if self.uglify else response
+        if self._meta.uglify:
+            response = self.uglify_json(response)
         return to_http(request, response, status)
 
     @include_metadata
@@ -201,7 +152,8 @@ class BaseResource(OptionsMixin):
         '''
         Return page of resources according to default or parameter values
         '''
-        page_objects, page_params = self.pagination.select(request, resources)
+        pagination = self._meta.pagination
+        page_objects, page_params = pagination.select(request, resources)
         parameters.validated.update( page_params )
         return page_objects
 

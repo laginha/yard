@@ -3,9 +3,10 @@
 from django.db.models import Avg, Max, Min, Count
 from yard.exceptions import NoMeta
 from yard.utils import is_generator
+from yard.consts import METADATA_OPTIONS
 
 
-class MetaDict(dict):
+class MetadataDict(dict):
     '''
     Per-request resource's metadata
     '''
@@ -14,7 +15,7 @@ class MetaDict(dict):
         self.resources = resources
         self.params    = params
         self.page      = page
-        self.results_name = pagination.results_per_page['parameter']
+        self.results_name = pagination.results_parameter
         self.offset_name  = pagination.offset_parameter
         if is_generator(self.resources):
             self.total_objects = lambda: None
@@ -54,7 +55,7 @@ class MetaDict(dict):
         query_string = reduce(dic_to_query, get.items(), '?')[2:]
         return self.request.path + "?" + query_string
 
-    def next_page(self):
+    def next_page(self, value):
         '''
         Adds the URI for the next page
         '''
@@ -70,7 +71,7 @@ class MetaDict(dict):
             else:
                 self['next_page'] = self.get_page_uri(next_offset)
 
-    def previous_page(self):
+    def previous_page(self, value):
         '''
         Adds the URI for the previous page
         '''
@@ -84,19 +85,19 @@ class MetaDict(dict):
             previous_offset = max( previous_offset, 0 )
             self['previous_page'] = self.get_page_uri(previous_offset)
 
-    def total_objects(self):
+    def total_objects(self, value):
         '''
         Adds the total number of the response (not-paginated)
         '''
         self['total_objects'] = self.resource_count
 
-    def paginated_objects(self):
+    def paginated_objects(self, value):
         '''
         Adds the number of paginated objects in the response
         '''
         self['paginated_objects'] = self.page_count
 
-    def validated_parameters(self):
+    def validated_parameters(self, value):
         '''
         Adds the parameters validated according to Resource.Parameters
         '''
@@ -106,7 +107,8 @@ class MetaDict(dict):
         '''
         Auxiliar method for aggregation based metadata options
         '''
-        if not value: return
+        if not value: 
+            return
         for a,b in value:
             self[a] = self.resources.aggregate(_yard_=call(b))['_yard_']
 
@@ -144,38 +146,29 @@ class MetaDict(dict):
             return
 
 
-class ResourceMeta(object):
+class Metadata(object):
     '''
     Class responsible for generating resource's metadata 
     '''
+    custom = {}
     
-    DEFAULTS = [
-        ('no_meta',               False),
-        ('validated_parameters',  True),
-        ('total_objects',         True),
-        ('paginated_objects',     True),
-        ('next_page',             True),
-        ('previous_page',         True),
-        ('average',               None),
-        ('minimum',               None),
-        ('maximum',               None),
-        ('count',                 None)
-    ]
-
-    def __init__(self, pagination, meta=type('Meta', (), {})):
+    def __init__(self, pagination):
         self.pagination = pagination
-        self.new_meta = [
-            (k,v) for k,v in meta.__dict__.iteritems() if callable(v)
-        ]
-        for k,v in self.DEFAULTS:
-            setattr(self, k, getattr(meta, k, v))
-
+        self.default = {}
+        for key,value in METADATA_OPTIONS.iteritems():
+            if key == 'custom':
+                self.custom = getattr(self, key, value)
+            else:
+                self.default[key] = getattr(self, key, value)
+            
     def generate(self, request, resources, page, params):
         '''
         Generate metadata according to given args
         '''
         try:
-            meta = MetaDict( request, resources, page, params, self.pagination )
+            meta = MetadataDict( 
+                request, resources, page, params, self.pagination
+            )
             self.generate_defaults( meta )
             self.generate_custom_meta( meta )
             return meta
@@ -186,19 +179,16 @@ class ResourceMeta(object):
         '''
         Generate metadata available by default
         '''
-        for name,default in self.DEFAULTS:
-            value = getattr(self, name)
-            if name=='no_meta' and value:
+        for name,value in self.default.iteritems():
+            if name == 'no_meta' and value:
                 raise NoMeta()
-            elif default==None:
-                getattr(meta, name)( value )
             elif value:
-                getattr(meta, name)()
+                getattr(meta, name)( value )
         return meta
 
     def generate_custom_meta(self, meta):
         '''
         Generate custom made metadata
         '''
-        for name,call in self.new_meta:
+        for name,call in self.custom.iteritems():
             meta.custom( name, call )
