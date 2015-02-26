@@ -12,7 +12,7 @@ from pip.req import parse_requirements
 
 setup(
     name             = 'yard',
-    version          = '2.1a0',
+    version          = '3.0a0',
     author           = "Diogo Laginha",
     author_email     = "diogo.laginha.machado@gmail.com",
     url              = 'https://github.com/laginha/yard',
