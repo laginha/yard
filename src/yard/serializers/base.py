@@ -4,15 +4,14 @@ from django.core.urlresolvers import NoReverseMatch
 from yard.utils import is_related_manager, is_method, is_dict
 from yard.fields import URI, Link
 from yard.exceptions import NoResourceMatch
-from yard.consts import RESOURCE_URI_KEYNAME
 
 
-class BaseJsonSerializer(object):
+class BaseSerializer(object):
     '''
     Responsible for creating the JSON response
     '''
     def __init__(self, api, fields, mobile=False):
-        self.fields = fields() if callable(fields) else fields
+        self.fields = fields
         self.api = api
         self.links = {}
     
@@ -36,7 +35,7 @@ class BaseJsonSerializer(object):
         '''
         init JSON for the resource
         '''
-        return {RESOURCE_URI_KEYNAME: self.api.get_uri(resource)}
+        return {}
 
     def handle_field(self, resource, key, value):
         '''

@@ -1,15 +1,23 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from yard.utils import is_generator
-from yard.consts import PAGINATION_OPTIONS
 
 
 class Pagination(object):
     '''
     Class responsible for resource pagination
     ''' 
+    
+    PAGINATION_OPTIONS = {
+        'offset_parameter': 'offset',
+        'results_parameter': 'results',
+        'results_per_page': 25,
+        'limit_per_page': 50,
+        'no_pagination': False,
+    }
+    
     def __init__(self):
-        for key,value in PAGINATION_OPTIONS.iteritems():
+        for key,value in self.PAGINATION_OPTIONS.iteritems():
             if not hasattr(self, key):
                 setattr(self, key, value)
     

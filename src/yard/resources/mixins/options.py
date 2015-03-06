@@ -9,6 +9,7 @@ class OptionsMixin(object):
         for http_method, resource_method in self.routes.items():
              if http_method != "OPTIONS" and hasattr(self, resource_method):
                  allowed_methods.append( http_method )
+        return allowed_methods
         
     def handle_options(self, request, kwargs):
         response = self.options(request, **kwargs)

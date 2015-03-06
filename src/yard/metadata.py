@@ -3,7 +3,6 @@
 from django.db.models import Avg, Max, Min, Count
 from yard.exceptions import NoMeta
 from yard.utils import is_generator
-from yard.consts import METADATA_OPTIONS
 
 
 class MetadataDict(dict):
@@ -150,12 +149,24 @@ class Metadata(object):
     '''
     Class responsible for generating resource's metadata 
     '''
-    custom = {}
+    METADATA_OPTIONS = {
+        'no_meta': False,
+        'validated_parameters': True,
+        'total_objects': True,
+        'paginated_objects': True,
+        'next_page': True,
+        'previous_page': True,
+        'average': None,
+        'minimum': None,
+        'maximum': None,
+        'count': None,
+        'custom': {},
+    }
     
     def __init__(self, pagination):
         self.pagination = pagination
         self.default = {}
-        for key,value in METADATA_OPTIONS.iteritems():
+        for key,value in self.METADATA_OPTIONS.iteritems():
             if key == 'custom':
                 self.custom = getattr(self, key, value)
             else:

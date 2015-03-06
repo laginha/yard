@@ -19,7 +19,7 @@ setup(
     description      = "Yet Another Resftul Django framework",
     packages         = find_packages(where='src'),
     package_dir      = {'': 'src'},
-    install_requires = ['Django', 'simplejson', 'rstr', 'gpolyencode'],
+    install_requires = ['Django', 'ujson', 'rstr', 'gpolyencode'],
     # dependency_links = ,
     extras_require   = {},
     zip_safe         = False,

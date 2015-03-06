@@ -1,8 +1,8 @@
 from yard.consts import RESOURCE_PK_KEYNAME
-from .base import BaseJsonSerializer
+from .base import BaseSerializer
 
 
-class MobileJsonSerializer(BaseJsonSerializer):
+class MobileSerializer(BaseSerializer):
     '''
     Responsible for creating the JSON response optimized for mobile
     '''

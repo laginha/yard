@@ -1,7 +1,7 @@
 from yard.swagger import Documentation
 from yard.metadata import Metadata
 from yard.pagination import Pagination
-from yard.serializers import BaseJsonSerializer
+from yard.serializers import HypermediaSerializer
 from yard.exceptions import NoModelError
 from yard.fields import get_field as get_json_field
 import copy
@@ -18,13 +18,12 @@ class ResourceMeta(object):
     
     DEFAULTS = {
         'model': None,
-        'serializer': BaseJsonSerializer,
+        'serializer': HypermediaSerializer,
         'uglify': False,
         'documentation': Documentation,
         'metadata': Metadata,
         'pagination': Pagination,
     }
-    
     
     def __init__(self, resource):
         

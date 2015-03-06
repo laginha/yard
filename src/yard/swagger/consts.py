@@ -50,5 +50,5 @@ SWAGGER_PARAMETERS_DEFINITIONS = getattr(settings, 'SWAGGER_PARAMETERS_DEFINITIO
 SWAGGER_SUPPORTED_METHODS = getattr(settings, 'SWAGGER_SUPPORTED_METHODS', ['get', 'post', 'put', 'delete'])
 SWAGGER_DOC_EXPANSION     = getattr(settings, 'SWAGGER_DOC_EXPANSION',     'list')
 SWAGGER_SORTER            = getattr(settings, 'SWAGGER_SORTER',            'alpha')
-SWAGGER_API_KEY_NAME      = getattr(settings, 'SWAGGER_API_KEY_NAME',      'key_name')
+SWAGGER_API_KEY_NAME      = getattr(settings, 'SWAGGER_API_KEY_NAME',      'key')
 SWAGGER_DEFAULT_KEY       = getattr(settings, 'SWAGGER_DEFAULT_KEY',       '')

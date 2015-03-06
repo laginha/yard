@@ -21,7 +21,8 @@ class VersionController(object):
             raise NoDefaultVersion()
 
     def get_documentation(self):
-        resource = self.versions[self.default](self.api, self.routes)
+        resource_class = self.versions[self.default]
+        resource = resource_class(self.api, self.routes, self.default)
         return resource.get_documentation()
 
     def get_version(self, request):

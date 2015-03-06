@@ -6,7 +6,7 @@ from yard.fields import (
     GenericForeignKey, ValuesSet, RelatedManager, QuerySet, OBJECT_TO_JSONFIELD, 
     Auto, MODELFIELD_TO_JSONFIELD, get_field,)
 from django.contrib.gis.db import models
-import simplejson
+import ujson
 import gpolyencode
 
 
@@ -14,7 +14,7 @@ def encoded_polyline_converter(data):
     encoder = gpolyencode.GPolyEncoder()
     return encoder.encode(data.coords)
 
-GeoJson = JsonField('string', lambda data: simplejson.loads(data.geojson))
+GeoJson = JsonField('string', lambda data: ujson.loads(data.geojson))
 EncodedPolyline = JsonField('string', encoded_polyline_converter)
 
 

@@ -1,5 +1,5 @@
 Django
-simplejson
+ujson
 rstr
 gpolyencode
 

@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django_simple_response.utils.process import to_http
 from yard.forms import Form
 from yard.consts import (
-    DEFAULT_STATUS_CODE, JSON_OBJECTS_KEYNAME, JSON_META_KEYNAME, 
+    DEFAULT_STATUS_CODE, JSON_OBJECTS_KEYNAME, JSON_METADATA_KEYNAME, 
     JSON_LINKS_KEYNAME,)
 from yard.fields import SELECT_RELATED_FIELDS, PREFETCH_RELATED_FIELDS
 from yard.utils import (
@@ -15,7 +15,6 @@ from yard.utils import (
 from yard.serializers import uglify_json
 from .mixins import OptionsMixin
 from .meta import ResourceMeta
-import copy
 
 
 def include_metadata(f):
@@ -71,7 +70,7 @@ class BaseResource(OptionsMixin):
             # IOError: if return file not found
             return HttpResponse(status=404)
 
-    def get_builder(self, fields):
+    def get_serializer(self, fields):
         '''
         Get JSON builder for the given fields
         '''
@@ -81,7 +80,7 @@ class BaseResource(OptionsMixin):
         '''
         Proccess response into a JSON serializable object
         '''
-        current_fields = fields(kwargs) if callable(fields) else fields
+        current_fields = fields(request) if callable(fields) else fields
         status = DEFAULT_STATUS_CODE
         if is_tuple(response):
             status, response = response
@@ -107,7 +106,7 @@ class BaseResource(OptionsMixin):
         '''
         Serialize queryset based response
         '''
-        builder = self.get_builder(fields)
+        builder = self.get_serializer(fields)
         serialized = self.serialize_all( resources, fields, builder )
         return serialized, builder.links
 
@@ -116,7 +115,7 @@ class BaseResource(OptionsMixin):
         '''
         Serialize list based response
         '''
-        builder = self.get_builder(fields)
+        builder = self.get_serializer(fields)
         serialized = []
         for each in resources:
             if is_modelinstance(each):
@@ -129,7 +128,7 @@ class BaseResource(OptionsMixin):
         '''
         Serialize model instance based response
         '''
-        builder = self.get_builder(fields)
+        builder = self.get_serializer(fields)
         response = self.serialize(resource, fields, builder, collection=False)
         if builder.links:
             response = {
@@ -142,7 +141,7 @@ class BaseResource(OptionsMixin):
         if meta or links:
             result = {JSON_OBJECTS_KEYNAME: objects}
             if meta:
-                result[JSON_META_KEYNAME] = meta
+                result[JSON_METADATA_KEYNAME] = meta
             if links:
                 result[JSON_LINKS_KEYNAME] = links
             return result
@@ -183,7 +182,7 @@ class BaseResource(OptionsMixin):
         Serializes each resource (within page) into json
         '''
         if builder == None:
-            builder = self.get_builder(fields)
+            builder = self.get_serializer(fields)
         return [builder.to_json(i) for i in resources]
 
     def serialize(self, resource, fields, builder=None, collection=True):
@@ -191,7 +190,7 @@ class BaseResource(OptionsMixin):
         Creates json for given resource
         '''
         if builder == None:
-            builder = self.get_builder(fields)
+            builder = self.get_serializer(fields)
         return builder.to_json(resource, collection)
     
     def uglify_json(self, response):
