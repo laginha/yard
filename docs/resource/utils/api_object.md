@@ -2,33 +2,15 @@
 
 This *Object* is responsible to generate the *urlpatterns* according to its *Resources*.
 
-
-### init
-
 The class constructor accepts two arguments:
 
-- **path**: defines the pre-path of its *Resources* (defaults to `r'^`)
-- **discover**: defines if the pre-path should return a list of available resources in the *Api* (defaults to `False`)
+- **path**: defines the root of the API and its *Resources* (defaults to `r'^`).
+- **discover**: defines if the root should return a swagger compliant JSON.
 
 ```python
 api = Api( r'^apipath/', discover=True )
 ```
 
-In this case a *HTTP GET* request to `http://example.com/apipath` would return a *JSON* response like this:
-
-```javascript
-{
-    Resources: [
-        {
-            uri: "some_resource/"
-            description: "some description"
-        },
-        ...
-    ]
-}
-```
-
-## Methods and Properties
 
 ### urlpatterns
 
@@ -41,20 +23,19 @@ api.urlpatterns
 ```
 
 
-### include
+### include()
 
 Add a *Resource* to the API
 
 ```python
-include( resource_path, resource_class, single_name=None, collection_name=None )
+include( resource_path, resource_class, name=None )
 ```
 
 Arguments:
 
 - **resource_path**: URI path of the resource.
 - **resource_class**: the *Resource* class you want to add.
-- **single_name**: viewname for `/path/to/resource/:id`.
-- **collection_name**: viewname for `/path/to/resource/`.
+- **name**: viewname's prefix.
 
 Example:
 
@@ -63,7 +44,7 @@ api.include( r'foo', FooResource )
 ```
 
 
-### extend
+### extend()
 
 Add the `urlpatterns` from another *urls*.
 
@@ -84,7 +65,7 @@ api.extend( r'someapp', 'path.to.someapp.urls' )
 ```
 
 
-### get_uri
+### get_uri()
 
 Get URI path of the resource associated the a given model. For this to work properly the expected *Resource* must have the class attribute `model`.
 

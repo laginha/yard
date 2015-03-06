@@ -2,6 +2,8 @@
 
 One of the most important features related to REST APIs is versioning. When a resource representation is changed in a non-backward compatible way, the resource should be versioned in order to provide any of the representations if requested.
 
+> Resource versioning is taken into consideration by the [API documentation module](meta/documentation.md).
+
 
 ## How To
 
@@ -11,25 +13,37 @@ The example below `BookResourceV2` and `BookResourceV3` are new versions (subcla
 from yard import resources
 
 class BookResource(resources.Resource):
-    fields = ('id', 'title', 'author')
-    ...
+    class Meta:
+        model = models.Book
+    
+    def list(self, request):
+        return models.Book.objects.all()
 
 class BookResourceV2(BookResource):
-    fields = ('id', 'title')
+    class Meta:
+        model = models.Book
+        fields = {
+            'title': fields.Unicode, 
+            'author': fields.Unicode
+        }
     
 class BookResourceV3(BookResource):
-    list_fields = ('id',)
+    class Meta:
+        model = models.Book
+        fields = {
+            'title': fields.Unicode, 
+        }
 ```    
 
 
-### ResourceVersions
+### VersionController
 
-This class is responsible for resource versioning. Each subclass of `ResourceVersions` requires the `default` attribute. This will be used whenever no version is mentioned in the HTTP request.
+This class is responsible for resource versioning. Each subclass of `VersionController` requires the `default` attribute. This will be used whenever no version is mentioned in the HTTP request.
 
 ```python
-from yard import versions
+from yard.version import VersionController
 
-class BookResourceVersions(version.ResourceVersions):
+class BookVersionController(VersionController):
     versions = {
         '1.0': BookResource,
         '2.0': BookResourceV2,
@@ -39,13 +53,11 @@ class BookResourceVersions(version.ResourceVersions):
     latest  = '3.0'
 ```    
 
-*urls.py*
-
 ```python
 from yard.api import Api
 
 api = Api()
-api.include( 'books', BookResourceVersions )
+api.include( 'books', BookVersionController )
 urlpatterns = api.urlpatterns
 ```
 

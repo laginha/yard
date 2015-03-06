@@ -1,6 +1,6 @@
 # Yet Another Restful Django Framework
 
-**Yard** is an *API* oriented framework that aims to simplify the developer's work when implementing complex *API design*. It provides a neat, familiar and easy way to control the logic for acceptable parameters in each http-GET-request.
+**Yard** is an *API* oriented framework that aims to simplify the developer's work when implementing complex *API design*.
 
 
 ## Usage
@@ -33,31 +33,19 @@ class BooksResource(resources.Resource):
         #GET /resource/
         return Book.objects.filter(**request.form.parameters)
 
-    def detail(self, request, book_id):
-        #GET /resource/:id/
-        return Book.objects.get( id=book_id )
-
-    def create(self, request):
-        #POST /resource/
-        return 401, 'You are not authorize'
-
-    def update(self, request, book_id):
-        #PUT /resource/:id/
-        ...
-
-    def destroy(self, request, book_id):
-        #DELETE /resource/:id/
-        ...
+    def detail(self, request, pk):
+        #GET /resource/:pk/
+        return Book.objects.get(pk=pk)
 ```
 
 *forms.py*
 
-```
+```python
 from yard import forms
 
 class ListBook(forms.QueryForm):
     year   = forms.IntegerField(required=False, min_value=1970, max_value=2012)
-    title  = forms.CharField(required=False)
+    title  = forms.CharField(required=False) # Django's fields
     genre  = forms.CharField(required=False)
     author = forms.CharField(required=False)
     house  = forms.CharField(required=False)
@@ -78,10 +66,10 @@ class ListBook(forms.QueryForm):
 *urls.py*
 
 ```python
-from views    import AuthorResource, BookResource
+from views import AuthorResource, BookResource
 from yard.api import Api
 
-api = Api()
+api = Api(discover=True) # Swagger support
 api.include( 'books', BookResource )
 api.include( 'authors', AuthorResource )
 
@@ -104,21 +92,17 @@ You can also install from source:
 
 - Resource and API oriented 
 - Complex API logic
-- Hypermedia API
 - JSON serialization
-- API discovery
+- Hypermedia and API discovery (Swagger support)
+- Resource versioning
 - Pagination
 - Metadata
-- Resource versioning
 
-For more information, check the [documentation](docs/index.md).
+For more information, check the [documentation](docs/index.md)!
 
 
 ## Motivations
 
-I've been working with a fairly complex project, with equally complex API design. *Django forms* weren't enough for what i needed, i still had too much code on my resources validating the input parameters. That was when I started to developed my own resource, inspired by the [Dagny](https://github.com/zacharyvoase/dagny) project, that would relieve my views from the ugliness of input validations.
+Just having fun while learning :) Nonetheless, I think *Yard* brings something new.
 
-With a few extra inspirations, *Yard* was born.
-
-Other frameworks and applications, more mature and solid, such as [Tastypie](http://django-tastypie.readthedocs.org/en/latest/) and [Django-Rest-Framework](http://django-rest-framework.org/), can be enough for most needs. But i think *Yard* brings something new. In the end, I'm just having fun really and keeping it simple.
-
+Be aware, there are other frameworks and applications more mature and solid, such as [Tastypie](http://django-tastypie.readthedocs.org/en/latest/) and [Django-Rest-Framework](http://django-rest-framework.org/), which are awesome.

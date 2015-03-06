@@ -5,7 +5,7 @@ from yard.resources import Resource
 from yard.api import Api
 from yard.tests.base import BaseTestCase
 from books.models  import *
-import simplejson
+import ujson
 
 create_return_list          = lambda r, **p: range(10)
 create_return_str           = lambda r, **p: 'foo'
@@ -61,7 +61,7 @@ class ResourceHttpMethodsTestCase( BaseTestCase ):
         assert response.status_code == status, response.status_code
         assert content_type in response['Content-Type'], response
         if content_type == "application/json":  
-            return simplejson.loads( response.content )
+            return ujson.loads( response.content )
         return response.content
     
     def test_show_method(self):

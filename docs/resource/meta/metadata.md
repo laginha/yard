@@ -1,9 +1,50 @@
 # Metadata
 
-For **index**'s `QuerySet`, list of model instances and `ValuesSet` based responses, *Yard* appends useful metadata by default.
+Whenever a Resource's **list** method returns a `QuerySet`, a list of model instances or a `ValuesSet`, *Yard* appends useful metadata by default to the resulting JSON representation.
 
 
-## Meta Options
+```python  
+from yard import metadata
+
+class BookMetadata(metadata.Metadata): 
+    validated_parameters = False
+    maximum = (('longest_title', 'title'),)
+```
+
+```python 
+from yard import resources
+
+class Book(resources.Resource):
+    class Meta:
+        model = models.Book
+        pagination = BookMetadata
+```
+
+```javascript
+{
+    "Objects": [
+        {
+            "publication_date": "2005-10-17", 
+            "author": {
+                "name": "George R.R. Martin", 
+            }, 
+            "title": "A Feast for Crows"
+        }, 
+        ...
+    ], 
+    "Meta": {
+        "longest_title": "A Feast for Crows",
+        "next_page": /books/?offset=25,
+        "previous_page": /books/?offset=25,
+        "paginated_objects": 25
+        "total_objects": 30, 
+        "longest_title": "A Feast for Crows",
+    }
+}
+```
+
+
+## Metadata Options
 
 
 ### total_objects
@@ -48,13 +89,6 @@ For **index**'s `QuerySet`, list of model instances and `ValuesSet` based respon
 - if set to `True`, no metadata is included in the *JSON* response.
 - defaults to `False`.
 
-### with_errors
-
-    with_errors = True
-
-- if set to `True`, adds parameters' validation errors to the *JSON* response.
-- defaults to `False`.
-
 ### average
 
     average = (('average_pages', 'number_of_pages'),)
@@ -87,63 +121,3 @@ If the available options are not enough for your needs, it is possible to create
     smallest_title = lambda x: x.aggregation(Min('title'))
     
 Custom-made meta option needs to be callable with a single argument, which is a the *QuerySet*.
-
-
-## Examples
-
-### with meta
-
-```python
-from yard import resources    
-    
-class BookResource(resources.Resource):
-    class Meta:
-        validated_parameters = False
-        maximum = (('longest_title', 'title'),)
-```
-
-```javascript
-{
-    "Objects": [
-        {
-            "publication_date": "2005-10-17", 
-            "author": {
-                "name": "George R.R. Martin", 
-            }, 
-            "title": "A Feast for Crows"
-        }, 
-        ...
-    ], 
-    "Meta": {
-        "longest_title": "A Feast for Crows",
-        "next_page": /myresource/?offset=25,
-        "previous_page": /myresource/?offset=25,
-        "paginated_objects": 25
-        "total_objects": 30, 
-        "longest_title": "A Feast for Crows",
-    }
-}
-```
-
-### without meta
-
-```python
-from yard import resources    
-    
-class BookResource(resources.Resource):
-    class Meta:
-        no_meta = True
-```
-
-```javascript
-[
-    {
-        "publication_date": "2005-10-17", 
-        "author": {
-            "name": "George R.R. Martin", 
-        }, 
-        "title": "A Feast for Crows"
-    },
-    ...
-]
-```

@@ -41,7 +41,7 @@ INSTALLED_APPS = (
     # example app
     'books',
     'yard.swagger', 
-    'yard',  
+    # 'yard',
 )
 
 MIDDLEWARE_CLASSES = (

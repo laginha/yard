@@ -3,17 +3,17 @@
 from django.test.client import Client, RequestFactory
 from yard.resources import Resource
 from yard.api import Api
-from yard.serializers import MobileJsonSerializer
+from yard.serializers import MobileSerializer
 from yard import fields
 from yard.tests.base import BaseTestCase
 from books.models  import *
 from books.resources import AuthorResource
-import simplejson
+import ujson
 
 
 class TestResource(Resource):
     class Meta:
-        serializer = MobileJsonSerializer
+        serializer = MobileSerializer
         model = Book
         fields = {
             'author': fields.Link
@@ -44,7 +44,7 @@ class MobileDrivenResourceTestCase( BaseTestCase ):
             response = self.collection_resource(request, **{})
             assert response.status_code == 200, response.status_code
             assert "application/json" in response['Content-Type']
-            content = simplejson.loads( response.content )
+            content = ujson.loads( response.content )
             assert "Objects" in content
             assert "Meta" in content
             assert "Links" in content
@@ -60,7 +60,7 @@ class MobileDrivenResourceTestCase( BaseTestCase ):
             response = self.single_resource(request, **{'pk':1})
             assert response.status_code == 200
             assert "application/json" in response['Content-Type']
-            content = simplejson.loads( response.content )
+            content = ujson.loads( response.content )
             assert "Meta" not in content
             return content
         

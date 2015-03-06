@@ -1,8 +1,22 @@
 # Uglification
 
-As discussed in [here](resource_types.md), using `MobileDrivenResource` results in a lighter *JSON* response. However you can also uglify *JSON* responses to optimize the response, whatever the resource type.
+You can add extra layer to the JSON response construction (besides [pagination](pagination.md), [serialization](serializers.md) and [metadata inclusion](metadata.md)) through uglification. 
 
-## Resource
+```python 
+from yard import resources, fields, serializers
+
+class Book(resources.Resource):
+    class Meta:
+        model = models.Book
+        uglify = True
+```
+
+This process may be used whatever is the chosen serializer. It acts upon the resulting JSON, uglifying it and making it lighter.
+
+
+## Examples
+
+#### HypermediaSerializer
 
 Normal response:
 
@@ -53,7 +67,7 @@ Uglified response:
 ```
 
 
-## MobileDrivenResource
+#### MobileSerializer
 
 Normal response:
 

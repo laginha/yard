@@ -239,7 +239,7 @@ If by any chance any of the above types don't work for your particular needs, yo
 
 ```python
 fields = {
-    'description': lambda text: text if len(text) <= 140 else text[:140]+"..."
+    'text': lambda text: text if len(text) <= 140 else text[:140]+"..."
 }
 ```
 
