@@ -5,7 +5,7 @@ from yard.resources import Resource
 from yard.api import Api
 from yard.serializers import MobileSerializer
 from yard import fields
-from yard.tests.base import BaseTestCase
+from yard.testcases.base import BaseTestCase
 from books.models  import *
 from books.resources import AuthorResource
 import ujson

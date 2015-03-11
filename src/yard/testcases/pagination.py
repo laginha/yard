@@ -2,7 +2,7 @@
 # encoding: utf-8
 from django.test.client import Client, RequestFactory
 from yard.pagination import Pagination
-from yard.tests.base import BaseTestCase
+from yard.testcases.base import BaseTestCase
 from books.models  import *
 
 

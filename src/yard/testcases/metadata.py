@@ -4,7 +4,7 @@ from django.test.client import Client, RequestFactory
 from yard.metadata import Metadata
 from yard.pagination import Pagination
 from yard.forms import Parameters
-from yard.tests.base import BaseTestCase
+from yard.testcases.base import BaseTestCase
 from books.models  import *
 
 

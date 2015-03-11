@@ -3,7 +3,7 @@
 from django.test.client import Client, RequestFactory
 from yard.api import Api
 from yard.resources import Resource
-from yard.tests.base import BaseTestCase
+from yard.testcases.base import BaseTestCase
 from books.models  import *
 from books.resources import BookResource, BookResourceVersions
 

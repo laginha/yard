@@ -5,7 +5,7 @@ from yard.resources import Resource
 from yard.resources.meta import model_to_fields
 from yard.api import Api
 from yard import fields as FIELDS
-from yard.tests.base import BaseTestCase
+from yard.testcases.base import BaseTestCase
 from books.models  import Book, Author
 
 
