@@ -8,6 +8,19 @@
     pip install yard-framework
 
 
+## Main features
+
+- Resource and API oriented 
+- JSON serialization
+    - with pagination
+    - and metadata
+- Hypermedia
+    - API documentation (Swagger support)
+    - API discovery and browsing
+- Resource versioning
+- GEOS support
+
+
 ## Usage
 
 *views.py*
@@ -80,19 +93,6 @@ api.include( 'books', BookResource )
 urlpatterns = api.urlpatterns
 ```
 
-    
-    
-## Main features
-
-- Resource and API oriented 
-- JSON serialization
-    - with pagination
-    - and metadata
-- Hypermedia
-    - API documentation (Swagger support)
-    - API discovery and browsing
-- Resource versioning
-- GEOS support
 
 For more information, check the [documentation](docs/index.md)!
 
