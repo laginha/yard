@@ -3,6 +3,13 @@
 **Yard** is an *API* oriented framework that aims to simplify the developer's work when implementing complex *API design*. It provides a neat, familiar and easy way to control the logic for acceptable parameters in each http-GET-request.
 
 
+## Install
+
+*Yard* is available on Pypi:
+
+    pip install yard-framework
+
+
 ## Usage
 
 *views.py*
@@ -68,17 +75,6 @@ urlpatterns = api.urlpatterns
 ```
 
 
-## Install
-
-*Yard* is available on Pypi:
-
-    pip install yard-framework
-    
-You can also install from source:
-
-    python setup.py install
-    
-    
 ## Main features
 
 - Resource and API oriented 
