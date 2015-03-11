@@ -5,6 +5,7 @@ Choosing the *field type* is not only a matter of semantics. It influences the *
 ### Integer
 
 Return JSON field as an integer.
+
 ```python
 fields = {
     'id': fields.Integer
@@ -14,6 +15,7 @@ fields = {
 ### Float
 
 Return JSON field as a float.
+
 ```python
 fields = {
     'id': fields.Float
@@ -41,7 +43,7 @@ fields = {
 
 ### JSON
 
-Alias for ´fields.ict´
+Alias for ´fields.dict´
 
 ### String
    
@@ -123,16 +125,6 @@ fields = {
 }
 ```
 
-### GeoJSON
-
-Return JSON field as GeoJSON.
-
-```python
-fields = {
-    'location': fields.GeoJson
-}
-```
-
 ### RelatedManager
 
 Return JSON field as a list of unicode values for RelatedManager input.
@@ -191,7 +183,7 @@ class AuthorsResource(resources.Resource):
         return Author.objects.get(pk=object_id)
 ```
 
-## Link
+### Link
 
 Return the `pk` as JSON field value and adds *incomplete-URI* to *JSON* response field *Links*. 
 
@@ -233,13 +225,44 @@ fields = {
 If you are too lazy to specify the field type, this is a good solution for you. However this won't work properly for certain class objects like `ManyRelatedManager`.
 
 
+## Geos
+
+### GeoJSON
+
+Return JSON field as GeoJSON.
+
+```python
+from yard.gis import fields
+```
+
+```python
+fields = {
+    'location': fields.GeoJson
+}
+```
+
+### EncodedPolyline
+
+Return JSON field as an [encoded polyline](https://developers.google.com/maps/documentation/utilities/polylinealgorithm).
+
+```python
+from yard.gis import fields
+```
+
+```python
+fields = {
+    'shape': fields.EncodedPolyline
+}
+```
+
+
 ## Create your own field type
 
 If by any chance any of the above types don't work for your particular needs, you can create your own:
 
 ```python
 fields = {
-    'text': lambda text: text if len(text) <= 140 else text[:140]+"..."
+    'text': lambda x: x if len(x) <= 140 else text[:137]+"..."
 }
 ```
 

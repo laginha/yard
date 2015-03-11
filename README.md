@@ -3,6 +3,11 @@
 **Yard** is an *API* oriented framework that aims to simplify the developer's work when implementing complex *API design*.
 
 
+## Install
+
+    pip install django_yard
+
+
 ## Usage
 
 *views.py*
@@ -66,43 +71,34 @@ class ListBook(forms.QueryForm):
 *urls.py*
 
 ```python
-from views import AuthorResource, BookResource
 from yard.api import Api
+from app.views import BookResource
 
 api = Api(discover=True) # Swagger support
 api.include( 'books', BookResource )
-api.include( 'authors', AuthorResource )
 
 urlpatterns = api.urlpatterns
 ```
 
-
-## Install
-
-*Yard* is available on Pypi:
-
-    pip install yard-framework
-    
-You can also install from source:
-
-    python setup.py install
     
     
 ## Main features
 
 - Resource and API oriented 
-- Complex API logic
 - JSON serialization
-- Hypermedia and API discovery (Swagger support)
+    - with pagination
+    - and metadata
+- Hypermedia
+    - API documentation (Swagger support)
+    - API discovery and browsing
 - Resource versioning
-- Pagination
-- Metadata
+- GEOS support
 
 For more information, check the [documentation](docs/index.md)!
 
 
 ## Motivations
 
-Just having fun while learning :) Nonetheless, I think *Yard* brings something new.
+Just having fun while learning :)
 
 Be aware, there are other frameworks and applications more mature and solid, such as [Tastypie](http://django-tastypie.readthedocs.org/en/latest/) and [Django-Rest-Framework](http://django-rest-framework.org/), which are awesome.
