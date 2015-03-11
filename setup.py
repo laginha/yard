@@ -3,15 +3,12 @@
 from setuptools import setup, find_packages
 from pip.req import parse_requirements
 
-# def parse_requirements():
-#     return pip.req.parse_requirements('requirements.txt')
-#
-# install_requires = [
-#     str(each.req) for each in parse_requirements() if each.req
-# ]
+install_reqs = parse_requirements("requirements.txt")
+reqs = [str(each.req) for each in install_reqs if each.req]
+
 
 setup(
-    name             = 'yard',
+    name             = 'django-yard',
     version          = '3.0a0',
     author           = "Diogo Laginha",
     author_email     = "diogo.laginha.machado@gmail.com",
@@ -19,8 +16,7 @@ setup(
     description      = "Yet Another Resftul Django framework",
     packages         = find_packages(where='src'),
     package_dir      = {'': 'src'},
-    install_requires = ['Django', 'ujson', 'rstr', 'gpolyencode'],
-    # dependency_links = ,
+    install_requires = reqs,
     extras_require   = {},
     zip_safe         = False,
     license          = 'MIT',
