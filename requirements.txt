@@ -2,6 +2,6 @@ Django
 simplejson
 rstr
 gpolyencode
-
-git+https://github.com/laginha/django-simple-response/
-git+https://github.com/laginha/django-key-auth/
+throttling
+django-easy-response
+django-key-auth
