@@ -30,7 +30,7 @@ class BookResource(Resource):
         description = "Search books in our store."
         model = Book
         fields = {
-            # 'id': fields.Auto,
+            'id': fields.Auto,
             'title': fields.Auto, 
             'publication_date': fields.Auto, 
             'genres': fields.Auto,
