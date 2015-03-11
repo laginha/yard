@@ -13,7 +13,7 @@ class ListBook(forms.QueryForm):
     house  = forms.CharField(required=False)
     
     class Meta:
-        aliases = {
+        lookups = {
             'year': 'publication_date__year',
             'title': 'title__icontains',
             'genre': 'genres',

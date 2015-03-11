@@ -12,7 +12,7 @@ setup(
     version          = '3.0.0',
     author           = "Diogo Laginha",
     author_email     = "diogo.laginha.machado@gmail.com",
-    url              = 'https://github.com/laginha/yard',
+    url              = 'https://github.com/laginha/yard/tree/develop',
     description      = "Yet Another Resftul Django framework",
     packages         = find_packages(where='src'),
     package_dir      = {'': 'src'},
