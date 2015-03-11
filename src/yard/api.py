@@ -2,7 +2,7 @@
 # encoding: utf-8
 from django.conf.urls import patterns, include, url
 from django.core.urlresolvers import reverse
-from django_simple_response.http import JsonResponse
+from easy_response.http import JsonResponse
 from yard.swagger.functions import build_swagger_object
 from yard.exceptions import NoResourceMatch
 import re

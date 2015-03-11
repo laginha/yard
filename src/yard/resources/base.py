@@ -3,7 +3,7 @@
 from django.conf import settings
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
-from django_simple_response.utils.process import to_http
+from easy_response.utils.process import to_http
 from yard.forms import Form
 from yard.consts import (
     DEFAULT_STATUS_CODE, JSON_OBJECTS_KEYNAME, JSON_METADATA_KEYNAME, 
