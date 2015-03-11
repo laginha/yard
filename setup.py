@@ -7,7 +7,7 @@ install_reqs = parse_requirements("requirements.txt")
 reqs = [str(each.req) for each in install_reqs if each.req]
 
 setup(
-    name             = 'yard',
+    name             = 'yard-framework',
     version          = '2.2.0',
     author           = "Diogo Laginha",
     author_email     = "diogo.laginha.machado@gmail.com",
