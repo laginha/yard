@@ -5,7 +5,7 @@
 
 ## Install
 
-    pip install django_yard
+    pip install yard-framework>=3.0.0
 
 
 ## Usage
