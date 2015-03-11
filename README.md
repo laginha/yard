@@ -5,7 +5,7 @@
 
 ## Install
 
-    pip install yard-framework>=3.0.0
+    pip install yard-framework
 
 
 ## Usage
