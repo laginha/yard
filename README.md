@@ -5,10 +5,9 @@
 
 ## Install
 
-*Yard* is available on Pypi:
+    pip install yard-framework==2.2.0
 
-    pip install yard-framework
-
+**Check the [version 3.x](https://github.com/laginha/yard/tree/develop)**
 
 ## Usage
 
