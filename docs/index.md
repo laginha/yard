@@ -2,7 +2,7 @@
 
 ### Usage
 
-- [Resource](resource.md)
+- [Resource](resource/intro.md)
 - [Decorators](decorators.md)
 - [Versioning](versioning.md)
 - [Integration with other Apps](apps/intro.md)

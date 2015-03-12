@@ -2,7 +2,7 @@
 
 One of the most important features related to REST APIs is versioning. When a resource representation is changed in a non-backward compatible way, the resource should be versioned in order to provide any of the representations if requested.
 
-> Resource versioning is taken into consideration by the [API documentation module](meta/documentation.md).
+> Resource versioning is taken into consideration by the [API documentation module](resource/meta/documentation.md).
 
 
 ## How To

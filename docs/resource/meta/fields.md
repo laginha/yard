@@ -36,7 +36,7 @@ The API-client, whenever requesting a resource collection (`list`), will receive
 }
 ```
 
-> Because `fields.Integer` and `fields.Unicode` are not enough, **see the [list of all available field types](meta/field_types.md)!**
+> Because `fields.Integer` and `fields.Unicode` are not enough, **see the [list of all available field types](field_types.md)!**
 
 
 ## Foreign keys in fields

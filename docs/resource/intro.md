@@ -10,4 +10,4 @@ Interested? Learn more:
 
 - [Basic usage](basic_usage.md)
 - [CRUD methods](crud.md)
-- [Meta options](meta.md)
+- [Meta options](meta/intro.md)

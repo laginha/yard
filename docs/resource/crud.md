@@ -48,5 +48,5 @@ Moreover, it returns the *Allow* response header, with the allowable HTTP method
 
 As you have noticied in the example above, the *CRUD* methods may return any object as it is not limited to django's `HttpResponse`. You can return a `int` for status code or any other object (including model instance and querysets) for the response content.
 
-For this feature, *Yard* mostly relies on [Django-Simple-Response app](https://github.com/laginha/django-simple-response). Check out [its documentation](https://github.com/laginha/django-simple-response/blob/master/docs/serialization.md).
+For this feature, *Yard* mostly relies on [django-easy-response app](https://github.com/laginha/django-easy-response). Check out [its documentation](https://github.com/laginha/django-simple-response/blob/master/docs/serialization.md).
 

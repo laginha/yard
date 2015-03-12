@@ -12,9 +12,9 @@ class Foo(Resource):
 
 However there are more options at your disposal.
 
-- [Fields](meta/fields.md)
-- [Serializers](meta/serializers.md)
-- [Uglification](meta/uglification.md)
-- [Pagination](meta/pagination.md)
-- [Metadata](meta/metadata.md)
-- [Documentation](meta/documentation.md)
+- [Fields](fields.md)
+- [Serializers](serializers.md)
+- [Uglification](uglification.md)
+- [Pagination](pagination.md)
+- [Metadata](metadata.md)
+- [Documentation](documentation.md)

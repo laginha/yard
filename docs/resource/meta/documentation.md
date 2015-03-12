@@ -56,7 +56,7 @@ class BookResource(Resource):
         ...
 ```    
 
-> Learn more about [*Yard* decorators](utils/decorators.md)!
+> Learn more about [*Yard* decorators](/laginha/yard/blob/develop/docs/decorators.md)!
 
 
 ## Customize
