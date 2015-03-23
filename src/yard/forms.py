@@ -1,5 +1,4 @@
-from django.forms import *
-from alo.forms import QueryModelForm, QueryForm
+from alo.forms import *
 from alo.operators import AND, OR
 
 class Parameters(dict):
@@ -11,7 +10,7 @@ class Parameters(dict):
             parameters.validated = {}
         elif isinstance(form, (QueryForm, QueryModelForm)):
             parameters = cls( form.parameters )
-            parameters.validated = form.non_empty_data
+            parameters.validated = form.validated_data
         else:
             parameters = cls( form.cleaned_data )
             parameters.validated = dict([

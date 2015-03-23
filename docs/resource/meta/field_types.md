@@ -227,13 +227,11 @@ If you are too lazy to specify the field type, this is a good solution for you. 
 
 ## Geos
 
-### GeoJSON
+The following are available only if there is an GEOS library accessible to Django.
+
+### GeoJson
 
 Return JSON field as GeoJSON.
-
-```python
-from yard.gis import fields
-```
 
 ```python
 fields = {
@@ -244,10 +242,6 @@ fields = {
 ### EncodedPolyline
 
 Return JSON field as an [encoded polyline](https://developers.google.com/maps/documentation/utilities/polylinealgorithm).
-
-```python
-from yard.gis import fields
-```
 
 ```python
 fields = {

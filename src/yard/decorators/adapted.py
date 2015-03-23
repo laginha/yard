@@ -5,7 +5,19 @@ from django.contrib.auth.decorators import (
     login_required as original_login_required,)
 from keyauth.decorators import key_required as original_key_required
 from throttling.decorators import throttle as original_throttle
+from alo.decorators import validate as original_validate
 from functools import wraps
+
+
+def validate(form_class, extra=None):
+    '''
+    Validate request according to given form
+    ''' 
+    original_decorator = original_validate(form_class, extra=extra)
+    def decorator(func):        
+        func.form_class = form_class
+        return original_decorator(func)
+    return decorator
 
 
 class to_yard_decorator(object):

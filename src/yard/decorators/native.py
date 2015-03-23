@@ -1,41 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
-from django.shortcuts import get_object_or_404
-from django.forms import ModelForm
 from functools import wraps
 import inspect
-
-
-def validate(form_class, extra=None):
-    '''
-    Validate request according to given form
-    ''' 
-    def decorator(func):        
-        func.form_class = form_class
-        
-        @wraps(func)
-        def wrapper(resource, request, *args, **kwargs):
-            
-            def do_validation(form_kwargs):
-                if extra != None:
-                    form_kwargs.update( extra(resource, request) )
-                form = form_class(**form_kwargs)
-                if form.is_valid():
-                    request.form = form
-                    return func(resource, request, *args, **kwargs)
-                return 400, form.errors
-            
-            form_kwargs = {'data': request.REQUEST}
-            if not hasattr(request, "FILES"): 
-                form_kwargs['files'] = request.FILES
-            if issubclass(form_class, ModelForm) and args:
-                if isinstance(args[0], int):
-                    instance = get_object_or_404(model, pk=args[0])
-                    form_kwargs['instance'] = instance
-            return do_validation(form_kwargs)
-
-        return wrapper
-    return decorator
 
 
 def exception_handling(exception, response):

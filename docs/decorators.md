@@ -3,22 +3,22 @@
 
 ## validate
 
-Check if Form is valid. If not, returns a *Bad Request* response (status 400). This decorator play a major part in the API documentation module.
+Based on [django-alo-forms](https://github.com/laginha/django-alo-forms) decorator, it checks if Form is valid. If not, returns a *Bad Request* response (status 400). This decorator play a major part in the API documentation module.
 
 
 ```python
 from yard.decorators import validate
 from yard.resources import Resource
 
+def get_extra_context(request):
+    return {'foo': 'bar'}
+
 class BookResource(Resource):
 
     class Meta:
         model = models.Foo
-
-    def get_extra_create_context(self, request):
-        return {'foo': 'bar'}
     
-    @create(SomeForm, extra=get_extra_create_context)
+    @validate(SomeForm, extra=get_extra_context)
     def create(self, request):
         return
 

@@ -40,24 +40,4 @@ class Book(Resource):
 ```
 
 As explained [here](meta/documentation.md), the `validate` decorator plays a part in the API documentation. Thus, when you use `alo.forms.QueryForm` or `alo.forms.QueryModelForm`, that module includes in the documentation JSON each field as parameter of type `query` (instead of type 'form').
-
-
----
-
-
-In addition to `django-alo-forms`, *Yard* provides a reimplementation of `PointField`.
-
-
-```python
-from yard.gis import forms
-
-class ListStores(forms.QueryForm):
-    location = forms.PointField(latitude_first=True)
-    ...
-```
-
-This field expects the following input: 
-
-- `<latitude.float>,<longitude.float>` if `latitude_first` set to `True` (e.g. `40.2,-8.41667`) 
-- `<longitude.float>,<latitude.float>` if `latitude_first` set to `False`, as it is by default. (e.g. `-8.41667,40.2`)
  

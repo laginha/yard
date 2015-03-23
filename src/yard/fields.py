@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 # encoding: utf-8
-from django.db import models
+try:
+    from django.contrib.gis.db import models
+    GIS_ENABLED = True
+except ImportError:
+    from django.db import models
+    import sys
+    sys.stdout.write("Warning: Could not find the GEOS library.\n")
+    GIS_ENABLED = False
 
 
 class JsonField(object):
@@ -31,7 +38,7 @@ File = JsonField('string', lambda data: data.url)
 FilePath = JsonField('string', lambda data: data.path)
 QuerySet = JsonField('array', lambda data: [unicode(i) for i in data])
 ValuesSet = List = JsonField('array', lambda data: list(data))
-JSON = Dict = JsonField('string', lambda data: list(data))
+Json = Dict = JsonField('string', lambda data: list(data))
 RelatedManager = JsonField('array', lambda data: [unicode(i) for i in data.all()])
 CommaSeparatedValue = JsonField('string', lambda data: [i for i in data.split(',')])
 
@@ -101,3 +108,38 @@ def get_field(obj):
 
 SELECT_RELATED_FIELDS = [URI, Link, ForeignKey]
 PREFETCH_RELATED_FIELDS = [GenericForeignKey, RelatedManager]
+
+
+if GIS_ENABLED:
+    import ujson
+    import gpolyencode
+    
+    def encoded_polyline_converter(data):
+        encoder = gpolyencode.GPolyEncoder()
+        return encoder.encode(data.coords)
+
+    GeoJson = JsonField('string', lambda data: ujson.loads(data.geojson))
+    EncodedPolyline = JsonField('string', encoded_polyline_converter)
+
+
+    OBJECT_TO_JSONFIELD.update({
+        models.fields.LineStringField: GeoJson,
+        models.fields.MultiLineStringField: GeoJson,
+        models.fields.PointField: GeoJson,
+        models.fields.MultiPointField: GeoJson,
+        models.fields.PolygonField: GeoJson,
+        models.fields.MultiPolygonField: GeoJson,
+        models.fields.GeometryField: GeoJson,
+        models.fields.GeometryCollectionField: GeoJson,
+    })
+
+    MODELFIELD_TO_JSONFIELD.update({
+        models.GeometryField: GeoJson,
+        models.PointField: GeoJson,
+        models.LineStringField: GeoJson,
+        models.PolygonField: GeoJson,
+        models.MultiPointField: GeoJson,
+        models.MultiLineStringField: GeoJson,
+        models.MultiPolygonField: GeoJson,
+    })   
+    
