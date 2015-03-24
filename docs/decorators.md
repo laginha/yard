@@ -18,7 +18,7 @@ class BookResource(Resource):
     class Meta:
         model = models.Foo
     
-    @validate(SomeForm, extra=get_extra_context)
+    @validate(SomeForm)
     def create(self, request):
         return
 

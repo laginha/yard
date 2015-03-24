@@ -9,11 +9,11 @@ from alo.decorators import validate as original_validate
 from functools import wraps
 
 
-def validate(form_class, extra=None):
+def validate(form_class):
     '''
     Validate request according to given form
     ''' 
-    original_decorator = original_validate(form_class, extra=extra)
+    original_decorator = original_validate(form_class)
     def decorator(func):        
         func.form_class = form_class
         return original_decorator(func)
