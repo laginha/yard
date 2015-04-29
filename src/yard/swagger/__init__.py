@@ -36,7 +36,11 @@ class Documentation(object):
             **kwargs )
     
     def get_response_schema(self, fields=None):
-        return build_swagger_schema(fields or self.resource.fields)
+        fields = fields or self.resource._meta.fields
+        if callable(fields):
+            from django.test import TestCase, RequestFactory
+            fields = fields(self.resource.Meta(), RequestFactory().get(''))
+        return build_swagger_schema(fields or self.resource._meta.fields)
     
     def get_path_parameter(self):
         return build_swagger_parameter(preset='path')

@@ -59,12 +59,13 @@ def build_swagger_object(request, paths):
                         for result in find(keyname, each):
                             yield result
     
+    scheme = request.scheme if hasattr(request, 'scheme') else 'http' 
     result = {
         'swagger':  "2.0",
         'info':     SWAGGER_INFO,
         'host':     request.get_host(),
         'basePath': request.path,
-        'schemes':  [request.scheme],
+        'schemes':  [scheme],
         'paths':    paths
     }
     if SWAGGER_CONSUMES:

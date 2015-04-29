@@ -8,10 +8,11 @@ import copy
 
 
 def model_to_fields(model):
-    fields = model._meta.fields
-    return dict([
-        (each.name, get_json_field(each)) for each in fields
-    ])
+    if model:
+        return dict([
+            (each.name, get_json_field(each)) for each in model._meta.fields
+        ])
+    return {}
 
 
 class ResourceMeta(object):
@@ -23,6 +24,9 @@ class ResourceMeta(object):
         'documentation': Documentation,
         'metadata': Metadata,
         'pagination': Pagination,
+        'query_form': None,
+        'create_form': None,
+        'update_form': None,
     }
     
     def __init__(self, resource):
@@ -31,13 +35,16 @@ class ResourceMeta(object):
             return getattr(resource.Meta, name, self.DEFAULTS.get(name))
         
         self.model = get_meta_attribute('model')
-        if not self.model:
-            raise NoModelError
+        # if not self.model:
+        #     raise NoModelError
         self.documentation = get_meta_attribute('documentation')(resource)
         self.pagination    = get_meta_attribute('pagination')()
         self.metadata      = get_meta_attribute('metadata')(self.pagination)
         self.uglify        = get_meta_attribute('uglify')
         self.serializer    = get_meta_attribute('serializer')
+        self.query_form    = get_meta_attribute('query_form')
+        self.create_form   = get_meta_attribute('create_form')
+        self.update_form   = get_meta_attribute('update_form')
         
         def get_fields(name, default=None):
             if hasattr(resource.Meta, name):

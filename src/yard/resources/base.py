@@ -13,6 +13,7 @@ from yard.utils import (
     is_tuple, is_queryset, is_modelinstance, is_generator, is_list,
     is_valuesset, is_dict,)
 from yard.serializers import uglify_json
+from yard.decorators import validate
 from .mixins import OptionsMixin
 from .meta import ResourceMeta
 
@@ -49,10 +50,18 @@ class BaseResource(OptionsMixin):
         self.api           = api
         self.version_name  = version_name
         self._meta         = ResourceMeta(self)
+        if self._meta.query_form and hasattr(self, 'list'):
+            self.list = validate(self._meta.query_form)(self.list)
+        if self._meta.create_form and hasattr(self, 'create'):
+            self.create = validate(self._meta.create_form)(self.create)
+        if self._meta.update_form and hasattr(self, 'update'):
+            self.update = validate(self._meta.update_form)(self.update)
 
     @property
     def tagname(self):
-        return self._meta.model.__name__.lower()
+        if self._meta.model:
+            return self._meta.model.__name__.lower()
+        return self.__class__.__name__.lower()
     
     def handle_request(self, request, **kwargs):
         '''
@@ -80,7 +89,7 @@ class BaseResource(OptionsMixin):
         '''
         Proccess response into a JSON serializable object
         '''
-        current_fields = fields(request) if callable(fields) else fields
+        current_fields = fields(self.Meta(), request) if callable(fields) else fields
         status = DEFAULT_STATUS_CODE
         if is_tuple(response):
             status, response = response
@@ -172,6 +181,10 @@ class BaseResource(OptionsMixin):
                     resources._prefetch_related_lookups.append( related )
                     find_related( fieldtype.iteritems(), related + '__' )
                    
+        if resources.query.select_related:
+            return resource
+        if resources._prefetch_related_lookups:
+            return resource
         if resources.query.select_related == False:
             resources.query.select_related = {}
         find_related( current_fields.iteritems() )

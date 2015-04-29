@@ -83,7 +83,7 @@ class Api(object):
         raise NoResourceMatch( modelinstance.__class__ )
     
     def clean_pattern(self, pattern, sub='{pk}'):
-        pattern = re.sub(r'\(\?P<(.+)>.+\)', sub, pattern)
+        pattern = re.sub(r'\(\?P<(.+^\/)>.+\)', sub, pattern)
         return re.sub(r'\?|\$|\^', '', pattern)
         
     def get_link(self, modelinstance):
@@ -123,8 +123,10 @@ class Api(object):
             for entry in urllist:
                 entry.clean_pattern = self.clean_pattern( entry.regex.pattern )
                 if hasattr(entry, 'url_patterns'):
-                    for each in get_entry_paths( entry.url_patterns, lambda_ ):
-                        pathlist.append( entry.clean_pattern + each )
+                    for a,b in get_entry_paths( entry.url_patterns, lambda_ ).items():
+                        pathlist.update({
+                            entry.clean_pattern+a: b
+                        })
                 elif not entry.clean_pattern:
                     continue
                 else:
@@ -133,6 +135,12 @@ class Api(object):
                     pathlist.update( lambda_(entry) )
             return pathlist
         
-        return get_entry_paths(self.list_of_urlpatterns, lambda entry: {
-            entry.clean_pattern: entry._callback.get_documentation()
-        })
+        def aux(entry):
+            if hasattr(entry._callback, 'get_documentation'):
+                print entry.clean_pattern
+                return {
+                    entry.clean_pattern: entry._callback.get_documentation()
+                }
+            return {}
+
+        return get_entry_paths(self.list_of_urlpatterns, aux)

@@ -1,6 +1,6 @@
 # Meta options
 
-As you have seen before it is mandatory for the Resource to have a Meta class declaring the bidding model, as follows:
+As you have seen before, the Resource may have a Meta class declaring the bidding model as follows:
 
 ```python
 from yard.resources import Resource

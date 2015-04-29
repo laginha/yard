@@ -29,6 +29,7 @@ class BookResource(Resource):
     class Meta:
         description = "Search books in our store."
         model = Book
+        query_form = ListBook
         fields = {
             'id': fields.Auto,
             'title': fields.Auto, 
@@ -41,7 +42,7 @@ class BookResource(Resource):
             }
         }
         
-    @validate(ListBook)
+    # @validate(ListBook)
     def list(self, request):
         params = request.form.parameters
         return Book.objects.filter( **params )

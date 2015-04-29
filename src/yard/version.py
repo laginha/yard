@@ -20,9 +20,12 @@ class VersionController(object):
         if not hasattr(self, 'default'):
             raise NoDefaultVersion()
 
+    @property
+    def default_resource(self):
+        return self.versions[ self.default ]
+
     def get_documentation(self):
-        resource_class = self.versions[self.default]
-        resource = resource_class(self.api, self.routes, self.default)
+        resource = self.default_resource(self.api, self.routes, self.default)
         return resource.get_documentation()
 
     def get_version(self, request):

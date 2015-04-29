@@ -33,7 +33,7 @@ from .forms import BookListForm
 class BooksResource(resources.Resource):
 
     class Meta:
-        # model associated with the resource (mandatory)
+        # model associated with the resource (not mandatory)
         model = Book
         # used in the list and detail methods
         fields = {
