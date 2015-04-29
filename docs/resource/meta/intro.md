@@ -12,6 +12,7 @@ class Foo(Resource):
 
 However there are more options at your disposal.
 
+- [Forms](forms.md)
 - [Fields](fields.md)
 - [Serializers](serializers.md)
 - [Uglification](uglification.md)
