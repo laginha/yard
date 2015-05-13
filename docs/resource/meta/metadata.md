@@ -17,7 +17,7 @@ from yard import resources
 class Book(resources.Resource):
     class Meta:
         model = models.Book
-        pagination = BookMetadata
+        metadata = BookMetadata
 ```
 
 ```javascript

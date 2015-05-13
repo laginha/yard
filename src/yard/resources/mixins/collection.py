@@ -1,4 +1,4 @@
-from yard.forms import QueryForm, QueryModelForm, Parameters
+from yard.forms import QueryForm, QueryModelForm
 
 
 class CollectionMixin(object):
@@ -18,10 +18,16 @@ class CollectionMixin(object):
 
     def handle_list(self, request, kwargs):
         response = self.list(request, **kwargs)
-        if hasattr(request, 'form'):
-            parameters = Parameters.create(request.form)
+        if getattr(request, 'form', None):
+            form = request.form
+            if isinstance(form, (QueryForm, QueryModelForm)):
+                parameters = form.validated_data
+            else:
+                parameters = dict([
+                    each for each in form.cleaned_data.iteritems() if each[1]
+                ])
         else:
-            parameters = Parameters.create()
+            parameters = {}
         return self.handle_response(
             request, response, self._meta.list_fields, parameters)
     

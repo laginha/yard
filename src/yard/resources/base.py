@@ -89,7 +89,10 @@ class BaseResource(OptionsMixin):
         '''
         Proccess response into a JSON serializable object
         '''
-        current_fields = fields(self.Meta(), request) if callable(fields) else fields
+        if callable(fields):
+            current_fields = fields(self.Meta(), request)
+        else:
+            current_fields = fields
         status = DEFAULT_STATUS_CODE
         if is_tuple(response):
             status, response = response
@@ -162,7 +165,7 @@ class BaseResource(OptionsMixin):
         '''
         pagination = self._meta.pagination
         page_objects, page_params = pagination.select(request, resources)
-        parameters.validated.update( page_params )
+        parameters.update( page_params )
         return page_objects
 
     def select_related(self, resources, current_fields):

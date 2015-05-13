@@ -3,7 +3,6 @@
 from django.test.client import Client, RequestFactory
 from yard.metadata import Metadata
 from yard.pagination import Pagination
-from yard.forms import Parameters
 from yard.testcases.base import BaseTestCase
 from books.models  import *
 
@@ -18,12 +17,12 @@ class MetadataTestCase( BaseTestCase ):
     def setUp(self):
         super(MetadataTestCase, self).setUp()
         self.pagination = TestPagination()
-        self.params = Parameters.create()
+        self.params = {}
         self.factory = RequestFactory()
 
     def get_metadata(self, request, meta, objects):
         paged, page_params = self.pagination.select(request, objects)
-        self.params.validated.update( page_params )
+        self.params.update( page_params )
         return meta.generate( request, objects, paged, self.params )
         
     def assert_defaults_in_meta(self, metadata, value=True):
@@ -54,7 +53,7 @@ class MetadataTestCase( BaseTestCase ):
     def assert_default_meta(self, request, objects):
         meta = Metadata(self.pagination)
         paged, page_params = self.pagination.select(request, objects)
-        self.params.validated.update( page_params )
+        self.params.update( page_params )
         metadata = meta.generate( request, objects, paged, self.params )
         self.assert_defaults_in_meta( metadata )
         self.assert_aggregates_not_in_meta( metadata )

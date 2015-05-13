@@ -8,7 +8,7 @@ except ImportError:
     import sys
     sys.stdout.write("Warning: Could not find the GEOS library.\n")
     GIS_ENABLED = False
-
+import simplejson
 
 class JsonField(object):
     def __init__(self, typename, converter=None, is_link=False, is_uri=False):
@@ -38,7 +38,7 @@ File = JsonField('string', lambda data: data.url)
 FilePath = JsonField('string', lambda data: data.path)
 QuerySet = JsonField('array', lambda data: [unicode(i) for i in data])
 ValuesSet = List = JsonField('array', lambda data: list(data))
-Json = Dict = JsonField('string', lambda data: list(data))
+Json = Dict = JsonField('json', lambda data: dict(data))
 RelatedManager = JsonField('array', lambda data: [unicode(i) for i in data.all()])
 CommaSeparatedValue = JsonField('string', lambda data: [i for i in data.split(',')])
 
@@ -119,6 +119,7 @@ if GIS_ENABLED:
         return encoder.encode(data.coords)
 
     GeoJson = JsonField('string', lambda data: ujson.loads(data.geojson))
+    Distance = JsonField('number', lambda data: data.km)
     EncodedPolyline = JsonField('string', encoded_polyline_converter)
 
 

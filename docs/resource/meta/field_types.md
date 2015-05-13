@@ -249,6 +249,15 @@ fields = {
 }
 ```
 
+### Distance
+
+Return the `km` attribute of the field (use this for `Distance` instances).
+
+```python
+fields = {
+    'shape': fields.Distance
+}
+```
 
 ## Create your own field type
 

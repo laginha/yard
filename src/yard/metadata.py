@@ -58,13 +58,12 @@ class MetadataDict(dict):
         '''
         Adds the URI for the next page
         '''
-        params = self.params.validated
         if not self.page_count:
             self['next_page'] = None
-        elif self.page_count < params[ self.results_name ]:
+        elif self.page_count < self.params[ self.results_name ]:
             self['next_page'] = None
         else:
-            next_offset = params[ self.offset_name ] + self.page_count
+            next_offset = self.params[ self.offset_name ] + self.page_count
             if next_offset > self.resource_count:
                 self['next_page'] = None
             else:
@@ -74,9 +73,8 @@ class MetadataDict(dict):
         '''
         Adds the URI for the previous page
         '''
-        params = self.params.validated
-        offset = min( self.resource_count, params[ self.offset_name ] )
-        sub = (self.page_count or params[ self.results_name ])
+        offset = min( self.resource_count, self.params[ self.offset_name ] )
+        sub = (self.page_count or self.params[ self.results_name ])
         previous_offset = offset - sub
         if previous_offset < 0 and offset <= 0:
             self['previous_page'] = None
@@ -100,7 +98,7 @@ class MetadataDict(dict):
         '''
         Adds the parameters validated according to Resource.Parameters
         '''
-        self['validated_parameters'] = self.params.validated
+        self['validated_parameters'] = self.params
 
     def set_aggregation(self, value, call):
         '''

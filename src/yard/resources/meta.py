@@ -18,12 +18,12 @@ def model_to_fields(model):
 class ResourceMeta(object):
     
     DEFAULTS = {
-        'model': None,
-        'serializer': HypermediaSerializer,
-        'uglify': False,
+        'model': None,#
+        'serializer': HypermediaSerializer,#
+        'uglify': False,#
         'documentation': Documentation,
-        'metadata': Metadata,
-        'pagination': Pagination,
+        'metadata': Metadata,#
+        'pagination': Pagination,#
         'query_form': None,
         'create_form': None,
         'update_form': None,

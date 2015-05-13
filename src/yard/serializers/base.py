@@ -10,7 +10,7 @@ class BaseSerializer(object):
     '''
     Responsible for creating the JSON response
     '''
-    def __init__(self, api, fields, mobile=False):
+    def __init__(self, api, fields):
         self.fields = fields
         self.api = api
         self.links = {}
