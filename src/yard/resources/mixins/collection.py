@@ -21,7 +21,7 @@ class CollectionMixin(object):
         if getattr(request, 'form', None):
             form = request.form
             if isinstance(form, (QueryForm, QueryModelForm)):
-                parameters = form.validated_data
+                parameters = form.get_validated_data()
             else:
                 parameters = dict([
                     each for each in form.cleaned_data.iteritems() if each[1]
