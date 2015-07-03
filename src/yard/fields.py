@@ -10,6 +10,7 @@ except ImportError:
     GIS_ENABLED = False
 import simplejson
 
+
 class JsonField(object):
     def __init__(self, typename, converter=None, is_link=False, is_uri=False):
         self.typename = typename
@@ -30,17 +31,33 @@ class JsonField(object):
             return self.converter(data, api) if api else self.converter(data)
 
 
-Integer = JsonField('integer', lambda data: int(data))
-Float = JsonField('number', lambda data: float(data))
-String = JsonField('string', lambda data: str(data))
-Boolean = JsonField('boolean', lambda data: bool(data))
+def builtin_converter(builtin):
+    def wrapper(data):
+        if isinstance(data, builtin):
+            return data
+        return builtin(data)
+    return wrapper
+
+Integer = JsonField('integer', int)
+Float = JsonField('number', float)
+String = JsonField('string', str)
+Boolean = JsonField('boolean', bool)
+List = JsonField('array', list)
+Dict = JsonField('json', dict)
+
 File = JsonField('string', lambda data: data.url)
 FilePath = JsonField('string', lambda data: data.path)
 QuerySet = JsonField('array', lambda data: [unicode(i) for i in data])
 ValuesSet = List = JsonField('array', lambda data: list(data))
-Json = Dict = JsonField('json', lambda data: dict(data))
 RelatedManager = JsonField('array', lambda data: [unicode(i) for i in data.all()])
 CommaSeparatedValue = JsonField('string', lambda data: [i for i in data.split(',')])
+
+
+def json_converter(data):
+    data = simplejson.dumps(data, default=lambda x: unicode(x))
+    return simplejson.loads(data)
+
+Json = JsonField('json', json_converter)
 
 
 def unicode_converter(data):
@@ -81,7 +98,8 @@ OBJECT_TO_JSONFIELD = {
 def auto_converter(data):
     return OBJECT_TO_JSONFIELD.get( type(data), Unicode )(data)
 
-Auto = JsonField('string', auto_converter)
+Auto = JsonField('object', auto_converter)
+Default = JsonField('object', lambda data: data)
 
 
 MODELFIELD_TO_JSONFIELD = {
@@ -111,8 +129,8 @@ PREFETCH_RELATED_FIELDS = [GenericForeignKey, RelatedManager]
 
 
 if GIS_ENABLED:
-    import ujson
     import gpolyencode
+    import ujson
     
     def encoded_polyline_converter(data):
         encoder = gpolyencode.GPolyEncoder()

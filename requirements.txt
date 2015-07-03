@@ -5,3 +5,4 @@ gpolyencode
 django-easy-response
 django-key-auth
 django-alo-forms
+throttling

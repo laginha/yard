@@ -2,6 +2,7 @@
 
 Choosing the *field type* is not only a matter of semantics. It influences the *JSON* response structure, as well as, the number of queries to the database.
 
+
 ### Integer
 
 Return JSON field as an integer.
@@ -37,13 +38,9 @@ Return JSON field as a dictionary.
 
 ```python
 fields = {
-    'extradata': fields.dict
+    'extradata': fields.Dict
 }
 ```
-
-### JSON
-
-Alias for ´fields.dict´
 
 ### String
    
@@ -65,6 +62,28 @@ fields = {
 }
 ```
 
+### Boolean
+
+Return JSON field as a boolean.
+
+```python
+fields = {
+    'is_male': fields.Boolean
+}
+```
+
+### JSON
+
+Return JSON field as a JSON serializable object.
+
+```python
+fields = {
+    'extradata': fields.Json
+}
+```
+
+This might be slow because firstly attempts to dump the input to string (recursively unicoding any non serializable object) and then loads it again into a python object.
+
 ### ForeignKey
    
 Same as `Unicode` although it enables *Yard* to automatically optimize the database query using `QuerySet.select_related`.
@@ -85,15 +104,6 @@ fields = {
 }
 ```
    
-### Boolean
-
-Return JSON field as a boolean.
-
-```python
-fields = {
-    'is_male': fields.Boolean
-}
-```
        
 ### CommaSeparatedValue
 
@@ -212,19 +222,6 @@ fields = {
 This is an lighter alternative to the `field.URI`! See the also the documentation about [MobileDrivenResource](resource_types.md).
 
 
-### Auto
-
-Return JSON field with the type most appropriated for the input.
-
-```python
-fields = {
-    'id': fields.Auto
-}
-```
-
-If you are too lazy to specify the field type, this is a good solution for you. However this won't work properly for certain class objects like `ManyRelatedManager`.
-
-
 ## Geos
 
 The following are available only if there is an GEOS library accessible to Django.
@@ -259,14 +256,43 @@ fields = {
 }
 ```
 
+## Non-specific fields
+
+The following field share the same disavantage: the swagger documentation of the field will not be specific as it would be for any other field type. However, for some cases that might not be a problem.
+
+### Default
+
+Return the input as it is, without any attempt to convert the input.
+
+```python
+fields = {
+    'id': fields.Default
+}
+```
+
+This is slightly faster, but it will not work tf the return value is not JSON serializable (e.g. `datetime`).
+
+### Auto
+
+Return JSON field with the type most appropriated for the input. By default it converts the input to unicode.
+
+```python
+fields = {
+    'id': fields.Auto
+}
+```
+
+
 ## Create your own field type
 
 If by any chance any of the above types don't work for your particular needs, you can create your own:
 
 ```python
+from yard import fields
+
+converter = lambda x: x if len(x) <= 140 else text[:137]+"..."
+
 fields = {
-    'text': lambda x: x if len(x) <= 140 else text[:137]+"..."
+    'text': fields.JsonField('string', converter)
 }
 ```
-
-Field types are functions that expect a single argument which is the result of `some_mode_instance.attribute` (or in the example above `some_model_instance.text`)

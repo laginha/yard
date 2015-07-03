@@ -9,7 +9,7 @@ reqs = [str(each.req) for each in install_reqs if each.req]
 
 setup(
     name             = 'yard-framework',
-    version          = '3.3.1',
+    version          = '3.4.0',
     author           = "Diogo Laginha",
     author_email     = "diogo.laginha.machado@gmail.com",
     url              = 'https://github.com/laginha/yard/tree/develop',
