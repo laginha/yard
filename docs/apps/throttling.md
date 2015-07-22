@@ -11,7 +11,7 @@ INSTALLED_APPS = (
 
 ```python
 from yard.resources import Resource
-from yard.decorators import throttle
+from yard.decorators.django_throttling import throttle
 
 class Book(Resource):
 

@@ -44,7 +44,7 @@ To include `django.form.fields` in the API documentation, user the `validate` de
 
 ```python
 from yard.resources import Resource
-from yard.decorators import validate
+from yard.decorators.django_alo_forms import validate
 
 class BookResource(Resource):
     class Meta:

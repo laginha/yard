@@ -27,8 +27,8 @@ class Pagination(object):
         '''
         if self.no_pagination:
             return resources, {}
-        offset, param1 = self.get_offset( request.REQUEST )
-        number, param2 = self.get_number( request.REQUEST )
+        offset, param1 = self.get_offset( request.GET )
+        number, param2 = self.get_number( request.GET )
         return self.paginate(resources, offset, number), dict(param1+param2)
     
     def get_limit(self, number):

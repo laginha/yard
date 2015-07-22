@@ -27,7 +27,7 @@ class ListBook(forms.QueryForm):
 
 ```python
 from yard.resources import Resource
-from yard.decorators import validate
+from yard.decorators.django_alo_forms import validate
 
 class Book(Resource):
 

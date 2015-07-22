@@ -7,7 +7,7 @@ Based on [django-alo-forms](https://github.com/laginha/django-alo-forms) decorat
 
 
 ```python
-from yard.decorators import validate
+from yard.decorators.django_alo_forms import validate
 from yard.resources import Resource
 
 def get_extra_context(request):
@@ -110,7 +110,7 @@ To protect a specific view through key based authentication.
 
 ```python
 from yard.resources import Resource
-from yard.decorators import key_required
+from yard.decorators.django_key_auth import key_required
 
 class Foo(Resource):
 
@@ -131,7 +131,7 @@ Limit each user (anonymous or authenticated) to a default maximum number of requ
 
 ```python
 from yard.resources import Resource
-from yard.decorators import throttle
+from yard.decorators.django_throttling import throttle
 
 class Book(Resource):
 
@@ -151,7 +151,7 @@ Lear more about [this decorator](apps/throttling.md).
 As simple as this:
 
 ```python
-from yard.decorators import to_yard_decorator
+from yard.decorators.utils import to_yard_decorator
 
 @to_yard_decorator
 def profile_required(): 

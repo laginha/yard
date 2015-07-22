@@ -1,8 +1,10 @@
 from yard import forms, fields
 from yard.version import VersionController
 from yard.resources import Resource
-from yard.decorators import (
-    validate, resource_decorator, login_required, key_required)
+from yard.decorators.django_alo_forms import validate
+from yard.decorators.django_key_auth import key_required
+from yard.decorators import resource_decorator
+from yard.decorators import login_required
 from .models import Book, Author
 from .forms import CreateBook, ListBook, QueryBookForm
     

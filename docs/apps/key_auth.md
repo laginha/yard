@@ -21,7 +21,7 @@ MIDDLEWARE_CLASSES = (
 
 ```python
 from yard.resources import Resource
-from yard.decorators import key_required
+from yard.decorators.django_key_auth import key_required
 
 class Book(Resource):
 

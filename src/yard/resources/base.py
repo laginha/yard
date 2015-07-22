@@ -5,15 +5,19 @@ from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from easy_response.utils.process import to_http
 from yard.forms import Form
-from yard.consts import (
-    DEFAULT_STATUS_CODE, JSON_OBJECTS_KEYNAME, JSON_METADATA_KEYNAME, 
-    JSON_LINKS_KEYNAME,)
-from yard.fields import SELECT_RELATED_FIELDS, PREFETCH_RELATED_FIELDS
-from yard.utils import (
-    is_tuple, is_queryset, is_modelinstance, is_generator, is_list,
-    is_valuesset, is_dict,)
+from yard.consts import DEFAULT_STATUS_CODE
+from yard.consts import JSON_OBJECTS_KEYNAME
+from yard.consts import JSON_METADATA_KEYNAME
+from yard.consts import JSON_LINKS_KEYNAME
+from yard.utils import is_tuple
+from yard.utils import is_queryset
+from yard.utils import is_modelinstance
+from yard.utils import is_generator
+from yard.utils import is_list
+from yard.utils import is_valuesset
+from yard.utils import is_dict
 from yard.serializers import uglify_json
-from yard.decorators import validate
+from yard.decorators.django_alo_forms import validate
 from .mixins import OptionsMixin
 from .meta import ResourceMeta
 
@@ -172,25 +176,31 @@ class BaseResource(OptionsMixin):
         '''
         Optimize queryset according to current response fields
         '''
+        
         def find_related(items, prefix=''):
             for name,fieldtype in items:
                 related = prefix + name
-                if fieldtype in SELECT_RELATED_FIELDS:
-                    resources.query.select_related[ related ] = {}
-                elif fieldtype in PREFETCH_RELATED_FIELDS:
-                    resources._prefetch_related_lookups.append( related )
-                elif isinstance(fieldtype, dict):
-                    resources.query.select_related[ related ] = {}
-                    resources._prefetch_related_lookups.append( related )
+                if isinstance(fieldtype, dict):
+                    if related in select_related_choices:
+                        resources.query.select_related[ related ] = {}
+                    else:
+                        resources._prefetch_related_lookups.append( related )
                     find_related( fieldtype.iteritems(), related + '__' )
-                   
-        if resources.query.select_related:
-            return resource
-        if resources._prefetch_related_lookups:
-            return resource
-        if resources.query.select_related == False:
-            resources.query.select_related = {}
-        find_related( current_fields.iteritems() )
+                elif fieldtype.use_in_select_related:
+                    resources.query.select_related[ related ] = {}
+                elif fieldtype.use_in_prefetch_related:
+                    resources._prefetch_related_lookups.append( related )
+        
+        if self._meta.model:
+            if not resources.query.select_related:
+                return resources
+            if not resources._prefetch_related_lookups:
+                return resources
+            if resources.query.select_related == False:
+                resources.query.select_related = {}
+            opts = self._meta.model._meta
+            select_related_choices = [f.name for f in opts.fields if f.is_relation]
+            find_related( current_fields.iteritems() )
         return resources
 
     def serialize_all(self, resources, fields, builder=None):

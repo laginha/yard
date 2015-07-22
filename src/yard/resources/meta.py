@@ -9,9 +9,9 @@ import copy
 
 def model_to_fields(model):
     if model:
-        return dict([
-            (each.name, get_json_field(each)) for each in model._meta.fields
-        ])
+        return {
+            each.name: get_json_field(each) for each in model._meta.fields
+        }
     return {}
 
 
