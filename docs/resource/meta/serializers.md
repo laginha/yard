@@ -106,8 +106,3 @@ class Book(resources.Resource):
     }
 }
 ```
-
-## GeojsonSerializer
-
-Fully compactible GeoJson response schema.
-
