@@ -50,10 +50,10 @@ class BaseResource(OptionsMixin):
                 yield getattr(cls, each)()
     
     def __init__(self, api, routes, version_name=None):
-        self.routes        = routes
-        self.api           = api
-        self.version_name  = version_name
-        self._meta         = ResourceMeta(self)
+        self.routes = routes
+        self.api = api
+        self.version_name = version_name
+        self._meta = ResourceMeta(self)
         if self._meta.query_form and hasattr(self, 'list'):
             self.list = validate(self._meta.query_form)(self.list)
         if self._meta.create_form and hasattr(self, 'create'):
@@ -73,7 +73,7 @@ class BaseResource(OptionsMixin):
         '''
         try:
             if request.method not in self.routes:
-                return to_http(request, status=404)
+                return to_http(request, None, status=405)
             method = self.routes[request.method]
             if not hasattr(self, method):
                 return HttpResponse(status=405)
