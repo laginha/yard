@@ -192,9 +192,9 @@ class BaseResource(OptionsMixin):
                     resources._prefetch_related_lookups.append( related )
         
         if self._meta.model:
-            if not resources.query.select_related:
+            if resources.query.select_related:
                 return resources
-            if not resources._prefetch_related_lookups:
+            if resources._prefetch_related_lookups:
                 return resources
             if resources.query.select_related == False:
                 resources.query.select_related = {}
