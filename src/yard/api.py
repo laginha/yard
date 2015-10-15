@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 from easy_response.http import JsonResponse
 from yard.swagger.functions import build_swagger_object
 from yard.exceptions import NoResourceMatch
+import uuid
 import re
 
 
@@ -79,7 +80,11 @@ class Api(object):
         '''
         if modelinstance.__class__ in self.model_to_urlname:
             name = self.model_to_urlname[ modelinstance.__class__ ]
-            return reverse( name, kwargs={'pk':modelinstance.pk} )
+            if isinstance(modelinstance.pk, uuid.UUID):
+                value = modelinstance.pk.hex
+            else:
+                value = modelinstance.pk
+            return reverse( name, kwargs={'pk':value} )
         raise NoResourceMatch( modelinstance.__class__ )
     
     def clean_pattern(self, pattern, sub='{pk}'):

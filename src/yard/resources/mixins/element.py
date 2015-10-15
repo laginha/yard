@@ -15,7 +15,7 @@ class ElementMixin(object):
     def as_detail_view(cls):
         return {
             'name': 'detail',
-            'path': r'/(?P<pk>\d+)/?$',
+            'path': r'/(?P<pk>[a-z0-9]+)/?$',
             'routes': cls.ELEMENT_ROUTES,
         }
     

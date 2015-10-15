@@ -100,10 +100,10 @@ class BaseResource(OptionsMixin):
         status = DEFAULT_STATUS_CODE
         if is_tuple(response):
             status, response = response
-        if is_valuesset(response):
-            response = self.handle_list_response(
-                request, list(response), current_fields, parameters)
-        elif is_queryset(response):
+        # if is_valuesset(response):
+        #     response = self.handle_list_response(
+        #         request, list(response), current_fields, parameters)
+        if is_queryset(response) or is_valuesset(response):
             response = self.select_related(response, current_fields)
             response = self.handle_queryset_response(
                 request, response, current_fields, parameters)
@@ -196,8 +196,7 @@ class BaseResource(OptionsMixin):
                 return resources
             if resources._prefetch_related_lookups:
                 return resources
-            if resources.query.select_related == False:
-                resources.query.select_related = {}
+            resources.query.select_related = {}
             opts = self._meta.model._meta
             select_related_choices = [f.name for f in opts.fields if f.is_relation]
             find_related( current_fields.iteritems() )

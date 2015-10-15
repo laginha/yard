@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 from django.core.urlresolvers import NoReverseMatch
-from yard.utils import is_related_manager, is_method, is_dict
+from yard.utils import is_related_manager, is_method, is_dict, is_list
 from yard.fields import URI, Link
 from yard.exceptions import NoResourceMatch
 
@@ -22,9 +22,11 @@ class BaseSerializer(object):
         if not resource: 
             return
         elif is_related_manager(resource):
-            return [self.to_json( i ) for i in resource.all()]
+            return [self.to_json(each) for each in resource.all()]
+        elif is_list(resource):
+            return [self.to_json(each) for each in resource]
         try:
-            json = self.init_json( resource ) if is_part_of_collection else {}
+            json = self.init_json(resource) if is_part_of_collection else {}
         except (NoReverseMatch, NoResourceMatch):
             json = {}
         for key, value in self.fields.iteritems():
@@ -49,7 +51,11 @@ class BaseSerializer(object):
         '''
         Handle fields of type dict - subfields
         '''
-        sub_resource = getattr( resource, field_name, None )
+        if isinstance(resource, dict):
+            # for valuesset responses
+            sub_resource = resource.get(field_name, None)
+        else:
+            sub_resource = getattr( resource, field_name, None )
         builder = self.__class__( self.api, subfields )
         json = { field_name: builder.to_json( sub_resource ) }
         self.links.update( builder.links )
@@ -59,10 +65,14 @@ class BaseSerializer(object):
         '''
         Handle field_names of type string
         '''
-        args      = field_name.split()
-        attribute = getattr( resource, args[0], None )
-        if is_method( attribute ):
-            attribute = attribute( *args[1:] )
+        args = field_name.split()
+        if isinstance(resource, dict):
+            # for valuesset responses
+            attribute = resource.get(args[0], None)
+        else:
+            attribute = getattr( resource, args[0], None )
+            if is_method( attribute ):
+                attribute = attribute( *args[1:] )
         try:
             if field_type.is_uri:
                 return {args[0]: field_type( attribute, self.api )}

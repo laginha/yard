@@ -12,6 +12,7 @@ except ImportError:
 from django.db.models.query import QuerySet
 from django.db.models.query import ValuesQuerySet
 import json
+import uuid
 
 
 class JsonField(object):
@@ -75,6 +76,7 @@ File = JsonField('string', lambda data: data.url)
 FilePath = JsonField('string', lambda data: data.path)
 Float = JsonField('number', float)
 Integer = JsonField('integer', int)
+UUID = JsonField('string', lambda data: data.hex)
 Json = JsonField('json', json_converter)
 QuerySet = JsonField('array', lambda data: [unicode(i) for i in data])
 String = JsonField('string', str)
@@ -101,6 +103,7 @@ OBJECT_TO_JSONFIELD = {
     tuple: List,
     set: List,
     dict: Dict,
+    uuid.UUID: UUID,
     QuerySet: QuerySet,
     ValuesQuerySet: ValuesSet,
 }
@@ -121,6 +124,7 @@ MODELFIELD_TO_JSONFIELD = {
     models.ImageField: File,
     models.FilePathField: FilePath,
     models.ManyToManyField: RelatedManager,
+    models.UUIDField: UUID,
 }    
 
 if GIS_ENABLED:

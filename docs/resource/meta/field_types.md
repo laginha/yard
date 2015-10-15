@@ -2,6 +2,15 @@
 
 Choosing the *field type* is not only a matter of semantics. It influences the *JSON* response structure, as well as, the number of queries to the database.
 
+### UUID
+
+Return JSON field as an hexadecimal string.
+
+```python
+fields = {
+    'uuid': fields.UUID
+}
+```
 
 ### Integer
 
